@@ -195,7 +195,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Property Management',
     icon: 'PM',
     headline: 'Hands-on management with senior accountability',
-    narrative: 'Jackie will emphasize Camelot as a responsive property management partner: senior oversight, weekly inspections, vendor coordination, resident communication, emergency response, and board-ready operational discipline.',
+    narrative: 'Camelot will emphasize responsive property management: senior oversight, weekly inspections, vendor coordination, resident communication, emergency response, and board-ready operational discipline.',
     proofPoints: ['Senior management access', 'Weekly site visits and vendor follow-up', 'Direct escalation path for boards and resident managers'],
   },
   accounting: {
@@ -203,7 +203,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Accounting & Reports',
     icon: 'CPA',
     headline: 'Accounting, collections, and board reporting strength',
-    narrative: 'Jackie will emphasize Camelot\'s accounting bench: CPA oversight, controller review, account managers, bookkeepers, MDS reporting, collections discipline, and monthly management reports deployed between the 20th and 25th.',
+    narrative: 'Camelot will emphasize its accounting bench: CPA oversight, controller review, account managers, bookkeepers, MDS reporting, collections discipline, and monthly management reports deployed between the 20th and 25th.',
     proofPoints: ['CPA, controller, account managers, and bookkeepers', 'MDS-backed monthly management reports', 'Collections, arrears, budgets, and custom board reporting'],
   },
   automation: {
@@ -211,7 +211,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Automation & AI',
     icon: 'AI',
     headline: 'Automation that makes service faster and cleaner',
-    narrative: 'Jackie will emphasize how Camelot uses ConciergePlus, MDS, AppFolio, Merlin AI, Jackie, SCOUT, and Camelot Central to move work orders, reporting, cost tracking, resident communication, and board support faster.',
+    narrative: 'Camelot will emphasize how it uses ConciergePlus, MDS, AppFolio, Merlin AI, SCOUT, and Camelot Central to move work orders, reporting, cost tracking, resident communication, and board support faster.',
     proofPoints: ['AI-assisted meeting minutes and triage', 'Automated reporting and cost tracking', 'Integrated portal, accounting, and property operations tools'],
   },
   compliance: {
@@ -219,7 +219,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Compliance & Violations',
     icon: 'LL',
     headline: 'Compliance pressure handled before it becomes board pain',
-    narrative: 'Jackie will emphasize HPD, DOB, ECB/OATH, DOF, LL97, LL11/FISP, DHCR, permits, tax liens, complaints, deadlines, and Camelot\'s release guardrails for verified compliance data.',
+    narrative: 'Camelot will emphasize HPD, DOB, ECB/OATH, DOF, LL97, LL11/FISP, DHCR, permits, tax liens, complaints, deadlines, and release guardrails for verified compliance data.',
     proofPoints: ['Violation and deadline tracking', 'LL97 and FISP compliance roadmap', 'Source-checked public-record risk review'],
   },
   project_management: {
@@ -227,7 +227,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Project Management',
     icon: 'CAP',
     headline: 'Capital projects with scope, bidding, and accountability',
-    narrative: 'Jackie will emphasize capital planning, contractor bidding, project management, change-order control, engineering coordination, closeout discipline, and board communication for upcoming improvements.',
+    narrative: 'Camelot will emphasize capital planning, contractor bidding, project management, change-order control, engineering coordination, closeout discipline, and board communication for upcoming improvements.',
     proofPoints: ['Bid leveling and vendor coordination', 'Construction oversight and change-order review', 'Board-facing project reporting'],
   },
   resident_experience: {
@@ -235,7 +235,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Resident Experience',
     icon: 'RX',
     headline: 'A better daily experience for residents and boards',
-    narrative: 'Jackie will emphasize ConciergePlus, resident portals, work orders, amenity bookings, package/service communication, front desk coordination, and practical resident-facing service.',
+    narrative: 'Camelot will emphasize ConciergePlus, resident portals, work orders, amenity bookings, package/service communication, front desk coordination, and practical resident-facing service.',
     proofPoints: ['Resident portal and mobile workflows', 'Work orders and amenity requests', 'Clearer communication between residents, staff, and management'],
   },
   staffing: {
@@ -243,7 +243,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Staffing & Front Desk',
     icon: 'STAFF',
     headline: 'Creative staffing models that reduce burnout',
-    narrative: 'Jackie will emphasize fractional senior leadership, assistant manager support, concierge/front desk staffing, resident manager coordination, union and non-union staff supervision, and deeper bench coverage.',
+    narrative: 'Camelot will emphasize fractional senior leadership, assistant manager support, concierge/front desk staffing, resident manager coordination, union and non-union staff supervision, and deeper bench coverage.',
     proofPoints: ['Fractional GM/service manager options', 'Assistant manager and account support coverage', 'Concierge/front desk staffing structure'],
   },
   energy_savings: {
@@ -251,7 +251,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Energy Savings',
     icon: 'E',
     headline: 'Energy, utility, and carbon savings with a compliance lens',
-    narrative: 'Jackie will emphasize utility benchmarking, LL97 exposure, Parity-style energy monitoring, vendor/rebate opportunities, and capital upgrades that reduce operating cost and carbon risk.',
+    narrative: 'Camelot will emphasize utility benchmarking, LL97 exposure, Parity-style energy monitoring, vendor/rebate opportunities, and capital upgrades that reduce operating cost and carbon risk.',
     proofPoints: ['LL97 penalty modeling', 'Utility tracking and energy monitoring', 'Rebates, incentives, and upgrade path review'],
   },
   budget_savings: {
@@ -259,7 +259,7 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     label: 'Budget Savings',
     icon: '$',
     headline: 'Savings from smarter operations, not service cuts',
-    narrative: 'Jackie will emphasize vendor rebidding, labor review, materials and supplies discipline, insurance review, purchasing controls, collections, and long-term value creation.',
+    narrative: 'Camelot will emphasize vendor rebidding, labor review, materials and supplies discipline, insurance review, purchasing controls, collections, and long-term value creation.',
     proofPoints: ['Vendor bidding and scope control', 'Labor, materials, and supplies review', 'Budget, reserve, and operating expense discipline'],
   },
   hoa_recovery: {
@@ -3015,8 +3015,8 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   });
   checks.push({
     name: 'Partner Logo / Website Links',
-    status: html.includes('commons.wikimedia.org/wiki/Special:Redirect/file/BankUnited_logo.svg') && html.includes('d2e1363xcu3t9u.cloudfront.net/2024/images/share.png') && html.includes('/images/partners/hubspot.svg') && html.includes('domecile_logo_evolve-f47345567bc24e05b97fd7c7f893ef2e897c9679312a2b55776c7d7d5f2d1b7d.svg') && html.includes('Blue-Gold%20Logo%20-%20Transparent%20No%20Tagline.png') && html.includes('https://www.bankunited.com') && html.includes('https://www.meetselect.com') && html.includes('https://www.domecile.com') && html.includes('https://www.buildinglink.io') ? 'pass' : 'fail',
-    detail: 'Partner slide must use real logo/web image URLs for BankUnited, Select, Domecile, and BuildingLink plus official website links',
+    status: html.includes('commons.wikimedia.org/wiki/Special:Redirect/file/BankUnited_logo.svg') && html.includes('d2e1363xcu3t9u.cloudfront.net/2024/images/share.png') && html.includes('/images/partners/mds.svg') && html.includes('CP-Platform-Plus-Image-scaled.png') && html.includes('PVEDI-E-Blue-V3-RGB.png') && html.includes('/images/partners/hubspot.svg') && html.includes('domecile_logo_evolve-f47345567bc24e05b97fd7c7f893ef2e897c9679312a2b55776c7d7d5f2d1b7d.svg') && html.includes('Blue-Gold%20Logo%20-%20Transparent%20No%20Tagline.png') && html.includes('https://www.bankunited.com') && html.includes('https://www.meetselect.com') && html.includes('https://www.domecile.com') && html.includes('https://www.buildinglink.io') && html.includes('https://www.pve-llc.com') ? 'pass' : 'fail',
+    detail: 'Partner slide must use real logo/web image URLs for MDS, ConciergePlus, BankUnited, Select, PVEDI, Domecile, and BuildingLink plus official website links',
   });
   checks.push({
     name: 'Camelot Case Studies',
@@ -5241,25 +5241,26 @@ ${[
 
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 20px">
 ${[
-  { name: 'Select', logo: 'https://d2e1363xcu3t9u.cloudfront.net/2024/images/share.png', url: 'https://www.meetselect.com', desc: 'Resident lifestyle benefits', max: '215px', h: '56px', bg: '#0B0B0B', pad: '8px 12px' },
-  { name: 'MDS', logo: '/images/partners/mds.svg', url: 'https://multidataservices.com', desc: 'Property management software', max: '190px', h: '52px', bg: '#fff', pad: '4px 8px' },
-  { name: 'BankUnited', logo: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/BankUnited_logo.svg', url: 'https://www.bankunited.com', desc: 'Banking and treasury partner', max: '220px', h: '46px', bg: '#fff', pad: '6px 8px' },
+  { name: 'ConciergePlus', logo: 'https://pubcdn.conciergeplus.com/wp-content/uploads/2026/05/CP-Platform-Plus-Image-scaled.png', url: 'https://www.conciergeplus.com', desc: 'Resident portal, work orders, payments, amenities, AI chatbot, and ticket workflows', max: '260px', h: '74px', bg: '#F4F5FB', pad: '4px 8px' },
+  { name: 'MDS', logo: '/images/partners/mds.svg', url: 'https://multidataservices.com', desc: 'Property management software, accounting reports, board packages, and monthly close cadence', max: '190px', h: '52px', bg: '#fff', pad: '4px 8px' },
+  { name: 'BankUnited', logo: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/BankUnited_logo.svg', url: 'https://www.bankunited.com', desc: 'Banking, treasury, virtual lockbox, shared balance visibility, and zero-fee banking workflow', max: '220px', h: '46px', bg: '#fff', pad: '6px 8px' },
+  { name: 'Select', logo: 'https://d2e1363xcu3t9u.cloudfront.net/2024/images/share.png', url: 'https://www.meetselect.com', desc: 'Resident lifestyle benefits and concierge membership value', max: '215px', h: '56px', bg: '#0B0B0B', pad: '8px 12px' },
+  { name: 'PVEDI Engineering', logo: 'https://static1.squarespace.com/static/640a5c792943d223933618c6/t/682273b3859251242cf33975/1747088307967/PVEDI-E-Blue-V3-RGB.png?format=1500w', url: 'https://www.pve-llc.com', desc: 'Strategic engineering alignment for inspections, restoration, envelopes, and capital projects', max: '240px', h: '52px', bg: '#fff', pad: '5px 8px' },
   { name: 'AppFolio', logo: '/images/partners/appfolio.svg', url: 'https://www.appfolio.com', desc: 'Property operations platform', max: '190px', h: '52px', bg: '#fff', pad: '4px 8px' },
   { name: 'PropertyShark', logo: '/images/partners/propertyshark.svg', url: 'https://www.propertyshark.com', desc: 'Market and ownership intelligence', max: '190px', h: '52px', bg: '#fff', pad: '4px 8px' },
-  { name: 'ConciergePlus', logo: '/images/partners/conciergeplus.svg', url: 'https://www.conciergeplus.com', desc: 'Resident portal and service workflow', max: '200px', h: '52px', bg: '#fff', pad: '4px 8px' },
   { name: 'HubSpot', logo: '/images/partners/hubspot.svg', url: 'https://www.hubspot.com', desc: 'CRM and client communications', max: '175px', h: '52px', bg: '#fff', pad: '4px 8px' },
   { name: 'Domecile', logo: 'https://www.domecile.com/assets/default/domecile_logo_evolve-f47345567bc24e05b97fd7c7f893ef2e897c9679312a2b55776c7d7d5f2d1b7d.svg', url: 'https://www.domecile.com', desc: 'Digital closing and building document workflow', max: '200px', h: '52px', bg: '#fff', pad: '4px 8px' },
   { name: 'BuildingLink', logo: 'https://www.buildinglink.io/hs-fs/hubfs/Blue-Gold%20Logo%20-%20Transparent%20No%20Tagline.png?width=625&height=124&name=Blue-Gold%20Logo%20-%20Transparent%20No%20Tagline.png', url: 'https://www.buildinglink.io', desc: 'Resident operations and building communications', max: '220px', h: '52px', bg: '#fff', pad: '4px 8px' },
-].map(p => `<a href="${p.url}" target="_blank" rel="noopener" style="background:#fff;border:1px solid #D5D0C6;text-decoration:none;min-height:136px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:0 6px 14px rgba(44,50,64,0.06)">
+].map(p => `<a href="${p.url}" target="_blank" rel="noopener" style="background:#fff;border:1px solid #D5D0C6;text-decoration:none;min-height:154px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;box-shadow:0 6px 14px rgba(44,50,64,0.06)">
 <div style="height:64px;width:100%;display:flex;align-items:center;justify-content:center;background:${p.bg};padding:${p.pad};border-radius:4px;overflow:hidden">
 <img src="${p.logo}" alt="${p.name} logo" style="width:100%;max-width:${p.max};height:${p.h};object-fit:contain;display:block">
 </div>
-<div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:0.8px;text-align:center">${p.desc}</div>
+<div style="font-size:9.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.45px;text-align:center;line-height:1.35">${p.desc}</div>
 </a>`).join('')}
 </div>
 
 <div style="background:#F5F0E5;border:1px solid #D5D0C6;border-left:4px solid #B8973A;padding:14px 18px;margin:0 0 16px">
-<p style="font-size:12px;color:#38557D;line-height:1.6">Camelot connects these platforms with Jackie, Merlin AI, and Camelot Central so boards get faster communication, better compliance visibility, cleaner financial workflows, and a resident experience that feels modern without losing human judgment.</p>
+<p style="font-size:12px;color:#38557D;line-height:1.6"><strong>Camelot connects software, banking, engineering, and service partners into one operating system.</strong> MDS supports board-ready accounting and monthly management reports delivered by the 20th-25th. ConciergePlus powers work orders, payments, amenity requests, administrative tickets, cloud file access, resident communication, automated board / annual / town-hall meeting workflows, and an AI chatbot layer over Camelot OS. BankUnited supports zero-fee banking, virtual lockbox workflows, shared account visibility, and treasury coordination. PVEDI Engineering strengthens Camelot's inspection, restoration, envelope, and capital-project bench.</p>
 </div>
 
 <div style="text-align:center;font-size:10px;color:#888;margin-top:8px">Also powered by: OpenAI NLP &nbsp;\u00B7&nbsp; AWS Cloud &nbsp;\u00B7&nbsp; RealtyMX &nbsp;\u00B7&nbsp; SiteCompli &nbsp;\u00B7&nbsp; Jack Jaffa</div>
@@ -5504,6 +5505,8 @@ ${[
 
 <!-- ConciergePlus Hero — the centerpiece -->
 <div style="background:#3A4B5B;border-radius:10px;padding:22px;margin-bottom:16px;color:#fff">
+<div style="display:grid;grid-template-columns:1fr 1.15fr;gap:18px;align-items:center;margin-bottom:14px">
+<div>
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
 <a href="https://conciergeplus.com/" target="_blank" rel="noopener" style="width:158px;height:48px;background:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:6px 10px;overflow:hidden">
 <img src="/images/partners/conciergeplus.svg" alt="ConciergePlus logo" style="width:100%;height:100%;object-fit:contain;display:block">
@@ -5513,8 +5516,14 @@ ${[
 <div style="font-size:11px;color:rgba(255,255,255,0.6)">28 integrated modules \u00B7 Board + Resident + Staff + Vendor portals \u00B7 Mobile app</div>
 </div>
 </div>
+<p style="font-size:11px;color:rgba(255,255,255,0.82);line-height:1.65;margin:0 0 12px">ConciergePlus gives residents and staff one trackable operating hub for service requests, payments, amenity reservations, administrative tickets, package and front desk workflows, cloud files, resident notices, and board communication. Camelot layers its internal AI workflow over the portal so routine questions, meeting logistics, vendor follow-up, and document retrieval move faster without losing human oversight.</p>
+</div>
+<div style="background:#F4F5FB;border:1px solid rgba(255,255,255,0.16);border-radius:8px;padding:10px;min-height:156px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+<img src="https://pubcdn.conciergeplus.com/wp-content/uploads/2026/05/CP-Platform-Plus-Image-scaled.png" alt="Plus by Concierge Plus platform screens" style="width:100%;height:150px;object-fit:contain;display:block">
+</div>
+</div>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px">
-${['Amenity Booking', 'Announcements', 'Package Delivery', 'Service Requests', 'Online Payments', 'Incident Reports', 'Key Tracking', 'Equipment Mgmt', 'Discussion Forum', 'Pet Registry', 'Parking Mgmt', 'Community Polls', 'Newsletter', 'Vacancy Dates', 'Entry Instructions', 'Residents\u2019 Guide'].map(m => `<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,0.8);text-align:center">${m}</div>`).join('\n')}
+${['Amenity Booking', 'Service Requests', 'Online Payments', 'Admin Ticket Orders', 'Package Delivery', 'Cloud File Depository', 'AI Chatbot Layer', 'Zoom Board Meetings', 'Annual / Town Hall Meetings', 'Virtual Lockbox', 'Shared Bank Visibility', 'Vendor / Staff Workflow', 'Announcements', 'Key Tracking', 'Parking Mgmt', 'Residents\u2019 Guide'].map(m => `<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,0.8);text-align:center">${m}</div>`).join('\n')}
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
 <div style="background:rgba(168,144,53,0.15);border:1px solid rgba(168,144,53,0.3);border-radius:6px;padding:10px;text-align:center">
@@ -5700,14 +5709,21 @@ ${buildPortfolioSection(d)}
 <div class="section-sub">BankUnited — premier banking for property management and co-op associations</div>
 
 <div style="background:#fff;border:2px solid #A89035;border-radius:8px;padding:22px;margin:16px 0">
+<div style="display:grid;grid-template-columns:1fr .95fr;gap:18px;align-items:center">
+<div>
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
 <div style="width:190px;height:56px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;padding:6px 8px;border:1px solid #E5E3DE">
 <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/BankUnited_logo.svg" alt="BankUnited" style="width:100%;height:44px;object-fit:contain;display:block">
 </div>
 <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:16px;color:#3A4B5B;font-weight:700">BankUnited Partnership</div>
 </div>
-<p style="font-size:12px;color:#555;line-height:1.8">Camelot works exclusively with <strong>BankUnited</strong> \u2014 in our view the premier banking partner for property management companies and co-op associations in New York City. BankUnited offers <strong>no account fees</strong>, competitive interest rate matching, and deep technology integration with our payment systems, vendor payments, and collections workflows. Their automation tools streamline bank reconciliations and management reporting \u2014 reducing errors and improving financial transparency.</p>
+<p style="font-size:12px;color:#555;line-height:1.8">Camelot works with <strong>BankUnited</strong> as a trusted banking and technology partner for property management companies, co-op associations, condominium boards, and HOAs. BankUnited supports <strong>zero bank fees for Camelot customers</strong>, virtual lockbox structures to hold funds, shareable account visibility so boards can see balances, competitive treasury options, and integration with payment, collections, vendor-payment, and reconciliation workflows.</p>
 <p style="font-size:12px;color:#A89035;font-weight:600;margin-top:10px">This relationship often delivers meaningful financial value from Day 1.</p>
+</div>
+<div style="background:#101827;border-radius:8px;padding:14px;min-height:172px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+<div style="color:#fff;font-size:20px;line-height:1.28;font-weight:700;max-width:320px">Software integrations should give HOA and board teams their day back.</div>
+</div>
+</div>
 </div>
 
 <!-- Select Partnership -->

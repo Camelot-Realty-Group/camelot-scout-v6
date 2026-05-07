@@ -43,6 +43,10 @@ const JACKIE_INTELLIGENT_REPORT_NOTE = 'This is an intelligent property introduc
 const CONCIERGE_PLUS_PRODUCT_SOURCE = 'https://conciergeplus.com/product-suite/';
 const CONCIERGE_PLUS_PLATFORM_IMAGE = 'https://pubcdn.conciergeplus.com/wp-content/uploads/2026/05/CP-Platform-Plus-Image-scaled.png';
 const CONCIERGE_PLUS_LOGO_IMAGE = 'https://pubcdn.conciergeplus.com/wp-content/uploads/2026/05/PLUS-Logo-01-1024x501.png';
+const MDS_LOGO_IMAGE = '/images/partners/mds.svg';
+const BANKUNITED_LOGO_IMAGE = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/BankUnited_logo.svg';
+const SELECT_BRAND_IMAGE = 'https://d2e1363xcu3t9u.cloudfront.net/2024/images/share.png';
+const PVEDI_LOGO_IMAGE = 'https://static1.squarespace.com/static/640a5c792943d223933618c6/t/682273b3859251242cf33975/1747088307967/PVEDI-E-Blue-V3-RGB.png?format=1500w';
 const HOA_ARCHITECTURE_IMAGE = 'https://cdn.dagnysrealestate.com/communities/the-hills-of-monroe-monroe-ct/the-hills-of-monroe-monroe-ct-condominium-4952-w1900.webp';
 const HOA_WINDGATE_IMAGE = 'https://cdn.dagnysrealestate.com/homes-for-sale/24161220/t_condo-202-windgate-circle-monroe-ct-0-009d.jpeg';
 const HOA_KENSINGTON_IMAGE = 'https://cdn.dagnysrealestate.com/homes-for-sale/24160370/t_townhome-condo-5-kensington-road-monroe-ct-0-5ed6.jpeg';
@@ -315,11 +319,11 @@ function executiveTeamSlide(): string {
 }
 
 function residentPortalSlide(d: MasterReportData): string {
-  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Resident Portal &amp; Automation</div><div style="display:grid;grid-template-columns:1fr .95fr;gap:28px;align-items:center"><div><div class="sub-heading">Plus by Concierge Plus</div><p class="body-text" style="margin-bottom:16px">Plus brings property operations into one connected system: residents, management, payments, communication, service requests, documents, amenity booking, packages, and AI support.</p><div class="gold-card"><div class="check"><span>✓</span><div>Residents can book amenities, submit maintenance requests, pay fees, track packages, and stay connected from one mobile-friendly platform.</div></div><div class="check"><span>✓</span><div>Management gains cleaner visibility, fewer disconnected tools, and daily operational workflows that are easier to track.</div></div><div class="check"><span>✓</span><div>Over 26 modules allow the board to enable what ${d.buildingName || 'the building'} needs without overwhelming residents.</div></div></div></div><div><img src="${CONCIERGE_PLUS_LOGO_IMAGE}" alt="Plus by Concierge Plus" style="width:100%;height:110px;object-fit:contain;margin-bottom:18px"><img src="${CONCIERGE_PLUS_PLATFORM_IMAGE}" alt="Concierge Plus product suite" style="width:100%;height:340px;object-fit:contain"></div></div><div class="source-note">Source: ${CONCIERGE_PLUS_PRODUCT_SOURCE}</div></div></div>`;
+  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Resident Portal &amp; Automation</div><div style="display:grid;grid-template-columns:1fr .95fr;gap:28px;align-items:center"><div><div class="sub-heading">Plus by Concierge Plus</div><p class="body-text" style="margin-bottom:16px">Plus brings property operations into one connected system: residents, management, payments, communication, service requests, administrative tickets, documents, amenity booking, packages, meeting logistics, and AI support.</p><div class="gold-card"><div class="check"><span>✓</span><div>Residents can book amenities, submit maintenance requests, pay fees, track packages, and stay connected from one mobile-friendly platform.</div></div><div class="check"><span>✓</span><div>Management gains cleaner visibility across work orders, administrative ticket orders, resident communications, board tasks, and vendor follow-up.</div></div><div class="check"><span>✓</span><div>Boards can add automated Zoom board meetings, annual meetings, town halls, cloud file access, and a chatbot layer over Camelot OS without overwhelming residents.</div></div></div></div><div><img src="${CONCIERGE_PLUS_LOGO_IMAGE}" alt="Plus by Concierge Plus" style="width:100%;height:110px;object-fit:contain;margin-bottom:18px"><img src="${CONCIERGE_PLUS_PLATFORM_IMAGE}" alt="Concierge Plus product suite" style="width:100%;height:340px;object-fit:contain"></div></div><div class="source-note">Source: ${CONCIERGE_PLUS_PRODUCT_SOURCE}</div></div></div>`;
 }
 
 function mdsAccountingSlide(): string {
-  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Accounting &amp; Reporting Proof</div><p class="body-text" style="margin-bottom:16px">Camelot's accounting package is built around board-ready monthly reporting, MDS workflows, clean backup, and a predictable reporting cadence.</p><div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:18px"><div class="gold-card"><div class="sub-heading" style="font-size:20px">Monthly Package Includes</div>${MDS_REPORT_PROOF_POINTS.map(item => `<div class="check"><span>✓</span><div>${item}</div></div>`).join('')}</div><div><div class="visual-card" style="padding:18px;margin-bottom:14px"><div class="sub-heading" style="font-size:18px">Reporting Cadence</div>${[['Close + reconciliation', 80], ['Board package QA', 88], ['Management report delivery', 96], ['Follow-up action list', 76]].map(([label, pct]) => `<div style="margin-bottom:13px"><div style="font-size:12px;font-weight:800;color:#1a2744">${label}</div><div class="mini-bar"><span style="width:${pct}%"></span></div></div>`).join('')}</div><div class="gold-card"><div class="sub-heading" style="font-size:18px">Why It Matters</div><p class="small">Boards should not chase basic financial answers. Camelot can deliver recurring financials, budget comparisons, arrears tracking, disbursement backup, and paid-invoice images so meetings focus on decisions instead of missing data.</p></div></div></div><div class="source-note">Sources: MDS sample report packages uploaded by Camelot · monthly reporting cadence supplied by Camelot.</div></div></div>`;
+  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Accounting &amp; Reporting Proof</div><p class="body-text" style="margin-bottom:16px">Camelot's accounting package is built around board-ready monthly reporting, MDS workflows, clean backup, in-house CPA oversight, and a predictable reporting cadence.</p><div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:18px"><div class="gold-card"><div style="height:58px;margin-bottom:12px"><img src="${MDS_LOGO_IMAGE}" alt="MDS property management software" style="max-width:230px;height:58px;object-fit:contain"></div><div class="sub-heading" style="font-size:20px">Monthly Package Includes</div>${MDS_REPORT_PROOF_POINTS.map(item => `<div class="check"><span>✓</span><div>${item}</div></div>`).join('')}<div class="check"><span>✓</span><div>In-house CPA, controller, account managers, and bookkeepers supporting tax returns, collections, budgets, and custom board reports.</div></div></div><div><div class="visual-card" style="padding:18px;margin-bottom:14px"><div class="sub-heading" style="font-size:18px">Reporting Cadence</div>${[['Close + reconciliation', 80], ['Board package QA', 88], ['Management report delivery by 20th-25th', 96], ['Follow-up action list', 76]].map(([label, pct]) => `<div style="margin-bottom:13px"><div style="font-size:12px;font-weight:800;color:#1a2744">${label}</div><div class="mini-bar"><span style="width:${pct}%"></span></div></div>`).join('')}</div><div class="gold-card"><div class="sub-heading" style="font-size:18px">Why It Matters</div><p class="small">Boards should not chase basic financial answers. Camelot can deliver recurring financials, budget comparisons, arrears tracking, disbursement backup, paid-invoice images, and accounting advisory so meetings focus on decisions instead of missing data.</p></div></div></div><div class="source-note">Sources: MDS sample report packages uploaded by Camelot · monthly reporting cadence supplied by Camelot.</div></div></div>`;
 }
 
 function onboardingChecklistSlide(): string {
@@ -398,7 +402,7 @@ function hoaClaimsSlide(): string {
 }
 
 function hoaTechnologySlide(): string {
-  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Technology &amp; Reporting</div><div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:22px"><div class="gold-card"><div class="sub-heading">Reporting Stack</div>${hoaBulletList(['Digital board packets and executive summaries', 'Cloud-based document management', 'Vendor tracking and open-item logs', 'Inspection photos and work order workflows', 'Financial dashboards and variance analysis', 'AI-assisted operational summaries', 'Resident communication systems'])}</div>${imageCard(HOA_DASHBOARD_IMAGE, 'Modern reporting dashboard', 'Scout concepts, Camelot dashboards, and cloud collaboration systems', 430)}</div><div class="source-note">Technology stack customized to board needs and association records.</div></div></div>`;
+  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Technology &amp; Reporting</div><div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:22px"><div class="gold-card"><div class="sub-heading">Reporting Stack</div>${hoaBulletList(['MDS accounting reports and monthly board package cadence', 'ConciergePlus resident portal for service requests, payments, amenities, files, and administrative tickets', 'BankUnited banking workflow with zero-fee customer banking, lockbox, and balance visibility', 'Cloud-based document management', 'Vendor tracking and open-item logs', 'Inspection photos and work order workflows', 'AI-assisted operational summaries'])}</div><div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div class="visual-card" style="height:98px;display:flex;align-items:center;justify-content:center"><img src="${MDS_LOGO_IMAGE}" alt="MDS" style="max-width:210px;max-height:64px;object-fit:contain"></div><div class="visual-card" style="height:98px;display:flex;align-items:center;justify-content:center"><img src="${BANKUNITED_LOGO_IMAGE}" alt="BankUnited" style="max-width:210px;max-height:56px;object-fit:contain"></div><div class="visual-card" style="height:98px;display:flex;align-items:center;justify-content:center"><img src="${SELECT_BRAND_IMAGE}" alt="Select" style="max-width:210px;max-height:64px;object-fit:contain;background:#000;padding:8px;border-radius:4px"></div><div class="visual-card" style="height:98px;display:flex;align-items:center;justify-content:center"><img src="${PVEDI_LOGO_IMAGE}" alt="PVEDI Engineering" style="max-width:230px;max-height:64px;object-fit:contain"></div></div><img src="${CONCIERGE_PLUS_PLATFORM_IMAGE}" alt="ConciergePlus product suite" style="width:100%;height:245px;object-fit:contain"></div></div><div class="source-note">Technology stack customized to board needs and association records. Sources: MDS, ConciergePlus, BankUnited, Select, and PVEDI official partner materials.</div></div></div>`;
 }
 
 function hoaFinancialSlide(): string {
@@ -822,26 +826,35 @@ export function generatePitchReport(d: MasterReportData): string {
   <div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div>
   <div class="pad">
     <div class="section-title">Technology Platform</div>
-    <div class="body-text" style="margin-bottom:20px">Merlin AI + Camelot OS + ConciergePlus — modern tools that respect your ${d.isRentStabilized ? "tenants'" : "shareholders'"} preferences.</div>
+    <div class="body-text" style="margin-bottom:20px">MDS + ConciergePlus + BankUnited + Merlin AI + Camelot OS — modern tools that respect your ${d.isRentStabilized ? "tenants'" : "shareholders'"} preferences and give the board cleaner control.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
       <div class="gold-card" style="padding:24px">
         <div class="sub-heading">For Board & Management</div>
-        <div class="check-item"><div class="check-icon">✓</div> Group and individual messaging</div>
-        <div class="check-item"><div class="check-icon">✓</div> Utility usage tracking</div>
-        <div class="check-item"><div class="check-icon">✓</div> Building files access</div>
+        <div class="check-item"><div class="check-icon">✓</div> MDS monthly reports delivered by the 20th-25th</div>
+        <div class="check-item"><div class="check-icon">✓</div> Virtual lockbox and shared bank balance visibility</div>
+        <div class="check-item"><div class="check-icon">✓</div> Cloud file depository and building files access</div>
         <div class="check-item"><div class="check-icon">✓</div> Compliance status updates</div>
-        <div class="check-item"><div class="check-icon">✓</div> AI-powered meeting minutes</div>
+        <div class="check-item"><div class="check-icon">✓</div> AI-powered board, annual, and town-hall meeting support</div>
       </div>
       <div class="gold-card" style="padding:24px">
         <div class="sub-heading">For Residents</div>
         <div class="check-item"><div class="check-icon">✓</div> ConciergePlus portal + mobile app</div>
         <div class="check-item"><div class="check-icon">✓</div> Pay maintenance online — zero bank fees</div>
-        <div class="check-item"><div class="check-icon">✓</div> AI chatbot support 24/7</div>
-        <div class="check-item"><div class="check-icon">✓</div> Download building documents</div>
+        <div class="check-item"><div class="check-icon">✓</div> Work orders, amenity requests, and administrative tickets</div>
+        <div class="check-item"><div class="check-icon">✓</div> AI chatbot support layered over Camelot OS</div>
         <div class="check-item"><div class="check-icon">✓</div> Traditional paper statements still supported</div>
       </div>
     </div>
-    <div style="font-size:12px;color:#6b7280;margin-top:16px">Powered by: OpenAI NLP  |  AWS Cloud  |  AppFolio Sync  |  HubSpot CRM  |  RealtyMX  |  PropertyShark</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px;align-items:center">
+      ${[
+        [MDS_LOGO_IMAGE, 'MDS'],
+        [CONCIERGE_PLUS_PLATFORM_IMAGE, 'ConciergePlus'],
+        [BANKUNITED_LOGO_IMAGE, 'BankUnited'],
+        [SELECT_BRAND_IMAGE, 'Select'],
+        [PVEDI_LOGO_IMAGE, 'PVEDI Engineering'],
+      ].map(([src, alt]) => `<div style="height:72px;background:#fff;border:1px solid rgba(184,151,58,.28);border-radius:8px;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden"><img src="${src}" alt="${alt}" style="max-width:100%;max-height:58px;object-fit:contain"></div>`).join('')}
+    </div>
+    <div style="font-size:12px;color:#6b7280;margin-top:12px">Powered by: OpenAI NLP  |  AWS Cloud  |  MDS  |  ConciergePlus  |  BankUnited  |  PVEDI Engineering  |  HubSpot CRM  |  PropertyShark</div>
   </div>
 </div>
 
