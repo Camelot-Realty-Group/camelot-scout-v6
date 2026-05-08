@@ -6,6 +6,169 @@ const PORT = process.env.PORT || 10000;
 // JSON body parser for API proxy routes
 app.use(express.json());
 
+function getHubSpotApiKey() {
+  return process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY || '';
+}
+
+function getScoutConfig() {
+  return {
+    apiUrl: process.env.SCOUT_API_URL || '',
+    apiKey: process.env.SCOUT_API_KEY || '',
+    workspaceId: process.env.SCOUT_WORKSPACE_ID || '',
+  };
+}
+
+function parseContactName(fullName = '') {
+  const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
+  return {
+    firstname: parts[0] || '',
+    lastname: parts.length > 1 ? parts.slice(1).join(' ') : '',
+  };
+}
+
+function normalizePhone(phone = '') {
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return digits;
+}
+
+function auditLeadQualitySnapshot(building = {}, contact = {}) {
+  const missingFields = [];
+  const strengths = [];
+  const warnings = [];
+  let score = 0;
+
+  if (building.address) score += 15;
+  else missingFields.push('property address');
+
+  if (building.units && Number(building.units) > 0) {
+    score += Number(building.units) >= 30 ? 15 : 8;
+    strengths.push(`${building.units} units identified`);
+  } else {
+    missingFields.push('unit count');
+  }
+
+  if (building.type) score += 8;
+  else missingFields.push('asset class');
+
+  if (building.borough || building.region || building.neighborhood || building.zip_code) {
+    score += 8;
+    strengths.push('geography available for routing');
+  } else {
+    missingFields.push('borough / region / zip');
+  }
+
+  if (contact.email) {
+    score += 18;
+    strengths.push('email contact available');
+  } else {
+    missingFields.push('verified email contact');
+  }
+
+  if (contact.phone) {
+    score += 10;
+    strengths.push('phone contact available');
+  } else {
+    missingFields.push('phone contact');
+  }
+
+  if (building.current_management && !/unknown|verify/i.test(building.current_management)) {
+    score += 8;
+    strengths.push('current management identified');
+  } else {
+    warnings.push('current management should be verified before a client-facing push');
+  }
+
+  if ((Number(building.market_value) || 0) > 0 || (Number(building.assessed_value) || 0) > 0) {
+    score += 6;
+    strengths.push('valuation or assessment signal available');
+  } else {
+    warnings.push('market value is missing or zero');
+  }
+
+  if ((Number(building.open_violations_count) || 0) > 0 || (Number(building.violations_count) || 0) > 0) {
+    score += 6;
+    strengths.push('compliance pain point available');
+  }
+
+  if (Array.isArray(building.signals) && building.signals.length) {
+    score += Math.min(6, building.signals.length * 2);
+    strengths.push('Scout signal history present');
+  }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const tier = missingFields.includes('property address') || missingFields.includes('unit count')
+    ? 'review'
+    : score >= 76
+      ? 'hot'
+      : score >= 55
+        ? 'warm'
+        : 'cold';
+
+  return { score, tier, missingFields, strengths, warnings };
+}
+
+function routeLeadSnapshot(building = {}, quality = {}) {
+  const region = building.borough || building.region || building.neighborhood || building.zip_code || 'Unassigned';
+  const tags = new Set([
+    `tier:${quality.tier || 'review'}`,
+    `region:${region}`,
+    `asset:${building.type || 'unknown'}`,
+  ]);
+  if ((Number(building.units) || 0) >= 100) tags.add('large-building');
+  if ((Number(building.open_violations_count) || 0) > 0) tags.add('compliance-pain');
+  if (/self/i.test(building.current_management || '')) tags.add('self-managed-review');
+  if ((Number(building.market_value) || 0) <= 0) tags.add('valuation-needed');
+
+  return {
+    team: quality.tier === 'hot'
+      ? 'David / Jackie priority desk'
+      : quality.tier === 'warm'
+        ? 'Scout outreach team'
+        : quality.tier === 'review'
+          ? 'Data quality review'
+          : 'Nurture queue',
+    region,
+    priority: quality.tier === 'hot' ? 'same-day' : quality.tier === 'warm' ? '24-48 hours' : 'nurture',
+    tags: Array.from(tags),
+  };
+}
+
+async function hubspotRequest(pathname, payload) {
+  const apiKey = getHubSpotApiKey();
+  if (!apiKey) throw new Error('HubSpot API key not configured');
+
+  const resp = await fetch(`https://api.hubapi.com${pathname}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify(payload),
+  });
+  const text = await resp.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = { error: text || 'Empty response from HubSpot', status: resp.status }; }
+  if (!resp.ok) {
+    const error = new Error(data?.message || data?.error || `HubSpot request failed: ${resp.status}`);
+    error.status = resp.status;
+    error.data = data;
+    throw error;
+  }
+  return data;
+}
+
+async function associateHubSpotContactDeal(contactId, dealId) {
+  return hubspotRequest('/crm/v3/associations/contacts/deals/batch/create', {
+    inputs: [
+      {
+        from: { id: String(contactId) },
+        to: { id: String(dealId) },
+        type: 'contact_to_deal',
+      },
+    ],
+  });
+}
+
 // Log available env vars on startup (keys only, not values)
 const envKeys = Object.keys(process.env).filter(k => k.includes('HUBSPOT') || k.includes('APOLLO') || k.includes('SUPABASE') || k.includes('AI_API'));
 console.log('Camelot OS server starting. Available API keys:', envKeys.length > 0 ? envKeys.join(', ') : 'NONE — set HUBSPOT_API_KEY, APOLLO_API_KEY in Render env vars');
@@ -13,6 +176,13 @@ console.log('Camelot OS server starting. Available API keys:', envKeys.length > 
 // ============================================================
 // HubSpot API Proxy — avoids CORS issues with browser-side calls
 // ============================================================
+console.log('Scout integration config:', {
+  scoutApiUrl: Boolean(getScoutConfig().apiUrl),
+  scoutApiKey: Boolean(getScoutConfig().apiKey),
+  scoutWorkspaceId: Boolean(getScoutConfig().workspaceId),
+  hubspotApiKey: Boolean(getHubSpotApiKey()),
+});
+
 app.post('/api/hubspot/contacts', async (req, res) => {
   const apiKey = process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY;
   if (!apiKey) {
@@ -71,6 +241,159 @@ app.post('/api/hubspot/deals', async (req, res) => {
 // ============================================================
 // Apollo API Proxy — contact enrichment
 // ============================================================
+// ============================================================
+// Scout + HubSpot Integration Orchestration
+// ============================================================
+app.get('/api/integrations/status', (_req, res) => {
+  const scout = getScoutConfig();
+  const hubspotKey = getHubSpotApiKey();
+  res.json({
+    scout: {
+      configured: Boolean(scout.apiUrl && scout.apiKey && scout.workspaceId),
+      apiUrlSet: Boolean(scout.apiUrl),
+      workspaceSet: Boolean(scout.workspaceId),
+    },
+    hubspot: {
+      configured: Boolean(hubspotKey),
+      dealsEnabled: process.env.HUBSPOT_CREATE_DEALS === 'true' && Boolean(process.env.HUBSPOT_DEAL_STAGE_ID),
+      associationEndpoint: '/crm/v3/associations/contacts/deals/batch/create',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.post('/api/integrations/push-building', async (req, res) => {
+  const body = req.body || {};
+  const building = body.building || {};
+  const contact = body.contact || {};
+  const quality = body.quality || auditLeadQualitySnapshot(building, contact);
+  const routing = body.routing || routeLeadSnapshot(building, quality);
+  const result = {
+    status: 'ok',
+    quality,
+    routing,
+    scout: { status: 'skipped', message: 'Scout API not configured.' },
+    hubspot: { status: 'skipped', message: 'HubSpot API key not configured.' },
+  };
+
+  if (!building.address) {
+    result.status = 'error';
+    result.scout = { status: 'error', message: 'Property address is required before export.' };
+    result.hubspot = { status: 'error', message: 'Property address is required before export.' };
+    return res.status(400).json(result);
+  }
+
+  const hubspotKey = getHubSpotApiKey();
+  if (hubspotKey) {
+    if (!contact.email) {
+      result.hubspot = {
+        status: 'skipped',
+        message: 'HubSpot contact skipped because no verified email is available.',
+      };
+    } else {
+      try {
+        const parsedName = parseContactName(contact.name);
+        const contactPayload = {
+          properties: {
+            email: contact.email,
+            firstname: contact.firstname || parsedName.firstname,
+            lastname: contact.lastname || parsedName.lastname,
+            phone: normalizePhone(contact.phone),
+            company: contact.company || building.name || building.address,
+            address: building.address,
+            city: building.borough || building.region || '',
+          },
+        };
+        const createdContact = await hubspotRequest('/crm/v3/objects/contacts', contactPayload);
+        const warnings = [];
+        let dealId;
+
+        if (process.env.HUBSPOT_CREATE_DEALS === 'true' && process.env.HUBSPOT_DEAL_STAGE_ID) {
+          try {
+            const dealPayload = {
+              properties: {
+                dealname: `${building.name || building.address} - Scout Lead`,
+                dealstage: process.env.HUBSPOT_DEAL_STAGE_ID,
+                pipeline: process.env.HUBSPOT_PIPELINE_ID || 'default',
+                amount: String(building.market_value || ''),
+              },
+            };
+            const deal = await hubspotRequest('/crm/v3/objects/deals', dealPayload);
+            dealId = deal.id;
+            await associateHubSpotContactDeal(createdContact.id, deal.id);
+          } catch (dealErr) {
+            warnings.push(dealErr.message || 'HubSpot deal association failed');
+          }
+        } else {
+          warnings.push('Deal creation skipped; set HUBSPOT_CREATE_DEALS=true and HUBSPOT_DEAL_STAGE_ID to enable.');
+        }
+
+        result.hubspot = {
+          status: 'ok',
+          message: dealId ? 'HubSpot contact and deal synced.' : 'HubSpot contact synced.',
+          id: createdContact.id,
+          warnings,
+        };
+      } catch (err) {
+        result.hubspot = {
+          status: 'error',
+          message: err.message || 'HubSpot sync failed.',
+        };
+      }
+    }
+  }
+
+  const scout = getScoutConfig();
+  if (scout.apiUrl && scout.apiKey && scout.workspaceId) {
+    try {
+      const base = scout.apiUrl.replace(/\/+$/, '');
+      const resp = await fetch(`${base}/leads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${scout.apiKey}`,
+          'X-Scout-Workspace-Id': scout.workspaceId,
+        },
+        body: JSON.stringify({
+          workspace_id: scout.workspaceId,
+          source: 'Camelot Scout OS',
+          building,
+          contact,
+          quality,
+          routing,
+          pushed_at: new Date().toISOString(),
+        }),
+      });
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || data?.error || `Scout API failed: ${resp.status}`);
+      result.scout = {
+        status: 'ok',
+        message: 'Scout lead pushed.',
+        id: data.id || data.lead_id || data.uuid,
+        url: data.url,
+      };
+    } catch (err) {
+      result.scout = {
+        status: 'error',
+        message: err.message || 'Scout API push failed.',
+      };
+    }
+  } else {
+    result.scout = {
+      status: 'skipped',
+      message: 'Scout API not configured. Set SCOUT_API_URL, SCOUT_API_KEY, and SCOUT_WORKSPACE_ID.',
+    };
+  }
+
+  const hasError = result.scout.status === 'error' || result.hubspot.status === 'error';
+  const hasOk = result.scout.status === 'ok' || result.hubspot.status === 'ok';
+  result.status = hasError && hasOk ? 'partial' : hasError ? 'error' : hasOk ? 'ok' : 'skipped';
+  const statusCode = result.status === 'error' ? 502 : 200;
+  res.status(statusCode).json(result);
+});
+
 app.post('/api/apollo/enrich', async (req, res) => {
   const apiKey = process.env.APOLLO_API_KEY || process.env.VITE_APOLLO_API_KEY;
   if (!apiKey) {

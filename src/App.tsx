@@ -12,6 +12,7 @@ import Outreach from '@/pages/Outreach';
 import Chat from '@/pages/Chat';
 import Archive from '@/pages/Archive';
 import Export from '@/pages/Export';
+import Integrations from '@/pages/Integrations';
 import Bots from '@/pages/Bots';
 import Settings from '@/pages/Settings';
 import Tutorials from '@/pages/Tutorials';
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/archive" element={<Archive />} />
           <Route path="/export" element={<Export />} />
+          <Route path="/integrations" element={<Integrations />} />
           <Route path="/bots" element={<Bots />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/tutorials" element={<Tutorials />} />

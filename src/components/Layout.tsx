@@ -85,6 +85,7 @@ const navigation: NavSection[] = [
     items: [
       { label: 'Merlin AI', href: '/chat', icon: <MessageSquare size={18} />, tourId: 'scout-ai' },
       { label: 'Archive', href: '/archive', icon: <Archive size={18} /> },
+      { label: 'Integrations', href: '/integrations', icon: <GitBranch size={18} /> },
       { label: 'Export', href: '/export', icon: <Download size={18} />, tourId: 'export' },
       { label: 'AI Bots', href: '/bots', icon: <Bot size={18} /> },
       { label: 'Settings', href: '/settings', icon: <Settings size={18} />, tourId: 'settings' },

@@ -15,6 +15,10 @@ const gutCheckFile = resolve(root, 'src/lib/gut-check.ts');
 const jackieV2File = resolve(root, 'src/lib/jackie-v2-orchestrator.ts');
 const scoutDoctrineFile = resolve(root, 'src/lib/scout-ai-doctrines.ts');
 const sentinelReportFile = resolve(root, 'src/lib/sentinel-report.ts');
+const integrationsFile = resolve(root, 'src/lib/integrations.ts');
+const integrationsPageFile = resolve(root, 'src/pages/Integrations.tsx');
+const serverFile = resolve(root, 'server.js');
+const botsPageFile = resolve(root, 'src/pages/Bots.tsx');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
 const nycApiSource = readFileSync(nycApiFile, 'utf8');
@@ -23,11 +27,15 @@ const gutCheckSource = readFileSync(gutCheckFile, 'utf8');
 const jackieV2Source = readFileSync(jackieV2File, 'utf8');
 const scoutDoctrineSource = readFileSync(scoutDoctrineFile, 'utf8');
 const sentinelReportSource = readFileSync(sentinelReportFile, 'utf8');
+const integrationsSource = readFileSync(integrationsFile, 'utf8');
+const integrationsPageSource = readFileSync(integrationsPageFile, 'utf8');
+const serverSource = readFileSync(serverFile, 'utf8');
+const botsPageSource = readFileSync(botsPageFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -188,6 +196,18 @@ const requiredTokens = [
   ['Sentinel PLUTO land context source', 'NYC DCP PLUTO/MapPLUTO'],
   ['Sentinel ACRIS foreclosure source', 'lis pendens'],
   ['Sentinel 15 percent pricing rule', '15% below comparable large-firm pricing'],
+  ['Scout integrations status endpoint', '/api/integrations/status'],
+  ['Scout integrations push endpoint', '/api/integrations/push-building'],
+  ['Scout API URL credential', 'SCOUT_API_URL'],
+  ['Scout workspace credential', 'SCOUT_WORKSPACE_ID'],
+  ['HubSpot server credential', 'HUBSPOT_API_KEY'],
+  ['HubSpot v3 contact endpoint', '/crm/v3/objects/contacts'],
+  ['HubSpot v3 association endpoint', '/crm/v3/associations/contacts/deals/batch/create'],
+  ['Safe contact name parsing', 'parseContactName'],
+  ['Lead Quality Audit feature', 'Lead Quality Audit'],
+  ['Lead routing feature', 'routeLead'],
+  ['Bidirectional lifecycle note', 'Bidirectional Scout outcome and HubSpot deal status sync'],
+  ['Scout HubSpot bot dashboard', 'Scout + HubSpot Sync Bot'],
 ];
 
 const failures = requiredTokens
