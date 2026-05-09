@@ -127,6 +127,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'Sentinel Memo', kind: 'Generated', status: 'reference' },
     ],
     actions: [
+      { label: 'Arthur Underwriting', href: '/arthur', icon: Landmark },
       { label: 'Sentinel', href: '/sentinel', icon: Sparkles },
       { label: 'Jackie Reports', href: '/report-center', icon: Crown },
       { label: 'Integrations', href: '/integrations', icon: GitBranch },

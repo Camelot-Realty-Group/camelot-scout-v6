@@ -23,6 +23,7 @@ import {
   Sword,
   Crown,
   Eye,
+  BarChart3,
   Zap,
   AlertTriangle,
   Menu,
@@ -72,6 +73,7 @@ const navigation: NavSection[] = [
       { label: 'Competitors', href: '/intelligence', icon: <Swords size={18} /> },
       { label: 'Reports', href: '/reports', icon: <FileText size={18} /> },
       { label: 'Sentinel — Market', href: '/sentinel', icon: <Eye size={18} /> },
+      { label: 'Arthur — Underwriting', href: '/arthur', icon: <BarChart3 size={18} /> },
     ],
   },
   {

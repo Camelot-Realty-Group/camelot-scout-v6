@@ -20,6 +20,8 @@ const integrationsPageFile = resolve(root, 'src/pages/Integrations.tsx');
 const serverFile = resolve(root, 'server.js');
 const botsPageFile = resolve(root, 'src/pages/Bots.tsx');
 const acquisitionPipelineFile = resolve(root, 'src/lib/acquisition-pipeline.ts');
+const arthurPageFile = resolve(root, 'src/pages/Arthur.tsx');
+const arthurUnderwritingFile = resolve(root, 'src/lib/arthur-underwriting.ts');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
 const nycApiSource = readFileSync(nycApiFile, 'utf8');
@@ -33,11 +35,13 @@ const integrationsPageSource = readFileSync(integrationsPageFile, 'utf8');
 const serverSource = readFileSync(serverFile, 'utf8');
 const botsPageSource = readFileSync(botsPageFile, 'utf8');
 const acquisitionPipelineSource = readFileSync(acquisitionPipelineFile, 'utf8');
+const arthurPageSource = readFileSync(arthurPageFile, 'utf8');
+const arthurUnderwritingSource = readFileSync(arthurUnderwritingFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -229,6 +233,17 @@ const requiredTokens = [
   ['Arthur underwriting prompt', 'ARTHUR_UNDERWRITING_PROMPT'],
   ['Arthur bot dashboard', 'Arthur Financial Underwriter'],
   ['Arthur no Sentinel-only rule', 'No Arthur model runs on Sentinel-only leads'],
+  ['Arthur route page', 'Arthur AI Underwriter'],
+  ['Arthur underwriting nav route', '/arthur'],
+  ['Arthur criteria coverage', 'ARTHUR_CRITERIA_FIELDS'],
+  ['Arthur listing search', 'searchArthurListings'],
+  ['Arthur report HTML generator', 'buildArthurReportHtml'],
+  ['Arthur editable Excel model', 'downloadArthurExcel'],
+  ['Arthur HubSpot handoff', 'Scout / HubSpot'],
+  ['Arthur sensitivity analysis', 'Sensitivity Analysis'],
+  ['Arthur subject map', 'Subject property map'],
+  ['Arthur criteria commercial property', 'Commercial property'],
+  ['Arthur bridge lender rates criterion', 'Bridge lender rates'],
 ];
 
 const failures = requiredTokens

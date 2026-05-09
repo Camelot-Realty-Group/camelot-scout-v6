@@ -27,6 +27,7 @@ import Agreements from '@/pages/Agreements';
 import Sentinel from '@/pages/Sentinel';
 import Violations from '@/pages/Violations';
 import LegalReportTerms from '@/pages/LegalReportTerms';
+import Arthur from '@/pages/Arthur';
 import { useBuildings } from '@/hooks/useBuildings';
 
 export default function App() {
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/report-center" element={<ReportCenter />} />
           <Route path="/agreements" element={<Agreements />} />
           <Route path="/sentinel" element={<Sentinel />} />
+          <Route path="/arthur" element={<Arthur />} />
           <Route path="/violations" element={<Violations />} />
           <Route path="/legal-report-terms" element={<LegalReportTerms />} />
           <Route path="*" element={<Navigate to="/" replace />} />
