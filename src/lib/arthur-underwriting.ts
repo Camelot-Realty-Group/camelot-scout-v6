@@ -17,6 +17,9 @@ export type ArthurDealType =
 export interface ArthurCriteria {
   location: string;
   dealTypes: ArthurDealType[];
+  applyDealTypeFilter: boolean;
+  applyUnitRangeFilter: boolean;
+  applySqftRangeFilter: boolean;
   minUnits: number;
   maxUnits: number;
   minSqft: number;
@@ -60,7 +63,12 @@ export interface ArthurProperty {
   listingAgent: string;
   listingSource: string;
   imageUrl: string;
+  brokerNotes: string;
+  arthurThesis: string;
   matchStatus?: 'exact' | 'nearest';
+  matchScore?: number;
+  mismatchReasons?: string[];
+  selectedCriteriaNotes?: string[];
   pros: string[];
   cons: string[];
   comps: Array<{ address: string; price: number; units: number; capRate: number; distance: string }>;
@@ -85,6 +93,9 @@ export interface ArthurModel {
 export const DEFAULT_ARTHUR_CRITERIA: ArthurCriteria = {
   location: 'New York, NY',
   dealTypes: ['walk_up', 'elevator', 'mixed_use', 'gp_lp'],
+  applyDealTypeFilter: false,
+  applyUnitRangeFilter: false,
+  applySqftRangeFilter: false,
   minUnits: 10,
   maxUnits: 250,
   minSqft: 5000,
@@ -157,6 +168,254 @@ export function arthurDealTypeLabel(type: ArthurDealType) {
 
 const ALL_DEAL_TYPES = Object.keys(TYPE_LABELS) as ArthurDealType[];
 
+type ArthurSeed = Omit<
+  ArthurProperty,
+  'id' | 'matchStatus' | 'matchScore' | 'mismatchReasons' | 'selectedCriteriaNotes' | 'comps'
+>;
+
+const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
+  {
+    name: 'Riverside Value-Add Portfolio',
+    address: '180 Riverside Drive, New York, NY',
+    location: 'Upper West Side, Manhattan',
+    type: 'gp_lp',
+    units: 112,
+    sqft: 136000,
+    askingPrice: 52000000,
+    lastSalePrice: 33280000,
+    lastSaleDate: '2014-06-15',
+    taxes: 624000,
+    insurance: 217600,
+    noi: 1976000,
+    capRate: 0.038,
+    violations: 9,
+    zoning: 'D7 / R10A',
+    floodZone: 'Possible waterfront exposure',
+    commuteScore: 96,
+    schoolScore: 82,
+    crimeScore: 78,
+    neighborhoodScore: 90,
+    ownership: 'Riverside ValueAdd Holdings LLC',
+    listingAgent: 'Listing agent to verify from source listing',
+    listingSource: 'MLS / StreetEasy / lender lead to verify',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=180%20Riverside%20Drive%2C%20New%20York%2C%20NY',
+    brokerNotes: 'Portfolio-sized residential value-add opportunity with institutional exit liquidity if operating assumptions hold.',
+    arthurThesis: 'Proceed only after Jackie validates rent roll, capex timeline, violations, staff structure, and achievable operating savings.',
+    pros: ['Institutional unit count', 'Strong Manhattan liquidity', 'Management and vendor rebid upside'],
+    cons: ['Waterfront insurance sensitivity', 'Rent-regulatory review required', 'Capex must be scoped before LOI'],
+  },
+  {
+    name: 'East Side Elevator Opportunity',
+    address: '201 East 79th Street, New York, NY',
+    location: 'Upper East Side, Manhattan',
+    type: 'elevator',
+    units: 167,
+    sqft: 201000,
+    askingPrice: 89000000,
+    lastSalePrice: 55180000,
+    lastSaleDate: '2015-06-15',
+    taxes: 1068000,
+    insurance: 371850,
+    noi: 3649000,
+    capRate: 0.041,
+    violations: 47,
+    zoning: 'R10 / C1-5 overlay',
+    floodZone: 'No obvious flood flag',
+    commuteScore: 90,
+    schoolScore: 78,
+    crimeScore: 73,
+    neighborhoodScore: 86,
+    ownership: 'EastSideElevatorOpportunity Holdings LLC',
+    listingAgent: 'Off-market / owner outreach candidate',
+    listingSource: 'Scout off-market lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=201%20East%2079th%20Street%2C%20New%20York%2C%20NY',
+    brokerNotes: 'Large elevator asset with meaningful compliance and management diligence required before underwriting confidence.',
+    arthurThesis: 'Potential acquisition if violations are curable, management transition is priced, and current income verifies against public records.',
+    pros: ['Large unit count', 'Prime UES address', 'Scale supports professionalized operations'],
+    cons: ['Compliance remediation must be priced before LOI', 'Current management and owner record need verification', 'Market value requires comp support'],
+  },
+  {
+    name: 'Midtown Mixed-Use Basis Play',
+    address: '345 West 58th Street, New York, NY',
+    location: 'Columbus Circle / Midtown West',
+    type: 'mixed_use',
+    units: 74,
+    sqft: 92000,
+    askingPrice: 41000000,
+    lastSalePrice: 27060000,
+    lastSaleDate: '2016-06-15',
+    taxes: 492000,
+    insurance: 193200,
+    noi: 1804000,
+    capRate: 0.044,
+    violations: 17,
+    zoning: 'C6-4',
+    floodZone: 'No obvious flood flag',
+    commuteScore: 84,
+    schoolScore: 74,
+    crimeScore: 68,
+    neighborhoodScore: 82,
+    ownership: 'MidtownMixedUseBasisPlay Holdings LLC',
+    listingAgent: 'Listing agent to verify from source listing',
+    listingSource: 'LoopNet / broker package style lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=345%20West%2058th%20Street%2C%20New%20York%2C%20NY',
+    brokerNotes: 'Mixed-use basis play where retail income, air rights, and expense leakage should be verified.',
+    arthurThesis: 'Best suited for a JV/GP-LP structure if commercial rents and expense recoveries support a defensible basis.',
+    pros: ['Mixed-use revenue upside', 'Central transit market', 'Potential commercial rent mark-to-market'],
+    cons: ['Retail lease rollover risk', 'Zoning and air-right review required', 'Insurance and tax escalation sensitivity'],
+  },
+  {
+    name: 'Harlem Walk-Up Assemblage',
+    address: '346 East 119th Street, New York, NY',
+    location: 'East Harlem, Manhattan',
+    type: 'walk_up',
+    units: 42,
+    sqft: 38500,
+    askingPrice: 14800000,
+    lastSalePrice: 9768000,
+    lastSaleDate: '2017-06-15',
+    taxes: 177600,
+    insurance: 90475,
+    noi: 695600,
+    capRate: 0.047,
+    violations: 36,
+    zoning: 'R7A',
+    floodZone: 'No obvious flood flag',
+    commuteScore: 78,
+    schoolScore: 70,
+    crimeScore: 63,
+    neighborhoodScore: 78,
+    ownership: 'HarlemWalkUpAssemblage Holdings LLC',
+    listingAgent: 'Off-market / owner outreach candidate',
+    listingSource: 'Scout distress lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=346%20East%20119th%20Street%2C%20New%20York%2C%20NY',
+    brokerNotes: 'Walk-up basis opportunity with compliance, rent-regulation, and renovation cadence risk.',
+    arthurThesis: 'Can move to Arthur underwriting after Jackie confirms tenant profile, violations, DHCR exposure, and realistic unit-turn program.',
+    pros: ['Lower basis than core Manhattan', 'Management distress creates leverage', 'Potential expense reset'],
+    cons: ['High violation load', 'Rent-regulatory exposure likely', 'Tenant coordination may slow execution'],
+  },
+  {
+    name: 'Hills of Monroe HOA Recovery',
+    address: '645 Main Street, Monroe, CT 06468',
+    location: 'Monroe, Connecticut',
+    type: 'hoa_condo_recovery',
+    units: 186,
+    sqft: 210000,
+    askingPrice: 32500000,
+    lastSalePrice: 23920000,
+    lastSaleDate: '2018-06-15',
+    taxes: 390000,
+    insurance: 525000,
+    noi: 1625000,
+    capRate: 0.05,
+    violations: 0,
+    zoning: 'Residential HOA',
+    floodZone: 'Review FEMA / local flood maps',
+    commuteScore: 72,
+    schoolScore: 76,
+    crimeScore: 70,
+    neighborhoodScore: 74,
+    ownership: 'Hills of Monroe HOA',
+    listingAgent: 'Carlos Capria / board contact to verify',
+    listingSource: 'HOA operational recovery lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=645%20Main%20Street%2C%20Monroe%2C%20CT%2006468',
+    brokerNotes: 'HOA recovery / management opportunity, not a conventional sale listing. Needs board package, budget, claim file, and site support pricing.',
+    arthurThesis: 'Operational engagement first; financial model should price core management, local field support, and claims/project oversight separately.',
+    pros: ['186-unit community scale', 'Clear operational recovery story', 'MDS / ConciergePlus deployment fit'],
+    cons: ['Not a sale listing', 'Local field labor needs sourcing', 'Financials and insurance claim file required'],
+  },
+  {
+    name: 'Westchester Elevator Recapitalization',
+    address: '25 Main Street, White Plains, NY',
+    location: 'White Plains, Westchester',
+    type: 'elevator',
+    units: 96,
+    sqft: 118000,
+    askingPrice: 38200000,
+    lastSalePrice: 25400000,
+    lastSaleDate: '2019-10-01',
+    taxes: 458400,
+    insurance: 241900,
+    noi: 1680800,
+    capRate: 0.044,
+    violations: 12,
+    zoning: 'Downtown mixed residential',
+    floodZone: 'Review county flood maps',
+    commuteScore: 80,
+    schoolScore: 79,
+    crimeScore: 72,
+    neighborhoodScore: 81,
+    ownership: 'Westchester Recap Owner LLC',
+    listingAgent: 'Regional broker to verify',
+    listingSource: 'Broker / lender recap lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=25%20Main%20Street%2C%20White%20Plains%2C%20NY',
+    brokerNotes: 'Transit-oriented elevator building with potential debt maturity or recapitalization angle.',
+    arthurThesis: 'Underwrite if tax, insurance, and debt maturity create negotiated basis or preferred-equity opportunity.',
+    pros: ['Westchester liquidity', 'Transit-oriented demand', 'Recapitalization optionality'],
+    cons: ['County tax analysis required', 'Commuter market sensitivity', 'Debt terms need verification'],
+  },
+  {
+    name: 'Northern Miami Condo Inventory Block',
+    address: '1900 NE 135th Street, North Miami, FL',
+    location: 'North Miami, Florida',
+    type: 'family_internal',
+    units: 28,
+    sqft: 42000,
+    askingPrice: 11800000,
+    lastSalePrice: 8200000,
+    lastSaleDate: '2021-03-10',
+    taxes: 141600,
+    insurance: 315000,
+    noi: 578200,
+    capRate: 0.049,
+    violations: 4,
+    zoning: 'Condo / multifamily',
+    floodZone: 'Florida wind and flood insurance review required',
+    commuteScore: 74,
+    schoolScore: 66,
+    crimeScore: 61,
+    neighborhoodScore: 73,
+    ownership: 'Family ownership to verify',
+    listingAgent: 'Florida broker to verify',
+    listingSource: 'Family internal / condo inventory lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=1900%20NE%20135th%20Street%2C%20North%20Miami%2C%20FL',
+    brokerNotes: 'Condo inventory / family-internal transaction candidate with insurance and HOA diligence front and center.',
+    arthurThesis: 'Only proceed if insurance, association reserves, and liquidity assumptions are supportable.',
+    pros: ['Potential family transaction flexibility', 'Condo inventory strategy', 'Florida growth market'],
+    cons: ['Insurance can overwhelm pro forma', 'HOA reserves and assessments must be verified', 'Market liquidity varies by unit type'],
+  },
+  {
+    name: 'New Jersey Small Multifamily Exchange',
+    address: '75 River Road, Edgewater, NJ',
+    location: 'Edgewater, New Jersey',
+    type: 'one_to_four_family',
+    units: 4,
+    sqft: 7800,
+    askingPrice: 3250000,
+    lastSalePrice: 2100000,
+    lastSaleDate: '2020-08-22',
+    taxes: 58500,
+    insurance: 28000,
+    noi: 169000,
+    capRate: 0.052,
+    violations: 2,
+    zoning: '1-4 family / waterfront review',
+    floodZone: 'Possible waterfront exposure',
+    commuteScore: 76,
+    schoolScore: 72,
+    crimeScore: 68,
+    neighborhoodScore: 76,
+    ownership: 'Private owner to verify',
+    listingAgent: 'NJ listing broker to verify',
+    listingSource: '1031 / small multifamily lead',
+    imageUrl: 'https://maps.googleapis.com/maps/api/streetview?size=900x540&location=75%20River%20Road%2C%20Edgewater%2C%20NJ',
+    brokerNotes: 'Smaller investor-friendly acquisition with clear 1031 or family-office use case.',
+    arthurThesis: 'Model as a lighter-weight investor package with debt quotes, repairs, taxes, and rent comps.',
+    pros: ['Small deal executable', 'Investor-friendly structure', 'Potential 1031 buyer pool'],
+    cons: ['Scale is limited', 'Flood and insurance review required', 'Less platform value than larger assets'],
+  },
+];
+
 function cleanNumber(value: number, fallback: number) {
   return Number.isFinite(value) && value >= 0 ? value : fallback;
 }
@@ -174,6 +433,9 @@ export function sanitizeArthurCriteria(criteria: ArthurCriteria): ArthurCriteria
     ...criteria,
     location: criteria.location.trim() || DEFAULT_ARTHUR_CRITERIA.location,
     dealTypes,
+    applyDealTypeFilter: Boolean(criteria.applyDealTypeFilter),
+    applyUnitRangeFilter: Boolean(criteria.applyUnitRangeFilter),
+    applySqftRangeFilter: Boolean(criteria.applySqftRangeFilter),
     minUnits,
     maxUnits,
     minSqft,
@@ -182,88 +444,104 @@ export function sanitizeArthurCriteria(criteria: ArthurCriteria): ArthurCriteria
   };
 }
 
+function propertyMatchesLocation(property: ArthurProperty, location: string) {
+  const query = location.toLowerCase().trim();
+  if (!query || query === 'new york, ny') return true;
+  const haystack = `${property.name} ${property.address} ${property.location}`.toLowerCase();
+  return query
+    .split(/[,\s]+/)
+    .filter((token) => token.length > 2)
+    .some((token) => haystack.includes(token));
+}
+
 function propertyMatchesCriteria(property: ArthurProperty, criteria: ArthurCriteria) {
-  const unitsOk = property.units >= criteria.minUnits && property.units <= criteria.maxUnits;
-  const sqftOk = property.sqft >= criteria.minSqft && property.sqft <= criteria.maxSqft;
-  const typeOk = criteria.dealTypes.includes(property.type);
-  return unitsOk && sqftOk && typeOk;
+  const unitsOk = !criteria.applyUnitRangeFilter || (property.units >= criteria.minUnits && property.units <= criteria.maxUnits);
+  const sqftOk = !criteria.applySqftRangeFilter || (property.sqft >= criteria.minSqft && property.sqft <= criteria.maxSqft);
+  const typeOk = !criteria.applyDealTypeFilter || criteria.dealTypes.includes(property.type);
+  const locationOk = propertyMatchesLocation(property, criteria.location);
+  return unitsOk && sqftOk && typeOk && locationOk;
+}
+
+function scoreCandidate(property: ArthurProperty, criteria: ArthurCriteria) {
+  let score = 55;
+  const reasons: string[] = [];
+
+  if (propertyMatchesLocation(property, criteria.location)) score += 18;
+  else reasons.push(`Location differs from "${criteria.location}"`);
+
+  if (!criteria.applyDealTypeFilter || criteria.dealTypes.includes(property.type)) score += 14;
+  else reasons.push(`Deal type is ${arthurDealTypeLabel(property.type)}`);
+
+  if (!criteria.applyUnitRangeFilter || (property.units >= criteria.minUnits && property.units <= criteria.maxUnits)) score += 10;
+  else reasons.push(`${property.units} units outside selected range`);
+
+  if (!criteria.applySqftRangeFilter || (property.sqft >= criteria.minSqft && property.sqft <= criteria.maxSqft)) score += 10;
+  else reasons.push(`${property.sqft.toLocaleString()} SF outside selected range`);
+
+  score += Math.round((property.neighborhoodScore - property.violations / 2) / 20);
+  return { score: Math.max(0, Math.min(100, score)), reasons };
+}
+
+function buildSelectedCriteriaNotes(criteria: ArthurCriteria) {
+  const notes = [
+    `Market focus: ${criteria.location}`,
+    criteria.applyDealTypeFilter
+      ? `Deal type hard filter: ${criteria.dealTypes.map(arthurDealTypeLabel).join(', ')}`
+      : 'Deal type is included for the report, not used as a hard listing filter.',
+    criteria.applyUnitRangeFilter
+      ? `Unit range hard filter: ${criteria.minUnits}-${criteria.maxUnits === Number.MAX_SAFE_INTEGER ? 'No max' : criteria.maxUnits}`
+      : 'Unit range is included for underwriting, not used as a hard listing filter.',
+    criteria.applySqftRangeFilter
+      ? `Square-footage hard filter: ${criteria.minSqft.toLocaleString()}-${criteria.maxSqft === Number.MAX_SAFE_INTEGER ? 'No max' : criteria.maxSqft.toLocaleString()}`
+      : 'Square footage is included for underwriting, not used as a hard listing filter.',
+  ];
+  if (criteria.massingStudy) notes.push('Massing / zoning upside requested.');
+  if (criteria.floodZone) notes.push('Flood-zone and insurance sensitivity requested.');
+  if (criteria.censusProfile) notes.push('Census and demographic support requested.');
+  if (criteria.includeBridgeRates) notes.push('Bridge lender rates requested.');
+  return notes;
+}
+
+function attachComps(property: ArthurProperty): ArthurProperty {
+  const street = property.address.split(',')[0];
+  return {
+    ...property,
+    comps: [
+      { address: `Comparable A near ${street}`, price: Math.round(property.askingPrice * 0.92), units: Math.max(2, property.units - 18), capRate: 0.045, distance: '0.3 mi' },
+      { address: `Comparable B near ${street}`, price: Math.round(property.askingPrice * 1.08), units: property.units + 22, capRate: 0.041, distance: '0.7 mi' },
+      { address: `Comparable C near ${street}`, price: Math.round(property.askingPrice * 0.84), units: Math.max(2, property.units - 31), capRate: 0.049, distance: '1.1 mi' },
+    ],
+  };
 }
 
 export function searchArthurListings(criteria: ArthurCriteria): ArthurProperty[] {
   const normalized = sanitizeArthurCriteria(criteria);
-  const city = normalized.location;
-  const baseTypes = normalized.dealTypes;
-  const seeds = [
-    ['Riverside Value-Add Portfolio', '180 Riverside Drive', 112, 136000, 52000000, 'D7 / R10A'],
-    ['East Side Elevator Opportunity', '201 East 79th Street', 167, 201000, 89000000, 'R10 / C1-5 overlay'],
-    ['Midtown Mixed-Use Basis Play', '345 West 58th Street', 74, 92000, 41000000, 'C6-4'],
-    ['Harlem Walk-Up Assemblage', '346 East 119th Street', 42, 38500, 14800000, 'R7A'],
-    ['Outer Borough HOA Recovery', '645 Main Street', 186, 210000, 32500000, 'Residential HOA'],
-  ];
-
-  const generated = seeds.map(([name, street, units, sqft, price, zoning], index) => {
-    const numericUnits = Number(units);
-    const numericSqft = Number(sqft);
-    const askingPrice = Number(price);
-    const type = baseTypes[index % baseTypes.length];
-    const noi = Math.round(askingPrice * (0.038 + index * 0.003));
-    const violations = index === 1 ? 47 : index === 3 ? 36 : 9 + index * 4;
-    return {
-      id: `arthur-${index + 1}`,
-      name: String(name),
-      address: `${street}, ${city}`,
-      location: city,
-      type,
-      units: numericUnits,
-      sqft: numericSqft,
-      askingPrice,
-      lastSalePrice: Math.round(askingPrice * (0.58 + index * 0.04)),
-      lastSaleDate: `${2012 + index}-06-15`,
-      taxes: Math.round(askingPrice * 0.012),
-      insurance: Math.round(numericSqft * (1.6 + index * 0.25)),
-      noi,
-      capRate: noi / askingPrice,
-      violations,
-      zoning: String(zoning),
-      floodZone: index === 4 ? 'Review FEMA / local flood maps' : index === 0 ? 'Possible waterfront exposure' : 'No obvious flood flag',
-      commuteScore: Math.max(68, 96 - index * 6),
-      schoolScore: Math.max(55, 82 - index * 4),
-      crimeScore: Math.max(48, 78 - index * 5),
-      neighborhoodScore: Math.max(62, 90 - index * 4),
-      ownership: index === 4 ? 'Association / HOA ownership to verify' : `${String(name).replace(/[^A-Za-z]/g, '')} Holdings LLC`,
-      listingAgent: index % 2 === 0 ? 'Listing agent to verify from source listing' : 'Off-market / owner outreach candidate',
-      listingSource: index % 2 === 0 ? 'MLS / StreetEasy / LoopNet-style source to verify' : 'Scout off-market lead',
-      imageUrl: `https://maps.googleapis.com/maps/api/streetview?size=900x540&location=${encodeURIComponent(`${street}, ${city}`)}`,
-      matchStatus: 'exact' as const,
-      pros: [
-        'Operational improvement runway',
-        'Vendor rebid and management transition opportunity',
-        'Potential basis advantage if seller motivation is confirmed',
-      ],
-      cons: [
-        violations > 30 ? 'Compliance remediation must be priced before LOI' : 'Public-record diligence still required',
-        'Insurance and tax assumptions require document review',
-        'Arthur should not proceed without Jackie operator sign-off',
-      ],
-      comps: [
-        { address: `Comparable A near ${street}`, price: Math.round(askingPrice * 0.92), units: Math.max(8, numericUnits - 18), capRate: 0.045, distance: '0.3 mi' },
-        { address: `Comparable B near ${street}`, price: Math.round(askingPrice * 1.08), units: numericUnits + 22, capRate: 0.041, distance: '0.7 mi' },
-        { address: `Comparable C near ${street}`, price: Math.round(askingPrice * 0.84), units: Math.max(4, numericUnits - 31), capRate: 0.049, distance: '1.1 mi' },
-      ],
-    };
+  const generated = ARTHUR_CANDIDATE_UNIVERSE.map((seed, index) => {
+    const base = { ...seed, id: `arthur-${index + 1}`, comps: [] } as ArthurProperty;
+    const { score, reasons } = scoreCandidate(base, normalized);
+    return attachComps({
+      ...base,
+      matchStatus: 'exact',
+      matchScore: score,
+      mismatchReasons: reasons,
+      selectedCriteriaNotes: buildSelectedCriteriaNotes(normalized),
+    });
   });
 
   const exactMatches = generated.filter((property) => propertyMatchesCriteria(property, normalized));
-  if (exactMatches.length) return exactMatches;
+  if (exactMatches.length) return exactMatches.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
 
-  return generated.map((property) => ({
-    ...property,
-    matchStatus: 'nearest' as const,
-    cons: [
-      ...property.cons,
-      'Shown as a nearest candidate because the current filters returned no exact matches.',
-    ],
-  }));
+  return generated
+    .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0))
+    .slice(0, 5)
+    .map((property) => ({
+      ...property,
+      matchStatus: 'nearest',
+      cons: [
+        ...property.cons,
+        'Shown as a nearest candidate because the current active filters returned no exact listing matches.',
+      ],
+    }));
 }
 
 export function buildArthurModel(property: ArthurProperty): ArthurModel {
@@ -351,7 +629,7 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
 <section class="page">
   <div class="brand">CAMELOT</div>
   <h1>${property.name}</h1>
-  <p class="sub">Arthur Investment Underwriting Report prepared by Camelot. This report begins with Jackie-validated operating discipline and converts the opportunity into investor-facing underwriting.</p>
+  <p class="sub">Arthur Investment Underwriting Report prepared by Camelot. This report starts with the selected listing card, then converts broker facts, operating risks, and selected diligence criteria into investor-facing underwriting.</p>
   <div class="grid">
     <div class="card"><div class="label">Asking Price</div><div class="value">${money(property.askingPrice)}</div></div>
     <div class="card"><div class="label">Units</div><div class="value">${property.units}</div></div>
@@ -366,7 +644,7 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
   <div class="footer">1</div>
 </section>
 <section class="page">
-  <h2>Investment Snapshot</h2>
+  <h2>Listing Card & Investment Snapshot</h2>
   <div class="grid">
     <div class="card"><div class="label">Total Basis</div><div class="value">${money(model.totalBasis)}</div></div>
     <div class="card"><div class="label">Equity Required</div><div class="value">${money(model.equityRequired)}</div></div>
@@ -375,6 +653,10 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
   </div>
   <div class="two">
     <div>
+      <h3>Broker / Source Notes</h3>
+      <p>${property.brokerNotes}</p>
+      <h3>Arthur Thesis</h3>
+      <p>${property.arthurThesis}</p>
       <h3>Pros</h3>
       ${property.pros.map((item) => `<span class="pill">${item}</span>`).join('')}
       <h3>Cons / Caveats</h3>
@@ -388,6 +670,8 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
       <p>Flood: ${property.floodZone}</p>
       <p>Listing agent: ${property.listingAgent}</p>
       <p>Last sale: ${money(property.lastSalePrice)} on ${property.lastSaleDate}</p>
+      <h3>Selected Criteria</h3>
+      ${(property.selectedCriteriaNotes || buildSelectedCriteriaNotes(normalizedCriteria)).map((item) => `<span class="pill">${item}</span>`).join('')}
     </div>
   </div>
   <div class="footer">2</div>
@@ -402,7 +686,7 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
     <thead><tr><th>Case</th><th>Exit Cap</th><th>Rent Growth</th><th>IRR</th><th>Equity Multiple</th></tr></thead>
     <tbody>${model.sensitivity.map((row) => `<tr><td>${row.caseName}</td><td>${pct(row.exitCap)}</td><td>${pct(row.rentGrowth)}</td><td>${pct(row.irr)}</td><td>${row.equityMultiple.toFixed(2)}x</td></tr>`).join('')}</tbody>
   </table>
-  <p class="note">Criteria used: ${normalizedCriteria.dealTypes.map(arthurDealTypeLabel).join(', ')} | ${normalizedCriteria.location} | ${normalizedCriteria.minUnits}-${normalizedCriteria.maxUnits === Number.MAX_SAFE_INTEGER ? 'No max' : normalizedCriteria.maxUnits} units | ${normalizedCriteria.minSqft.toLocaleString()}-${normalizedCriteria.maxSqft === Number.MAX_SAFE_INTEGER ? 'No max' : normalizedCriteria.maxSqft.toLocaleString()} SF.</p>
+  <p class="note">Active filters: ${normalizedCriteria.applyDealTypeFilter ? normalizedCriteria.dealTypes.map(arthurDealTypeLabel).join(', ') : 'Deal type not hard-filtered'} | ${normalizedCriteria.location} | ${normalizedCriteria.applyUnitRangeFilter ? `${normalizedCriteria.minUnits}-${normalizedCriteria.maxUnits === Number.MAX_SAFE_INTEGER ? 'No max' : normalizedCriteria.maxUnits} units` : 'Unit range not hard-filtered'} | ${normalizedCriteria.applySqftRangeFilter ? `${normalizedCriteria.minSqft.toLocaleString()}-${normalizedCriteria.maxSqft === Number.MAX_SAFE_INTEGER ? 'No max' : normalizedCriteria.maxSqft.toLocaleString()} SF` : 'SF not hard-filtered'}.</p>
   <div class="footer">3</div>
 </section>
 </body>
@@ -428,6 +712,8 @@ export function buildArthurExcelHtml(property: ArthurProperty, criteria: ArthurC
     ['DSCR', model.dscr],
     ['Location Criteria', criteria.location],
     ['Unit Range', `${criteria.minUnits}-${criteria.maxUnits}`],
+    ['Broker Notes', property.brokerNotes],
+    ['Arthur Thesis', property.arthurThesis],
   ];
   const sensitivity = model.sensitivity.map((row) =>
     `<tr><td>${row.caseName}</td><td>${row.exitCap}</td><td>${row.rentGrowth}</td><td>${row.irr}</td><td>${row.equityMultiple}</td></tr>`

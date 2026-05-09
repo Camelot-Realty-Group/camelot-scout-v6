@@ -1,13 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   BarChart3,
-  Building2,
-  Download,
   ExternalLink,
   FileSpreadsheet,
   FileText,
   Mail,
-  Map,
   Printer,
   RefreshCw,
   Search,
@@ -28,7 +25,6 @@ import {
   buildArthurModel,
   buildArthurReportHtml,
   downloadArthurExcel,
-  sanitizeArthurCriteria,
   searchArthurListings,
 } from '@/lib/arthur-underwriting';
 
@@ -58,6 +54,7 @@ export default function Arthur() {
     [results, selectedId]
   );
   const hasNearestResults = results.some((property) => property.matchStatus === 'nearest');
+  const exactResultCount = results.filter((property) => property.matchStatus !== 'nearest').length;
   const model = useMemo(() => selected ? buildArthurModel(selected) : null, [selected]);
   const reportHtml = useMemo(() => selected && model ? buildArthurReportHtml(selected, criteria, model) : '', [selected, criteria, model]);
 
@@ -186,15 +183,25 @@ export default function Arthur() {
               <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                 <div>
                   <h2 className="font-bold">Listing Search Results</h2>
-                  <p className="text-xs text-gray-500">Pick a property to study. Arthur updates the report and model live.</p>
+                  <p className="text-xs text-gray-500">Pick a property card or row to drill into the listing, report, and editable model.</p>
                 </div>
-                <span className="text-xs text-gray-500">{results.length} candidates</span>
+                <span className="text-xs text-gray-500">{hasNearestResults ? `${exactResultCount} exact / ${results.length} nearest` : `${results.length} candidates`}</span>
               </div>
               {hasNearestResults && (
                 <div className="mx-4 mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                  No exact match was found for the current unit/SF/type range, so Arthur is showing nearest candidates instead of returning an empty report queue.
+                  No exact match was found for the active hard filters, so Arthur is showing nearest candidates. Turn off hard filters or widen the ranges to broaden the true listing queue.
                 </div>
               )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4">
+                {results.map((property) => (
+                  <ListingCard
+                    key={property.id}
+                    property={property}
+                    active={selected?.id === property.id}
+                    onSelect={() => setSelectedId(property.id)}
+                  />
+                ))}
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
@@ -260,6 +267,34 @@ export default function Arthur() {
                 <Metric label="Equity Required" value={formatCurrency(model.equityRequired)} />
                 <Metric label="Base IRR" value={`${(model.irr * 100).toFixed(1)}%`} />
                 <Metric label="Equity Multiple" value={`${model.equityMultiple.toFixed(2)}x`} />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 mt-5">
+                <div className="rounded-lg border border-gray-200 overflow-hidden bg-camelot-cream">
+                  <img src={selected.imageUrl} alt={selected.name} className="h-52 w-full object-cover" />
+                  <div className="p-3">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Selected Listing Card</p>
+                    <p className="font-semibold">{selected.listingSource}</p>
+                    <p className="text-xs text-gray-500 mt-1">{selected.listingAgent}</p>
+                  </div>
+                </div>
+                <Card title="Broker Facts, Criteria & Arthur Read">
+                  <p className="text-sm text-gray-600 leading-relaxed">{selected.brokerNotes}</p>
+                  <p className="text-sm text-gray-600 leading-relaxed mt-3">{selected.arthurThesis}</p>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {(selected.selectedCriteriaNotes || []).map((note) => (
+                      <span key={note} className="text-xs bg-camelot-cream border border-gray-200 rounded-full px-3 py-1">{note}</span>
+                    ))}
+                  </div>
+                  {selected.matchStatus === 'nearest' && Boolean(selected.mismatchReasons?.length) && (
+                    <div className="mt-4 rounded-md bg-amber-50 border border-amber-200 p-3">
+                      <p className="text-xs font-semibold text-amber-900">Why this is a nearest candidate</p>
+                      {selected.mismatchReasons?.map((reason) => (
+                        <p key={reason} className="text-xs text-amber-800 mt-1">{reason}</p>
+                      ))}
+                    </div>
+                  )}
+                </Card>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
@@ -345,6 +380,12 @@ export default function Arthur() {
           background: white;
         }
         .action-btn:hover { background: #f9fafb; }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
       `}</style>
     </div>
   );
@@ -367,7 +408,7 @@ function CriteriaPanel({
           <p className="text-xs text-gray-500 mt-1">Change assumptions here before or after report generation.</p>
         </div>
         <button
-          onClick={() => setCriteria(sanitizeArthurCriteria(DEFAULT_ARTHUR_CRITERIA))}
+          onClick={() => setCriteria(DEFAULT_ARTHUR_CRITERIA)}
           className="text-xs border border-gray-200 rounded-md px-2 py-1 hover:bg-gray-50"
         >
           Reset
@@ -385,6 +426,18 @@ function CriteriaPanel({
           <input value={criteria.blockLot} onChange={(e) => setCriteria((p) => ({ ...p, blockLot: e.target.value }))} placeholder="Optional BBL, APN, block/lot" className="mt-1 w-full border border-gray-200 rounded-md px-3 py-2 text-sm" />
         </label>
 
+        <div className="rounded-lg border border-camelot-gold/30 bg-camelot-cream p-3">
+          <p className="text-xs font-semibold text-camelot-dark">Hard Filter Controls</p>
+          <p className="text-xs text-gray-500 mt-1">
+            Leave these unchecked when you want the report to include criteria without choking off the listing search.
+          </p>
+          <div className="grid grid-cols-1 gap-2 mt-3">
+            <Toggle label="Use deal types as a listing filter" checked={criteria.applyDealTypeFilter} onChange={(value) => setCriteria((p) => ({ ...p, applyDealTypeFilter: value }))} />
+            <Toggle label="Use unit range as a listing filter" checked={criteria.applyUnitRangeFilter} onChange={(value) => setCriteria((p) => ({ ...p, applyUnitRangeFilter: value }))} />
+            <Toggle label="Use square footage as a listing filter" checked={criteria.applySqftRangeFilter} onChange={(value) => setCriteria((p) => ({ ...p, applySqftRangeFilter: value }))} />
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <NumberInput label="Min Units" value={criteria.minUnits} onChange={(value) => setCriteria((p) => ({ ...p, minUnits: value }))} />
           <NumberInput label="Max Units" hint="0 = no max" value={criteria.maxUnits} onChange={(value) => setCriteria((p) => ({ ...p, maxUnits: value }))} />
@@ -394,6 +447,9 @@ function CriteriaPanel({
 
         <div>
           <span className="text-xs uppercase tracking-wide text-gray-500">Deal Type</span>
+          <p className="text-[11px] text-gray-400 mt-1">
+            These shape Arthur’s report. They narrow listings only when the hard filter is checked.
+          </p>
           <div className="grid grid-cols-2 gap-2 mt-2">
             {DEAL_TYPES.map((type) => (
               <button
@@ -425,6 +481,40 @@ function CriteriaPanel({
         </div>
       </div>
     </section>
+  );
+}
+
+function ListingCard({ property, active, onSelect }: { property: ArthurProperty; active: boolean; onSelect: () => void }) {
+  const score = Math.round((property.commuteScore + property.neighborhoodScore + (100 - Math.min(80, property.violations))) / 3);
+  return (
+    <button
+      onClick={onSelect}
+      className={cn(
+        'text-left border rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow',
+        active ? 'border-camelot-gold ring-2 ring-camelot-gold/20' : 'border-gray-200'
+      )}
+    >
+      <div className="relative h-36 bg-camelot-cream">
+        <img src={property.imageUrl} alt={property.name} className="h-full w-full object-cover" />
+        <span className="absolute top-2 left-2 rounded bg-camelot-navy text-white text-[11px] px-2 py-1">{arthurDealTypeLabel(property.type)}</span>
+        {property.matchStatus === 'nearest' && <span className="absolute top-2 right-2 rounded bg-amber-600 text-white text-[11px] px-2 py-1">Nearest</span>}
+      </div>
+      <div className="p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold leading-tight">{property.name}</p>
+            <p className="text-xs text-gray-500 mt-1">{property.address}</p>
+          </div>
+          <span className="text-xs font-semibold text-camelot-gold">{score}/100</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
+          <div><span className="block text-gray-400">Price</span><span className="font-semibold">{formatCurrency(property.askingPrice)}</span></div>
+          <div><span className="block text-gray-400">Units</span><span className="font-semibold">{formatNumber(property.units)}</span></div>
+          <div><span className="block text-gray-400">Cap</span><span className="font-semibold">{(property.capRate * 100).toFixed(1)}%</span></div>
+        </div>
+        <p className="text-xs text-gray-500 mt-3 line-clamp-2">{property.brokerNotes}</p>
+      </div>
+    </button>
   );
 }
 
