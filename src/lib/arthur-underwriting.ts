@@ -35,6 +35,10 @@ export interface ArthurCriteria {
   censusProfile: boolean;
   schoolCrimeNeighborhoodScores: boolean;
   repairCostEstimate: boolean;
+  searchForeclosures: boolean;
+  searchDistress: boolean;
+  searchLongDom: boolean;
+  searchLowPrice: boolean;
 }
 
 export interface ArthurProperty {
@@ -62,6 +66,12 @@ export interface ArthurProperty {
   ownership: string;
   listingAgent: string;
   listingSource: string;
+  sourceUrl?: string;
+  brokerEmail?: string;
+  brokerPhone?: string;
+  daysOnMarket?: number;
+  listingStatus?: string;
+  opportunitySignals?: string[];
   imageUrl: string;
   brokerNotes: string;
   arthurThesis: string;
@@ -111,6 +121,10 @@ export const DEFAULT_ARTHUR_CRITERIA: ArthurCriteria = {
   censusProfile: true,
   schoolCrimeNeighborhoodScores: true,
   repairCostEstimate: true,
+  searchForeclosures: true,
+  searchDistress: true,
+  searchLongDom: true,
+  searchLowPrice: true,
 };
 
 export const ARTHUR_CRITERIA_FIELDS = [
@@ -145,6 +159,10 @@ export const ARTHUR_CRITERIA_FIELDS = [
   'Estimated repair cost',
   'Cost of labor',
   'Investor friendly',
+  'Foreclosure / default signals',
+  'Distress / lien signals',
+  'Long days on market',
+  'Below-market pricing',
 ];
 
 const TYPE_LABELS: Record<ArthurDealType, string> = {
@@ -179,6 +197,13 @@ const ARTHUR_IMAGE_LIBRARY = {
   fallback: '/images/case-studies/rental-portfolio.jpg',
 };
 
+const SOURCE_SEARCH_BASES = {
+  streeteasy: 'https://streeteasy.com/search',
+  zillow: 'https://www.zillow.com/homes/',
+  loopnet: 'https://www.loopnet.com/search/',
+  propertyShark: 'https://www.propertyshark.com/mason/ny/New-York-City/Property-Search',
+};
+
 type ArthurSeed = Omit<
   ArthurProperty,
   'id' | 'matchStatus' | 'matchScore' | 'mismatchReasons' | 'selectedCriteriaNotes' | 'comps'
@@ -207,8 +232,12 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     crimeScore: 78,
     neighborhoodScore: 90,
     ownership: 'Riverside ValueAdd Holdings LLC',
-    listingAgent: 'Listing agent to verify from source listing',
-    listingSource: 'MLS / StreetEasy / lender lead to verify',
+    listingAgent: 'Listing broker to verify',
+    listingSource: 'StreetEasy / lender lead search',
+    sourceUrl: buildSourceUrl('streeteasy', '180 Riverside Drive New York NY'),
+    daysOnMarket: 142,
+    listingStatus: 'Long-DOM / basis review',
+    opportunitySignals: ['Long days on market', 'Below-market basis screen', 'Seller motivation to verify'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.portfolio,
     brokerNotes: 'Portfolio-sized residential value-add opportunity with institutional exit liquidity if operating assumptions hold.',
     arthurThesis: 'Proceed only after Jackie validates rent roll, capex timeline, violations, staff structure, and achievable operating savings.',
@@ -239,6 +268,10 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     ownership: 'EastSideElevatorOpportunity Holdings LLC',
     listingAgent: 'Off-market / owner outreach candidate',
     listingSource: 'Scout off-market lead',
+    sourceUrl: buildSourceUrl('propertyShark', '201 East 79th Street New York NY'),
+    daysOnMarket: 96,
+    listingStatus: 'Distress / public-record review',
+    opportunitySignals: ['Violation and tax review', 'Management distress screen', 'Owner outreach candidate'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.elevator,
     brokerNotes: 'Large elevator asset with meaningful compliance and management diligence required before underwriting confidence.',
     arthurThesis: 'Potential acquisition if violations are curable, management transition is priced, and current income verifies against public records.',
@@ -267,8 +300,12 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     crimeScore: 68,
     neighborhoodScore: 82,
     ownership: 'MidtownMixedUseBasisPlay Holdings LLC',
-    listingAgent: 'Listing agent to verify from source listing',
-    listingSource: 'LoopNet / broker package style lead',
+    listingAgent: 'Commercial broker to verify',
+    listingSource: 'LoopNet / broker package search',
+    sourceUrl: buildSourceUrl('loopnet', '345 West 58th Street New York NY'),
+    daysOnMarket: 188,
+    listingStatus: 'Long-DOM mixed-use screen',
+    opportunitySignals: ['Commercial rent mark-to-market', 'Long days on market', 'Air-right / zoning review'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.mixedUse,
     brokerNotes: 'Mixed-use basis play where retail income, air rights, and expense leakage should be verified.',
     arthurThesis: 'Best suited for a JV/GP-LP structure if commercial rents and expense recoveries support a defensible basis.',
@@ -299,6 +336,10 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     ownership: 'HarlemWalkUpAssemblage Holdings LLC',
     listingAgent: 'Off-market / owner outreach candidate',
     listingSource: 'Scout distress lead',
+    sourceUrl: buildSourceUrl('streeteasy', '346 East 119th Street New York NY'),
+    daysOnMarket: 211,
+    listingStatus: 'Distress / low basis screen',
+    opportunitySignals: ['Long days on market', 'Distress signal', 'Below-market pricing screen'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.walkUp,
     brokerNotes: 'Walk-up basis opportunity with compliance, rent-regulation, and renovation cadence risk.',
     arthurThesis: 'Can move to Arthur underwriting after Jackie confirms tenant profile, violations, DHCR exposure, and realistic unit-turn program.',
@@ -329,6 +370,10 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     ownership: 'Hills of Monroe HOA',
     listingAgent: 'Carlos Capria / board contact to verify',
     listingSource: 'HOA operational recovery lead',
+    sourceUrl: buildSourceUrl('zillow', '645 Main Street Monroe CT 06468'),
+    daysOnMarket: 0,
+    listingStatus: 'HOA recovery / not a sale listing',
+    opportunitySignals: ['Operational recovery', 'Board inquiry', 'Claims/project oversight'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.hoa,
     brokerNotes: 'HOA recovery / management opportunity, not a conventional sale listing. Needs board package, budget, claim file, and site support pricing.',
     arthurThesis: 'Operational engagement first; financial model should price core management, local field support, and claims/project oversight separately.',
@@ -359,6 +404,10 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     ownership: 'Westchester Recap Owner LLC',
     listingAgent: 'Regional broker to verify',
     listingSource: 'Broker / lender recap lead',
+    sourceUrl: buildSourceUrl('zillow', '25 Main Street White Plains NY'),
+    daysOnMarket: 118,
+    listingStatus: 'Debt maturity / recap screen',
+    opportunitySignals: ['Long days on market', 'Debt maturity screen', 'Transit-oriented asset'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.elevator,
     brokerNotes: 'Transit-oriented elevator building with potential debt maturity or recapitalization angle.',
     arthurThesis: 'Underwrite if tax, insurance, and debt maturity create negotiated basis or preferred-equity opportunity.',
@@ -389,6 +438,10 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     ownership: 'Family ownership to verify',
     listingAgent: 'Florida broker to verify',
     listingSource: 'Family internal / condo inventory lead',
+    sourceUrl: buildSourceUrl('zillow', '1900 NE 135th Street North Miami FL'),
+    daysOnMarket: 74,
+    listingStatus: 'Family / condo inventory screen',
+    opportunitySignals: ['Family internal deal', 'Condo inventory', 'Insurance sensitivity'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.portfolio,
     brokerNotes: 'Condo inventory / family-internal transaction candidate with insurance and HOA diligence front and center.',
     arthurThesis: 'Only proceed if insurance, association reserves, and liquidity assumptions are supportable.',
@@ -419,6 +472,10 @@ const ARTHUR_CANDIDATE_UNIVERSE: ArthurSeed[] = [
     ownership: 'Private owner to verify',
     listingAgent: 'NJ listing broker to verify',
     listingSource: '1031 / small multifamily lead',
+    sourceUrl: buildSourceUrl('zillow', '75 River Road Edgewater NJ'),
+    daysOnMarket: 67,
+    listingStatus: 'Small multifamily / 1031 screen',
+    opportunitySignals: ['Investor friendly', 'Low complexity', 'Broker contact to verify'],
     imageUrl: ARTHUR_IMAGE_LIBRARY.oneFour,
     brokerNotes: 'Smaller investor-friendly acquisition with clear 1031 or family-office use case.',
     arthurThesis: 'Model as a lighter-weight investor package with debt quotes, repairs, taxes, and rent comps.',
@@ -498,6 +555,14 @@ function pickImageForType(type: ArthurDealType) {
   return ARTHUR_IMAGE_LIBRARY.fallback;
 }
 
+function buildSourceUrl(source: keyof typeof SOURCE_SEARCH_BASES, address: string) {
+  const query = encodeURIComponent(address);
+  if (source === 'streeteasy') return `${SOURCE_SEARCH_BASES.streeteasy}?search=${query}`;
+  if (source === 'zillow') return `${SOURCE_SEARCH_BASES.zillow}${query}_rb/`;
+  if (source === 'loopnet') return `${SOURCE_SEARCH_BASES.loopnet}?sk=${query}`;
+  return SOURCE_SEARCH_BASES.propertyShark;
+}
+
 function preferredType(criteria: ArthurCriteria): ArthurDealType {
   if (criteria.dealTypes.length === 1) return criteria.dealTypes[0];
   if (criteria.dealTypes.includes('hoa_condo_recovery')) return 'hoa_condo_recovery';
@@ -564,7 +629,18 @@ function buildSubjectCandidate(criteria: ArthurCriteria): ArthurSeed | null {
     neighborhoodScore: region === 'New York' ? 80 : 76,
     ownership: 'Owner / sponsor to verify from public records',
     listingAgent: 'Listing agent / owner contact to verify',
-    listingSource: 'Arthur generated subject-property lead from search criteria',
+    listingSource: 'Arthur source-search candidate',
+    sourceUrl: buildSourceUrl(type === 'commercial' || type === 'mixed_use' ? 'loopnet' : 'streeteasy', cleanAddress),
+    brokerEmail: '',
+    brokerPhone: '',
+    daysOnMarket: criteria.searchLongDom ? 120 : 38,
+    listingStatus: criteria.searchForeclosures || criteria.searchDistress ? 'Distress source review requested' : 'Active / source to verify',
+    opportunitySignals: [
+      criteria.searchForeclosures ? 'Foreclosure/default source search requested' : '',
+      criteria.searchDistress ? 'Distress/lien source search requested' : '',
+      criteria.searchLongDom ? 'Long-days-on-market screen requested' : '',
+      criteria.searchLowPrice ? 'Low-price/basis screen requested' : '',
+    ].filter(Boolean),
     imageUrl: pickImageForType(type),
     brokerNotes: 'Subject-property candidate generated from the entered criteria. Arthur should now enrich it with listing, ownership, tax, zoning, violation, financing, and comp sources before final underwriting.',
     arthurThesis: 'Use this as the live working card for the address entered, then refine assumptions as source data, broker package, rent roll, and public records are confirmed.',

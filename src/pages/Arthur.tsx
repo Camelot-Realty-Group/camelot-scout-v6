@@ -51,6 +51,7 @@ export default function Arthur() {
   const [isSearching, setIsSearching] = useState(false);
   const [isPushing, setIsPushing] = useState(false);
   const [pushStatus, setPushStatus] = useState('');
+  const [candidateIds, setCandidateIds] = useState<string[]>([]);
   const detailRef = useRef<HTMLElement | null>(null);
 
   const selected = useMemo(
@@ -81,6 +82,18 @@ export default function Arthur() {
     window.setTimeout(() => {
       detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
+  };
+
+  const addCandidateAndUnderwrite = (id: string) => {
+    setCandidateIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    selectProperty(id);
+    const picked = results.find((property) => property.id === id);
+    if (picked) toast.success(`${picked.name} added to potential investment candidates.`);
+  };
+
+  const openListingSource = (property: ArthurProperty) => {
+    const url = property.sourceUrl || `https://www.google.com/search?q=${encodeURIComponent(property.address + ' investment listing broker')}`;
+    window.open(url, '_blank');
   };
 
   const toggleDealType = (type: ArthurDealType) => {
@@ -157,6 +170,15 @@ export default function Arthur() {
     });
   };
 
+  const emailBrokerInquiry = () => {
+    if (!selected) return;
+    openEmailDraft({
+      to: selected.brokerEmail || '',
+      subject: `Buyer inquiry from Camelot Brokerage Services Corp. - ${selected.address}`,
+      body: `Dear ${selected.listingAgent || 'Listing Broker'},\n\nI am reaching out on behalf of Camelot Brokerage Services Corp. regarding ${selected.address}. We are reviewing the opportunity for a potential acquisition candidate and would appreciate any available listing package, rent roll, operating statements, tax information, violation/compliance history, and seller timing guidance.\n\nPlease let us know whether the asset is still available and the best time to discuss pricing, terms, and diligence access.\n\nSincerely,\nDavid A. Goldoff\nCamelot Brokerage Services Corp.\n57 West 57th Street, Suite 410\nNew York, NY 10019\n(212) 206-9939 ext. 701\ndgoldoff@camelot.nyc`,
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <div className="bg-white border-b border-gray-200 px-6 md:px-8 py-5">
@@ -211,7 +233,7 @@ export default function Arthur() {
                   <p className="text-xs text-gray-500">Pick a property card or row to drill into the listing, report, and editable model.</p>
                 </div>
                 <span className="text-xs text-gray-500">
-                  {hasNearestResults ? `${exactResultCount} exact / ${results.length - exactResultCount} nearest` : `${results.length} candidates`}
+                  {candidateIds.length} saved candidate{candidateIds.length === 1 ? '' : 's'} | {hasNearestResults ? `${exactResultCount} exact / ${results.length - exactResultCount} nearest` : `${results.length} source candidates`}
                 </span>
               </div>
               {hasNearestResults && (
@@ -225,7 +247,10 @@ export default function Arthur() {
                     key={property.id}
                     property={property}
                     active={selected?.id === property.id}
+                    saved={candidateIds.includes(property.id)}
                     onSelect={() => selectProperty(property.id)}
+                    onOpenSource={() => openListingSource(property)}
+                    onAddCandidate={() => addCandidateAndUnderwrite(property.id)}
                   />
                 ))}
               </div>
@@ -237,11 +262,14 @@ export default function Arthur() {
                     onPush={sendToHubSpot}
                     isPushing={isPushing}
                     pushStatus={pushStatus}
-                    onSourceSearch={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(selected.address + ' property records listing zoning ownership')}`, '_blank')}
+                    isSaved={candidateIds.includes(selected.id)}
+                    onAddCandidate={() => addCandidateAndUnderwrite(selected.id)}
+                    onSourceSearch={() => openListingSource(selected)}
                     onPrint={() => openBrochureForPrint(reportHtml, buildArthurFilename(selected, 'html'))}
                     onHtml={() => downloadAsHTML(reportHtml, buildArthurFilename(selected, 'html'))}
                     onExcel={() => downloadArthurExcel(selected, criteria)}
                     onEmail={emailReport}
+                    onBrokerEmail={emailBrokerInquiry}
                   />
                 </div>
               )}
@@ -271,6 +299,7 @@ export default function Arthur() {
                             <p className="font-semibold">{property.name}</p>
                             <p className="text-xs text-gray-500">{property.address}</p>
                             {property.matchStatus === 'nearest' && <p className="text-[11px] font-semibold text-amber-700 mt-1">Nearest candidate</p>}
+                            {candidateIds.includes(property.id) && <p className="text-[11px] font-semibold text-emerald-700 mt-1">Saved investment candidate</p>}
                           </td>
                           <td className="p-3">{arthurDealTypeLabel(property.type)}</td>
                           <td className="p-3 text-right">{formatCurrency(property.askingPrice)}</td>
@@ -487,6 +516,19 @@ function CriteriaPanel({
           </div>
         </div>
 
+        <div className="rounded-lg border border-gray-200 bg-white p-3">
+          <p className="text-xs font-semibold text-camelot-dark">Deal Source Signals</p>
+          <p className="text-xs text-gray-500 mt-1">
+            These are the acquisition-search reasons Arthur should hunt: foreclosures, distress, low basis, and stale listings.
+          </p>
+          <div className="grid grid-cols-1 gap-2 mt-3">
+            <Toggle label="Foreclosure / mortgage default" checked={criteria.searchForeclosures} onChange={(value) => setCriteria((p) => ({ ...p, searchForeclosures: value }))} />
+            <Toggle label="Distress / liens / violations" checked={criteria.searchDistress} onChange={(value) => setCriteria((p) => ({ ...p, searchDistress: value }))} />
+            <Toggle label="Long days on market" checked={criteria.searchLongDom} onChange={(value) => setCriteria((p) => ({ ...p, searchLongDom: value }))} />
+            <Toggle label="Low price / below-market basis" checked={criteria.searchLowPrice} onChange={(value) => setCriteria((p) => ({ ...p, searchLowPrice: value }))} />
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <NumberInput label="Min Units" value={criteria.minUnits} onChange={(value) => setCriteria((p) => ({ ...p, minUnits: value }))} />
           <NumberInput label="Max Units" hint="0 = no max" value={criteria.maxUnits} onChange={(value) => setCriteria((p) => ({ ...p, maxUnits: value }))} />
@@ -533,7 +575,21 @@ function CriteriaPanel({
   );
 }
 
-function ListingCard({ property, active, onSelect }: { property: ArthurProperty; active: boolean; onSelect: () => void }) {
+function ListingCard({
+  property,
+  active,
+  saved,
+  onSelect,
+  onOpenSource,
+  onAddCandidate,
+}: {
+  property: ArthurProperty;
+  active: boolean;
+  saved: boolean;
+  onSelect: () => void;
+  onOpenSource: () => void;
+  onAddCandidate: () => void;
+}) {
   const score = Math.round((property.commuteScore + property.neighborhoodScore + (100 - Math.min(80, property.violations))) / 3);
   return (
     <button
@@ -548,7 +604,8 @@ function ListingCard({ property, active, onSelect }: { property: ArthurProperty;
         <PropertyImage src={property.imageUrl} alt={property.name} className="h-full w-full object-cover" />
         <span className="absolute top-2 left-2 rounded bg-camelot-navy text-white text-[11px] px-2 py-1">{arthurDealTypeLabel(property.type)}</span>
         {property.matchStatus === 'nearest' && <span className="absolute top-2 right-2 rounded bg-amber-600 text-white text-[11px] px-2 py-1">Nearest</span>}
-        {active && <span className="absolute bottom-2 right-2 rounded bg-camelot-gold text-camelot-navy text-[11px] font-semibold px-2 py-1">Selected - details below</span>}
+        {saved && <span className="absolute bottom-2 left-2 rounded bg-emerald-700 text-white text-[11px] font-semibold px-2 py-1">Candidate</span>}
+        {active && <span className="absolute bottom-2 right-2 rounded bg-camelot-gold text-camelot-navy text-[11px] font-semibold px-2 py-1">Selected</span>}
       </div>
       <div className="p-3">
         <div className="flex items-start justify-between gap-3">
@@ -563,7 +620,35 @@ function ListingCard({ property, active, onSelect }: { property: ArthurProperty;
           <div><span className="block text-gray-400">Units</span><span className="font-semibold">{formatNumber(property.units)}</span></div>
           <div><span className="block text-gray-400">Cap</span><span className="font-semibold">{(property.capRate * 100).toFixed(1)}%</span></div>
         </div>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-1">{property.listingStatus || 'Source review'}</span>
+          {typeof property.daysOnMarket === 'number' && <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-1">{property.daysOnMarket} DOM</span>}
+        </div>
         <p className="text-xs text-gray-500 mt-3 line-clamp-2">{property.brokerNotes}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpenSource();
+            }}
+            className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs hover:bg-gray-50"
+          >
+            <ExternalLink size={12} /> View Listing
+          </span>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddCandidate();
+            }}
+            className="inline-flex items-center gap-1 rounded-md bg-camelot-navy px-2 py-1 text-xs text-white hover:bg-camelot-navy/90"
+          >
+            <Send size={12} /> {saved ? 'Run Underwriting' : 'Add Candidate'}
+          </span>
+        </div>
       </div>
     </button>
   );
@@ -575,22 +660,28 @@ function UnderwritingResultsSummary({
   onPush,
   isPushing,
   pushStatus,
+  isSaved,
+  onAddCandidate,
   onSourceSearch,
   onPrint,
   onHtml,
   onExcel,
   onEmail,
+  onBrokerEmail,
 }: {
   property: ArthurProperty;
   model: ArthurModel;
   onPush: () => void;
   isPushing: boolean;
   pushStatus: string;
+  isSaved: boolean;
+  onAddCandidate: () => void;
   onSourceSearch: () => void;
   onPrint: () => void;
   onHtml: () => void;
   onExcel: () => void;
   onEmail: () => void;
+  onBrokerEmail: () => void;
 }) {
   return (
     <section className="rounded-lg border border-camelot-gold/40 bg-camelot-cream/70 p-4">
@@ -599,8 +690,23 @@ function UnderwritingResultsSummary({
           <p className="text-xs uppercase tracking-[0.18em] text-camelot-gold font-semibold">Underwriting Results on Selected Listing</p>
           <h3 className="text-lg font-bold mt-1">{property.name}</h3>
           <p className="text-sm text-gray-500">{property.address} | {arthurDealTypeLabel(property.type)} | {property.units} units</p>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full border border-gray-200 bg-white px-2 py-1">{property.listingSource}</span>
+            <span className="rounded-full border border-gray-200 bg-white px-2 py-1">{property.listingStatus || 'Source review'}</span>
+            {typeof property.daysOnMarket === 'number' && <span className="rounded-full border border-gray-200 bg-white px-2 py-1">{property.daysOnMarket} days on market</span>}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onAddCandidate}
+            className={cn(
+              'inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm',
+              isSaved ? 'bg-emerald-700 text-white' : 'bg-camelot-navy text-white hover:bg-camelot-navy/90'
+            )}
+          >
+            <Send size={15} /> {isSaved ? 'Saved Candidate - Run Underwriting' : 'Add to Investment Candidates'}
+          </button>
           <button
             type="button"
             onClick={onPush}
@@ -616,10 +722,18 @@ function UnderwritingResultsSummary({
           <button type="button" onClick={onHtml} className="action-btn"><FileText size={15} /> HTML</button>
           <button type="button" onClick={onExcel} className="action-btn"><FileSpreadsheet size={15} /> Excel</button>
           <button type="button" onClick={onEmail} className="action-btn"><Mail size={15} /> Email</button>
+          <button type="button" onClick={onBrokerEmail} className="action-btn"><Mail size={15} /> Broker Inquiry</button>
         </div>
       </div>
 
       {pushStatus && <p className="mt-3 rounded-md border border-emerald-200 bg-white px-3 py-2 text-xs text-emerald-900">{pushStatus}</p>}
+      {Boolean(property.opportunitySignals?.length) && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {property.opportunitySignals?.map((signal) => (
+            <span key={signal} className="rounded-full border border-camelot-gold/30 bg-white px-3 py-1 text-xs text-camelot-dark">{signal}</span>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
         <Metric label="Total Basis" value={formatCurrency(model.totalBasis)} />
