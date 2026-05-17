@@ -2152,6 +2152,8 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
   const annualFee = 0;
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const canonicalAddress = '12500 NE 15th Avenue, North Miami, FL 33161';
+  const uploadedExterior = 'https://camelot-scout-v6.onrender.com/images/three-horizons-east/three-horizons-east-condominium.webp';
+  const verifiedPropertyImages = [uploadedExterior];
   const streetView = `https://maps.googleapis.com/maps/api/streetview?size=1200x700&location=${encodeURIComponent(canonicalAddress)}&fov=82&key=${GOOGLE_MAPS_REPORT_KEY}`;
   const mapImage = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(canonicalAddress)}&zoom=16&size=1200x700&maptype=roadmap&markers=color:red%7C${encodeURIComponent(canonicalAddress)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
   const floridaSources: ComplianceSourceCheck[] = [
@@ -2370,7 +2372,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       officialWebsite: null,
       brandingTitle: 'Three Horizons East Condominium',
       brandingDescription: 'North Miami condominium receivership takeover requiring Florida source verification and immediate operating-control workflow.',
-      brandingImages: [streetView, mapImage],
+      brandingImages: [...verifiedPropertyImages, streetView, mapImage],
       researchSources: [
         'Miami-Dade Property Appraiser',
         'Miami-Dade Clerk of Courts - Civil / receivership docket',
@@ -2387,11 +2389,11 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       researchStatus: 'verified',
     },
     buildingPhotos: {
-      exterior: [streetView, mapImage],
+      exterior: [...verifiedPropertyImages, streetView, mapImage],
       interior: [],
       streetView,
       satellite: `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_REPORT_KEY}&q=${encodeURIComponent(canonicalAddress)}&zoom=17&maptype=satellite`,
-      source: 'Google Street View / Maps fallback pending uploaded receiver property photos',
+      source: 'Verified uploaded Three Horizons East property photo plus Google Maps fallback',
     },
     neighborhoodIntel: {
       crimeScore: 0,
