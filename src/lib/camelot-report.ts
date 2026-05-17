@@ -2224,7 +2224,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       source: 'User-provided receivership engagement facts',
       status: 'loaded',
       count: 1,
-      detail: 'Camelot is working with past board members, board counsel, the court-appointed receiver, unit owners, engineers, contractors, and service providers to stabilize operations and restore the property.',
+      detail: 'Camelot is working with past board members, board counsel, the court-appointed receiver, unit owners, a licensed CAM operator through an affiliate partnership, engineers, contractors, and service providers to stabilize operations and restore the property.',
     },
   ];
   const tieredPricing: TieredPricing = {
@@ -2242,7 +2242,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     reportFocus: {
       selectedFocus: ['hoa_recovery', 'property_management', 'accounting', 'automation', 'compliance', 'project_management'],
       inquiryOrganization: 'Three Horizons East Condominium',
-      inquiryNotes: 'Florida receivership takeover. Camelot is coordinating with past board members, board attorney, the court-appointed receiver, unit owners, engineers, contractors, consultants, and service providers. The report must use Florida, Miami-Dade, and North Miami source paths only.',
+      inquiryNotes: 'Florida receivership takeover. Camelot is coordinating with past board members, board attorney, the court-appointed receiver, unit owners, a licensed CAM operator affiliate partner, engineers, contractors, consultants, and service providers. The report must use Florida, Miami-Dade, and North Miami source paths only.',
     },
     units,
     stories: 0,
@@ -2326,6 +2326,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     boardMembers: [{ name: 'Court-appointed receiver / association authority', title: 'Receivership authority to verify through Miami-Dade Clerk docket' }],
     buildingStaff: [
       { role: 'Receiver property management company', name: 'Camelot' },
+      { role: 'Licensed CAM operator affiliate partner', name: 'Florida CAM compliance and local association operations support' },
       { role: 'Receiver / board counsel / past board coordination', name: 'Court and association stakeholders' },
       { role: 'Local North Miami field support', name: 'Property managers, engineers, GC, maintenance, cleaning, guard service, and project consultants to be staffed and coordinated by Camelot' },
     ],
@@ -2366,7 +2367,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     feeComparison: null,
     streetEasy: null,
     commercialIntel: {
-      commercialSignals: ['Receivership operations', 'Condominium association control transition', 'Florida court-aware management', 'Vendor and contract turnover review', 'Insurance, life-safety, 40-year certification, and restoration review'],
+      commercialSignals: ['Receivership operations', 'Condominium association control transition', 'Florida court-aware management', 'Licensed CAM operator affiliate partnership', 'Vendor and contract turnover review', 'Insurance, life-safety, 40-year certification, and restoration review'],
       likelyCommercialUses: [],
       amenities: ['Condominium common areas to inspect', 'Parking / access control to verify', 'Fire sprinkler and fire monitoring systems to verify', 'Insurance and building-condition files to collect', 'Staffing, cleaning, guard service, maintenance, project management, engineering, and GC support to coordinate'],
       revenueOpportunities: ['Vendor rebidding', 'Insurance claim and reserve coordination', 'Collections and arrears process cleanup', 'Budget recovery and cash-control review', 'Capital improvement planning', 'Receivership reporting cadence', 'Refinance-readiness support once compliance needs are met'],
@@ -2433,6 +2434,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
           'Capital improvements, repairs, maintenance, engineering, GC, project management, and consultant coordination',
           'Insurance inspection requirement review and refinance-readiness plan for a future traditional mortgage',
           'North Miami local staffing base: property management, maintenance, cleaning, guard service, engineers, service providers, and contractors',
+          'Licensed CAM operator affiliate partnership for Florida condominium operations and compliance support',
         ],
       },
       floridaSourceStack: floridaSources.map(source => source.source),
@@ -3150,6 +3152,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       'refinance',
       'court-appointed receiver',
       'past board members',
+      'licensed CAM operator',
     ];
     const missingFloridaTokens = requiredFloridaTokens.filter(token => !html.includes(token));
     checks.push({
@@ -3783,7 +3786,7 @@ td a{color:#a89035;font-weight:800}
 <h1>${safe(d.buildingName)}</h1>
 <p style="font-size:22px;max-width:680px;margin-top:18px">${safe(d.address)}</p>
 <div class="callout" style="max-width:720px;margin-top:44px;background:rgba(255,255,255,.08);border-color:#d8b24a;color:#fff">
-Camelot is working with the court-appointed receiver, past board members, board attorney, unit owners, engineers, contractors, consultants, and local service providers to stabilize Three Horizons East Condominium and bring the property back into operating health.
+Camelot is working with the court-appointed receiver, past board members, board attorney, unit owners, a licensed CAM operator through an affiliate partnership, engineers, contractors, consultants, and local service providers to stabilize Three Horizons East Condominium and bring the property back into operating health.
 </div>
 <div class="grid" style="margin-top:36px">
 <div class="photo"><img src="${safe(firstPhoto)}" alt="${safe(d.buildingName)}" onerror="${subjectImageOnErrorChain([secondPhoto], d.buildingName)}"></div>
@@ -3799,7 +3802,7 @@ Camelot is working with the court-appointed receiver, past board members, board 
 <div class="grid">
 <div>
 <p><strong>Three Horizons East Condominium is not a standard management pitch.</strong> The operating posture is a receivership stabilization plan: protect the asset, stabilize communication, secure records, verify court authority, rebuild controls, and create a disciplined property management cadence.</p>
-<p>Camelot's role is to sit at the center of the recovery effort: coordinating with the receiver, past board members, board counsel, unit owners, engineers, general contractors, insurance parties, maintenance vendors, cleaning, guard service, and project consultants so the building can move from distress toward compliance, solvency, refinance readiness, and long-term board control.</p>
+<p>Camelot's role is to sit at the center of the recovery effort: coordinating with the receiver, past board members, board counsel, unit owners, a licensed CAM operator affiliate partner, engineers, general contractors, insurance parties, maintenance vendors, cleaning, guard service, and project consultants so the building can move from distress toward compliance, solvency, refinance readiness, and long-term board control.</p>
 <div class="callout"><strong>No inherited source mismatch:</strong> this report intentionally excludes city/state source paths that do not govern this Florida property.</div>
 </div>
 <div class="grid-3" style="grid-template-columns:1fr">
@@ -3887,10 +3890,10 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <h2>How Camelot Takes Control</h2>
 <div class="grid-3">
 <div class="risk-card"><h3>Accounting</h3><p>Receiver-grade AP, collections, bank reconciliation, vendor controls, owner balances, and monthly financial reporting.</p></div>
-<div class="risk-card"><h3>Operations</h3><p>Unit-owner communication, service tickets, emergency escalation, local staffing, vendor dispatch, site inspections, guard/cleaning/maintenance support, and photo-based condition reporting.</p></div>
+<div class="risk-card"><h3>Operations</h3><p>Unit-owner communication, licensed CAM operator affiliate support, service tickets, emergency escalation, local staffing, vendor dispatch, site inspections, guard/cleaning/maintenance support, and photo-based condition reporting.</p></div>
 <div class="risk-card"><h3>Technology</h3><p>Cloud files, reporting dashboards, work order tracking, board/receiver packages, and automated reminders for deadlines and closeout items.</p></div>
 </div>
-<div class="callout">Camelot's role is to become the operating nerve center for the receiver: one place for records, money movement, vendor work, owner communication, project management, compliance tracking, and status reporting. Three Horizons East is Camelot's North Miami flagship assignment and a pilot platform for long-term expansion in this market.</div>
+<div class="callout">Camelot's role is to become the operating nerve center for the receiver: one place for records, money movement, vendor work, owner communication, licensed CAM operator affiliate support, project management, compliance tracking, and status reporting. Three Horizons East is Camelot's North Miami flagship assignment and a pilot platform for long-term expansion in this market.</div>
 <div class="footer">Operational model is tailored to condominium receivership, not a routine new-business proposal.</div><div class="page">8</div>
 </section>
 
