@@ -2298,6 +2298,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       { type: 'Budget recovery', description: 'Camelot must help develop a sound operating budget, strengthen collections, improve checks and controls, and bring the association into the black.', severity: 'high' },
       { type: '40-year certification and life-safety compliance', description: 'Building recertification, fire sprinklers, fire monitoring, insurance requirements, and all applicable local compliance items must be organized and driven to completion.', severity: 'high' },
       { type: 'Capital improvement and refinance path', description: 'Repairs, maintenance, capital work, engineering, GC coordination, insurance compliance, and project management support the path toward refinancing out of a high-interest short-term bridge loan into more traditional debt.', severity: 'high' },
+      { type: 'Managing-agent scope', description: 'Camelot is positioned as the managing-agent platform, supported by a licensed Florida CAM operator affiliate where required, with receiver/court authority, unit-owner ledgers, lock-box collections, notices, accounting controls, maintenance oversight, and vendor coordination built into the operating plan.', severity: 'high' },
       { type: 'Florida source verification', description: 'Miami-Dade, North Miami, Florida DBPR, Sunbiz, clerk, tax, flood, insurance, and association records must replace non-Florida source paths.', severity: 'high' },
     ],
     scoutScore: 78,
@@ -2370,7 +2371,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       commercialSignals: ['Receivership operations', 'Condominium association control transition', 'Florida court-aware management', 'Licensed CAM operator affiliate partnership', 'Vendor and contract turnover review', 'Insurance, life-safety, 40-year certification, and restoration review'],
       likelyCommercialUses: [],
       amenities: ['Gated access', 'Swimming pool', 'Fitness facilities to verify', 'Clubhouse / recreation areas', 'Elevator access', 'Parking', 'Common outdoor spaces', 'Condominium common areas to inspect', 'Fire sprinkler and fire monitoring systems to verify', 'Insurance and building-condition files to collect', 'Staffing, cleaning, guard service, maintenance, project management, engineering, and GC support to coordinate'],
-      revenueOpportunities: ['Vendor rebidding', 'Insurance claim and reserve coordination', 'Collections and arrears process cleanup', 'Budget recovery and cash-control review', 'Capital improvement planning', 'Receivership reporting cadence', 'Refinance-readiness support once compliance needs are met'],
+      revenueOpportunities: ['Vendor rebidding', 'Insurance claim and reserve coordination', 'Collections and arrears process cleanup', 'Lock-box collections and unit-owner ledger discipline', 'Monthly billing and delinquency notice workflow', 'Budget recovery and cash-control review', 'Capital improvement planning', 'Receivership reporting cadence', 'Refinance-readiness support once compliance needs are met'],
       officialWebsite: null,
       brandingTitle: 'Three Horizons East Condominium',
       brandingDescription: 'Three Horizons East is an established 89-unit, six-story North Miami condominium built in 1972. Camelot’s engagement is positioned as both a receivership stabilization mandate and the company’s first North Miami management platform.',
@@ -2426,6 +2427,15 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
         status: 'In receivership',
         currentManagement: 'Camelot receivership property management takeover and stabilization platform',
         strategicExpansion: 'Camelot’s first North Miami management engagement and South Florida expansion platform',
+        agreementScope: [
+          'Camelot serves as the managing-agent platform for the property, subject to receiver authority and applicable court orders',
+          'Florida community-association management functions are coordinated through a duly licensed Florida CAM operator affiliate where required by law',
+          'Camelot back-office support includes owner ledger updates, notice mailing/support, accounting coordination, reporting, collections workflow, and document organization',
+          'Monthly billing, common charges, assessments, rents, and other charges are handled through operating-account and lock-box procedures as directed by the receiver/client',
+          'Delinquency notices, legal referrals, foreclosure-support notices, and collection proceedings are coordinated only with proper receiver/client authorization and counsel',
+          'Maintenance oversight includes common-area cleanliness, building systems, elevator, electrical, plumbing, HVAC, masonry, decor, repairs, alterations, and capital work coordination',
+          'Camelot coordinates board/receiver meetings, owner communications, vendor documentation, insurance requirements, and transition materials during the receivership period',
+        ],
         immediatePriorities: [
           'Court order and receiver authority file',
           'Operating budget, banking, collections, payables, and checks and controls',
@@ -3103,6 +3113,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
         'Receiver Management Transition Plan',
         'Florida Compliance and Code Review',
         'Camelot Operating Model',
+        'Managing Agent Scope',
         'Required Intake Request',
         'Next Steps',
       ]
@@ -3156,6 +3167,8 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       'court-appointed receiver',
       'past board members',
       'licensed CAM operator',
+      'Managing Agent Scope',
+      'lock-box',
       '89-unit',
       'Built in 1972',
     ];
@@ -3725,6 +3738,12 @@ function generateFloridaReceivershipBrochureHTML(d: MasterReportData): string {
 </div>`).join('');
   const sourceChips = (d.commercialIntel?.researchSources || []).map(source => `<span>${safe(source)}</span>`).join('');
   const amenityChips = (d.commercialIntel?.amenities || []).slice(0, 10).map(item => `<span>${safe(item)}</span>`).join('');
+  const agreementScope = Array.isArray(d.raw?.receivership?.agreementScope) ? d.raw.receivership.agreementScope as string[] : [];
+  const agreementScopeRows = agreementScope.map((item, index) => `
+<tr>
+<td>${index + 1}</td>
+<td>${safe(item)}</td>
+</tr>`).join('');
   const photoCandidates = buildSubjectImageCandidates(d);
   const firstPhoto = photoCandidates[0] || buildSubjectStreetViewUrl(d);
   const secondPhoto = photoCandidates[1] || `https://maps.googleapis.com/maps/api/staticmap?center=${encodedAddr}&zoom=16&size=900x500&markers=color:red%7C${encodedAddr}&key=${GOOGLE_MAPS_REPORT_KEY}`;
@@ -3912,6 +3931,19 @@ Camelot's first job is to create control: file transfer, court-order review, res
 
 <section class="slide">
 <div class="logo">CAMELOT</div>
+<div class="kicker">Managing Agent Scope</div>
+<h2>Camelot + Licensed CAM Affiliate Support</h2>
+<p>Camelot is presented as the managing-agent platform for Three Horizons East, working with the Association, the court-appointed receiver, and a licensed Florida CAM operator affiliate where required by law. The public report should describe the operating structure without naming individual people or affiliate principals.</p>
+<table>
+<thead><tr><th style="width:56px">#</th><th>Service Scope Reflected in Agreement Materials</th></tr></thead>
+<tbody>${agreementScopeRows}</tbody>
+</table>
+<div class="callout">This is service-scope language, not a substitute for the final agreement, receiver instructions, court orders, or legal advice. The goal is to show the practical management controls Camelot will help install.</div>
+<div class="footer">Agreement language summarized without personal names or private affiliate-party details.</div><div class="page">9</div>
+</section>
+
+<section class="slide">
+<div class="logo">CAMELOT</div>
 <div class="kicker">Required Intake Request</div>
 <h2>Files Needed to Finalize the Takeover File</h2>
 <div class="grid">
@@ -3921,6 +3953,7 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <li>Association governing documents and current roster</li>
 <li>Bank accounts, balances, arrears, AP aging, and prior financials</li>
 <li>Insurance policies, claims, incident logs, and open restoration files</li>
+<li>Operating account, lock-box, banking authority, owner ledgers, common-charge billing, assessment, and collections files</li>
 <li>Vendor contracts, certificates, invoices, open work orders, staffing needs, and emergency contacts</li>
 <li>Permit, code, 40-year certification, fire sprinkler, fire monitoring, life-safety, elevator, roof, plumbing, electrical, and structural files</li>
 <li>Bridge loan, mortgage, refinance, insurance inspection, and capital improvement files</li>
@@ -3929,7 +3962,7 @@ Camelot's first job is to create control: file transfer, court-order review, res
 </div>
 <div class="photo"><img src="${safe(secondPhoto)}" alt="${safe(d.buildingName)} location" onerror="${subjectImageOnErrorChain([firstPhoto], d.buildingName)}"></div>
 </div>
-<div class="footer">Uploaded receiver photos should be added to this report once available.</div><div class="page">9</div>
+<div class="footer">Uploaded receiver photos should be added to this report once available.</div><div class="page">10</div>
 </section>
 
 <section class="slide dark">
@@ -3943,7 +3976,7 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <a class="stat" href="https://www.camelot.nyc" target="_blank" rel="noopener" style="text-decoration:none"><div class="val">Web</div><div class="lbl">www.camelot.nyc</div></a>
 </div>
 <p style="margin-top:44px;color:rgba(255,255,255,.65)">David A. Goldoff, Founder & President<br>646-523-9068 | info@camelot.nyc</p>
-<div class="footer">Camelot Property Management Services Corp. | Florida receivership management report</div><div class="page">10</div>
+<div class="footer">Camelot Property Management Services Corp. | Florida receivership management report</div><div class="page">11</div>
 </section>
 </main>
 </body>
