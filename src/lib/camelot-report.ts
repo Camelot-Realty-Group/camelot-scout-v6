@@ -2224,7 +2224,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       source: 'User-provided receivership engagement facts',
       status: 'loaded',
       count: 1,
-      detail: 'Camelot was hired as the receiver property management company; prior manager Michael Curtis; no active management company to rely on during takeover.',
+      detail: 'Camelot is working with past board members, board counsel, the court-appointed receiver, unit owners, engineers, contractors, and service providers to stabilize operations and restore the property.',
     },
   ];
   const tieredPricing: TieredPricing = {
@@ -2242,7 +2242,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     reportFocus: {
       selectedFocus: ['hoa_recovery', 'property_management', 'accounting', 'automation', 'compliance', 'project_management'],
       inquiryOrganization: 'Three Horizons East Condominium',
-      inquiryNotes: 'Florida receivership takeover. Camelot has been hired as the receiver property management company. The report must use Florida, Miami-Dade, and North Miami source paths only.',
+      inquiryNotes: 'Florida receivership takeover. Camelot is coordinating with past board members, board attorney, the court-appointed receiver, unit owners, engineers, contractors, consultants, and service providers. The report must use Florida, Miami-Dade, and North Miami source paths only.',
     },
     units,
     stories: 0,
@@ -2257,7 +2257,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     dofOwner: 'Three Horizons East Condominium Association / Receiver authority to verify',
     bbl: 'Miami-Dade folio to verify',
     registrationOwner: 'Three Horizons East Condominium Association / Receiver authority to verify',
-    managementCompany: 'Camelot receivership property management takeover; prior manager Michael Curtis; no active management company',
+    managementCompany: 'Camelot receivership property management takeover and stabilization platform',
     violationsTotal: 0,
     violationsOpen: 0,
     violationClassA: 0,
@@ -2294,10 +2294,11 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     distressScore: 78,
     distressLevel: 'receivership takeover',
     distressSignals: [
-      { type: 'Receivership', description: 'Property is in receivership and requires immediate operating control, document capture, vendor review, and court-aware reporting.', severity: 'high' },
-      { type: 'Management transition', description: 'No active management company is in place; Camelot has been hired as receiver property management company.', severity: 'high' },
-      { type: 'Prior manager transition', description: 'Prior manager Michael Curtis should be treated as a transition-history source only until files are reconciled.', severity: 'medium' },
-      { type: 'Florida source verification', description: 'Miami-Dade, North Miami, Florida DBPR, Sunbiz, clerk, tax, flood, insurance, and association records must replace all New York source paths.', severity: 'high' },
+      { type: 'Receivership', description: 'Property is in receivership and requires immediate operating control, court-aware reporting, owner communication, and coordinated stabilization.', severity: 'high' },
+      { type: 'Budget recovery', description: 'Camelot must help develop a sound operating budget, strengthen collections, improve checks and controls, and bring the association into the black.', severity: 'high' },
+      { type: '40-year certification and life-safety compliance', description: 'Building recertification, fire sprinklers, fire monitoring, insurance requirements, and all applicable local compliance items must be organized and driven to completion.', severity: 'high' },
+      { type: 'Capital improvement and refinance path', description: 'Repairs, maintenance, capital work, engineering, GC coordination, insurance compliance, and project management support the path toward refinancing out of a high-interest short-term bridge loan into more traditional debt.', severity: 'high' },
+      { type: 'Florida source verification', description: 'Miami-Dade, North Miami, Florida DBPR, Sunbiz, clerk, tax, flood, insurance, and association records must replace non-Florida source paths.', severity: 'high' },
     ],
     scoutScore: 78,
     scoutGrade: 'A',
@@ -2325,8 +2326,8 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     boardMembers: [{ name: 'Court-appointed receiver / association authority', title: 'Receivership authority to verify through Miami-Dade Clerk docket' }],
     buildingStaff: [
       { role: 'Receiver property management company', name: 'Camelot' },
-      { role: 'Previous manager', name: 'Michael Curtis' },
-      { role: 'On-site / vendor / maintenance roster', name: 'To be collected during takeover' },
+      { role: 'Receiver / board counsel / past board coordination', name: 'Court and association stakeholders' },
+      { role: 'Local North Miami field support', name: 'Property managers, engineers, GC, maintenance, cleaning, guard service, and project consultants to be staffed and coordinated by Camelot' },
     ],
     professionals: { lawFirm: null, accountingFirm: null, engineer: null, architect: null },
     contactResearchSources: [
@@ -2335,7 +2336,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       'Florida DBPR condominium / association records',
       'Florida Division of Corporations - Sunbiz',
       'Receiver transition files and court orders',
-      'Prior manager file turnover: Michael Curtis',
+      'Past board, board counsel, receiver, unit owner, and consultant transition files',
     ],
     professionalResearchSources: [
       'Receiver counsel and court filings',
@@ -2365,10 +2366,10 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
     feeComparison: null,
     streetEasy: null,
     commercialIntel: {
-      commercialSignals: ['Receivership operations', 'Condominium association control transition', 'Florida court-aware management', 'Vendor and contract turnover review', 'Insurance and restoration review'],
+      commercialSignals: ['Receivership operations', 'Condominium association control transition', 'Florida court-aware management', 'Vendor and contract turnover review', 'Insurance, life-safety, 40-year certification, and restoration review'],
       likelyCommercialUses: [],
-      amenities: ['Condominium common areas to inspect', 'Parking / access control to verify', 'Life-safety systems to verify', 'Insurance and building-condition files to collect'],
-      revenueOpportunities: ['Vendor rebidding', 'Insurance claim and reserve coordination', 'Collections and arrears process cleanup', 'Common-area operating audit', 'Receivership reporting cadence'],
+      amenities: ['Condominium common areas to inspect', 'Parking / access control to verify', 'Fire sprinkler and fire monitoring systems to verify', 'Insurance and building-condition files to collect', 'Staffing, cleaning, guard service, maintenance, project management, engineering, and GC support to coordinate'],
+      revenueOpportunities: ['Vendor rebidding', 'Insurance claim and reserve coordination', 'Collections and arrears process cleanup', 'Budget recovery and cash-control review', 'Capital improvement planning', 'Receivership reporting cadence', 'Refinance-readiness support once compliance needs are met'],
       officialWebsite: null,
       brandingTitle: 'Three Horizons East Condominium',
       brandingDescription: 'North Miami condominium receivership takeover requiring Florida source verification and immediate operating-control workflow.',
@@ -2384,7 +2385,7 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
         'Miami-Dade Tax Collector',
         'FEMA Flood Map Service Center',
         'Receiver transition files',
-        'Prior manager turnover files: Michael Curtis',
+        'Past board, board attorney, receiver, unit owner, engineer, GC, insurance, and consultant records',
       ],
       researchStatus: 'verified',
     },
@@ -2420,16 +2421,18 @@ function buildFloridaReceivershipReport(address: string): MasterReportData {
       noNySources: true,
       receivership: {
         status: 'In receivership',
-        currentManagement: 'Camelot was hired as receiver property management company',
-        previousManager: 'Michael Curtis',
+        currentManagement: 'Camelot receivership property management takeover and stabilization platform',
         immediatePriorities: [
           'Court order and receiver authority file',
-          'Banking, collections, payables, and operating cash controls',
+          'Operating budget, banking, collections, payables, and checks and controls',
           'Vendor contract and insurance certificate review',
-          'Building department, code, permit, and life-safety review',
+          '40-year certification, building department, code, permit, fire sprinkler, fire monitoring, and life-safety review',
           'Resident communication and emergency escalation protocol',
           'Photo documentation and site-condition baseline',
           'Budget, arrears, AP, payroll/vendor, and reserve file audit',
+          'Capital improvements, repairs, maintenance, engineering, GC, project management, and consultant coordination',
+          'Insurance inspection requirement review and refinance-readiness plan for a future traditional mortgage',
+          'North Miami local staffing base: property management, maintenance, cleaning, guard service, engineers, service providers, and contractors',
         ],
       },
       floridaSourceStack: floridaSources.map(source => source.source),
@@ -3027,7 +3030,7 @@ export function runReportQA(d: MasterReportData): QACheckResult {
     name: 'Violation Source Coverage',
     status: (!isHoaRecovery && !isFloridaReceivership && missingCoreComplianceSources.length) || suspiciousAllZero ? 'fail' : 'pass',
     detail: isFloridaReceivership
-      ? 'Florida receivership mode: Miami-Dade, North Miami, Florida DBPR, Sunbiz, court, tax, flood, insurance, and association records replace NYC feeds'
+      ? 'Florida receivership mode: Miami-Dade, North Miami, Florida DBPR, Sunbiz, court, tax, flood, insurance, and association records replace non-Florida feeds'
       : isHoaRecovery
       ? 'Connecticut HOA proposal mode: NYC violation feeds are not applicable; HOA, municipal, insurance, restoration, and vendor files are flagged for transition review'
       : missingCoreComplianceSources.length
@@ -3142,8 +3145,11 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       'Sunbiz',
       'Miami-Dade Tax Collector',
       'FEMA Flood Map Service Center',
-      'Michael Curtis',
-      'receiver property management company',
+      '40-year certification',
+      'fire sprinkler',
+      'refinance',
+      'court-appointed receiver',
+      'past board members',
     ];
     const missingFloridaTokens = requiredFloridaTokens.filter(token => !html.includes(token));
     checks.push({
@@ -3777,7 +3783,7 @@ td a{color:#a89035;font-weight:800}
 <h1>${safe(d.buildingName)}</h1>
 <p style="font-size:22px;max-width:680px;margin-top:18px">${safe(d.address)}</p>
 <div class="callout" style="max-width:720px;margin-top:44px;background:rgba(255,255,255,.08);border-color:#d8b24a;color:#fff">
-Camelot has been hired as the receiver's property management company. This report is written for a North Miami, Miami-Dade County receivership takeover and uses Florida source paths, court-aware operating priorities, and local municipal verification steps.
+Camelot is working with the court-appointed receiver, past board members, board attorney, unit owners, engineers, contractors, consultants, and local service providers to stabilize Three Horizons East Condominium and bring the property back into operating health.
 </div>
 <div class="grid" style="margin-top:36px">
 <div class="photo"><img src="${safe(firstPhoto)}" alt="${safe(d.buildingName)}" onerror="${subjectImageOnErrorChain([secondPhoto], d.buildingName)}"></div>
@@ -3792,8 +3798,8 @@ Camelot has been hired as the receiver's property management company. This repor
 <h2>Immediate Takeover Priorities</h2>
 <div class="grid">
 <div>
-<p><strong>Three Horizons East Condominium is not a standard management pitch.</strong> The operating posture is a receivership transition: protect the asset, stabilize communication, secure records, verify court authority, rebuild controls, and create a disciplined property management cadence.</p>
-<p>Based on your direction, Camelot is treating prior manager Michael Curtis as a transition-history source while Camelot steps in as receiver property management company. That means the report must stay anchored to Florida records and local North Miami conditions.</p>
+<p><strong>Three Horizons East Condominium is not a standard management pitch.</strong> The operating posture is a receivership stabilization plan: protect the asset, stabilize communication, secure records, verify court authority, rebuild controls, and create a disciplined property management cadence.</p>
+<p>Camelot's role is to sit at the center of the recovery effort: coordinating with the receiver, past board members, board counsel, unit owners, engineers, general contractors, insurance parties, maintenance vendors, cleaning, guard service, and project consultants so the building can move from distress toward compliance, solvency, refinance readiness, and long-term board control.</p>
 <div class="callout"><strong>No inherited source mismatch:</strong> this report intentionally excludes city/state source paths that do not govern this Florida property.</div>
 </div>
 <div class="grid-3" style="grid-template-columns:1fr">
@@ -3855,9 +3861,9 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <div class="kicker">30-60-90 Day Takeover</div>
 <h2>Receiver Management Transition Plan</h2>
 <div class="grid-3">
-<div class="risk-card"><h3>First 30 Days</h3><p>Court order intake, receiver authority file, bank/payables controls, vendor list, insurance policies, emergency contacts, resident notice, photo baseline, and critical life-safety review.</p></div>
-<div class="risk-card"><h3>Days 31-60</h3><p>Budget and arrears review, vendor rebidding plan, permit/code review, resident communication cadence, insurance/restoration tracking, collections workflow, and monthly reporting package.</p></div>
-<div class="risk-card"><h3>Days 61-90</h3><p>Stabilization plan, reserve and capital needs, board/receiver dashboard, risk register, compliance calendar, project priority list, and recommended operating budget.</p></div>
+<div class="risk-card"><h3>First 30 Days</h3><p>Court order intake, receiver authority file, bank/payables controls, owner communication, vendor list, insurance policies, emergency contacts, photo baseline, and critical life-safety review.</p></div>
+<div class="risk-card"><h3>Days 31-60</h3><p>Budget recovery, arrears and collections, vendor rebidding, permit/code review, 40-year certification tracking, fire sprinkler and fire monitoring review, insurance/restoration tracking, and monthly receiver reporting.</p></div>
+<div class="risk-card"><h3>Days 61-90</h3><p>Capital improvement plan, maintenance and repair cadence, staffing plan, compliance calendar, project priority list, refinance-readiness roadmap, and recommended operating budget.</p></div>
 </div>
 <div class="footer">Transition plan is receivership-specific and should be updated once court files, budgets, vendors, and site photos are collected.</div><div class="page">6</div>
 </section>
@@ -3869,8 +3875,8 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <div class="grid">
 <div class="risk-card"><h3>Municipal / Permit Review</h3><p>City of North Miami and Miami-Dade permit, inspection, unsafe-structure, recertification, contractor, and code files should be pulled immediately.</p></div>
 <div class="risk-card"><h3>Court / Official Records</h3><p>Miami-Dade civil docket and Official Records should control the receivership authority, claims, liens, notices, and all required reporting steps.</p></div>
-<div class="risk-card"><h3>Insurance / Restoration</h3><p>Policies, claims, open scopes, water intrusion, casualty losses, vendor estimates, deductibles, and renewal risk must be organized into a receiver-ready file.</p></div>
-<div class="risk-card"><h3>Financial Controls</h3><p>Cash controls, AP approval, arrears, owner balances, vendor aging, association budget, bank access, and receiver reporting should be rebuilt before routine operations resume.</p></div>
+<div class="risk-card"><h3>Insurance / Restoration</h3><p>Policies, claims, open scopes, inspection requirements, fire/life-safety conditions, vendor estimates, deductibles, and renewal risk must be organized into a receiver-ready file.</p></div>
+<div class="risk-card"><h3>Financial Controls</h3><p>Cash controls, AP approval, arrears, owner balances, vendor aging, association budget, bank access, foreclosure-assistance notices, and receiver reporting should be rebuilt before routine operations resume.</p></div>
 </div>
 <div class="footer">Florida report mode replaces non-local compliance systems with Miami-Dade and North Miami records.</div><div class="page">7</div>
 </section>
@@ -3881,10 +3887,10 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <h2>How Camelot Takes Control</h2>
 <div class="grid-3">
 <div class="risk-card"><h3>Accounting</h3><p>Receiver-grade AP, collections, bank reconciliation, vendor controls, owner balances, and monthly financial reporting.</p></div>
-<div class="risk-card"><h3>Operations</h3><p>Resident communication, service tickets, emergency escalation, vendor dispatch, site inspections, and photo-based condition reporting.</p></div>
+<div class="risk-card"><h3>Operations</h3><p>Unit-owner communication, service tickets, emergency escalation, local staffing, vendor dispatch, site inspections, guard/cleaning/maintenance support, and photo-based condition reporting.</p></div>
 <div class="risk-card"><h3>Technology</h3><p>Cloud files, reporting dashboards, work order tracking, board/receiver packages, and automated reminders for deadlines and closeout items.</p></div>
 </div>
-<div class="callout">Camelot's role is to become the operating nerve center for the receiver: one place for records, money movement, vendor work, resident communication, and status reporting.</div>
+<div class="callout">Camelot's role is to become the operating nerve center for the receiver: one place for records, money movement, vendor work, owner communication, project management, compliance tracking, and status reporting. Three Horizons East is Camelot's North Miami flagship assignment and a pilot platform for long-term expansion in this market.</div>
 <div class="footer">Operational model is tailored to condominium receivership, not a routine new-business proposal.</div><div class="page">8</div>
 </section>
 
@@ -3899,8 +3905,9 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <li>Association governing documents and current roster</li>
 <li>Bank accounts, balances, arrears, AP aging, and prior financials</li>
 <li>Insurance policies, claims, incident logs, and open restoration files</li>
-<li>Vendor contracts, certificates, invoices, open work orders, and emergency contacts</li>
-<li>Permit, code, life-safety, elevator, roof, plumbing, electrical, and structural files</li>
+<li>Vendor contracts, certificates, invoices, open work orders, staffing needs, and emergency contacts</li>
+<li>Permit, code, 40-year certification, fire sprinkler, fire monitoring, life-safety, elevator, roof, plumbing, electrical, and structural files</li>
+<li>Bridge loan, mortgage, refinance, insurance inspection, and capital improvement files</li>
 <li>Resident communication log and unresolved complaints</li>
 </ul>
 </div>
@@ -3913,7 +3920,7 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <div class="logo">CAMELOT</div>
 <div class="kicker">Next Steps</div>
 <h2>Receiver Takeover Action Meeting</h2>
-<p style="font-size:19px;max-width:720px">Camelot is ready to move from report to action: collect the court and transition files, document the property condition, confirm Florida record sources, and begin a disciplined receivership management cadence for Three Horizons East Condominium.</p>
+<p style="font-size:19px;max-width:760px">Camelot is ready to move from report to action: stabilize operations, document the property condition, coordinate all parties, help bring the budget into the black, drive 40-year certification and life-safety compliance, support capital repairs, and prepare the property for a cleaner refinance path after compliance needs are met.</p>
 <div class="grid-3" style="margin-top:34px">
 <a class="stat" href="mailto:dgoldoff@camelot.nyc?subject=${encodeURIComponent('Three Horizons East - receiver management takeover')}" style="text-decoration:none"><div class="val">Email</div><div class="lbl">dgoldoff@camelot.nyc</div></a>
 <a class="stat" href="tel:+12122069939;ext=701" style="text-decoration:none"><div class="val">Call</div><div class="lbl">212-206-9939 x701</div></a>
