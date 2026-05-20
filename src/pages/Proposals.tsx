@@ -162,7 +162,8 @@ export default function Proposals() {
       if (error) throw error;
       setSavedProposals(data || []);
     } catch (err: any) {
-      console.error('Failed to load proposals:', err);
+      console.warn('Supabase proposal table unavailable; proposal library will stay in local/demo mode.', err?.message || err);
+      setSavedProposals([]);
     } finally {
       setLoadingProposals(false);
     }

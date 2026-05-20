@@ -434,8 +434,8 @@ export function useBuildings() {
       if (error) throw error;
       store.setBuildings(data || []);
     } catch (err: any) {
-      console.error('Failed to load buildings:', err);
-      store.setError(err.message);
+      console.warn('Supabase building table unavailable; using Scout demo data instead.', err?.message || err);
+      store.setError(null);
       // Fall back to demo data
       store.setBuildings(DEMO_BUILDINGS);
     } finally {

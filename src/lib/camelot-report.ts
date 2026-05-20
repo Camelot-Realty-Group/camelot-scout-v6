@@ -1870,6 +1870,17 @@ ${photos.map((url, index) => `<div style="border-radius:6px;overflow:hidden;heig
 </div>`;
 }
 
+function renderSubjectPhotoStrip(d: MasterReportData, options: { limit?: number; height?: number; caption?: string } = {}): string {
+  const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
+  const photos = buildSubjectImageCandidates(d).slice(0, options.limit || 3);
+  if (!photos.length) return '';
+  const height = options.height || 118;
+  return `<div style="display:grid;grid-template-columns:repeat(${Math.min(photos.length, options.limit || 3)},1fr);gap:10px;margin:10px 0 18px">
+${photos.map((url, index) => `<div style="height:${height}px;border:1px solid #D5D0C6;background:#EDE9DF;overflow:hidden;border-radius:6px;box-shadow:0 4px 10px rgba(44,50,64,0.08)"><img src="${escape(url)}" alt="${escape(d.buildingName)} visual ${index + 1}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display='none'"></div>`).join('\n')}
+${options.caption ? `<div style="grid-column:1/-1;font-size:8.5px;color:#888;text-transform:uppercase;letter-spacing:0.8px;text-align:right">${escape(options.caption)}</div>` : ''}
+</div>`;
+}
+
 function isHoaExecutiveRecoveryOpportunity(address: string, borough?: string): boolean {
   return /hills\s+of\s+monroe|monroe,\s*ct|monroe\s+ct|connecticut\s+hoa|hoa\s+executive|carlos\s+capria/i.test(`${address} ${borough || ''}`);
 }
@@ -4754,6 +4765,7 @@ ${theme.proofPoints.map(point => `<li>${safe(point)}</li>`).join('')}
 <div class="brand-logo"><img src="./images/camelot-logo.png" alt="Camelot Realty Group" onerror="this.style.display='none'"></div>
 <h2 class="deck-title">Commercial &amp; Amenity Intelligence</h2>
 <p class="deck-kicker" style="margin:-8px 0 28px 24px">Camelot checks the subject property for commercial occupants, owner/renter uses, revenue-producing spaces, official building branding, and resident amenities.</p>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 106, caption: 'Subject-property amenity and exterior visuals' })}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
 <div class="deck-card" style="min-height:220px">
 <h4>Commercial Owners &amp; Renters</h4>
@@ -4799,6 +4811,7 @@ ${commercialIntel.brandingImages.length > 0 ? `<div style="display:grid;grid-tem
 <div class="section section-cream">
 <div class="section-title">Neighborhood Intelligence</div>
 <div class="section-sub">${d.neighborhoodName ? d.neighborhoodName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : d.borough || 'New York City'} &mdash; Market Context</div>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 90, caption: 'Property imagery anchors the neighborhood and route analysis' })}
 
 <div style="margin-bottom:20px">
 <div style="margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid #D5D0C6;height:250px">
@@ -4853,6 +4866,7 @@ ${d.neighborhoodIntel ? generateNeighborhoodIntelHTML(d.neighborhoodIntel, d.nei
 <div class="section section-cream">
 <div class="section-title">The Property</div>
 <div class="section-sub">Building overview and current intelligence</div>
+${renderSubjectPhotoStrip(d, { limit: 4, height: 104, caption: d.buildingPhotos?.source || 'Property visual reference set' })}
 <div class="stats-row">
 <div class="stat-box"><div class="val">${d.units || 'N/A'}</div><div class="lbl">Units</div></div>
 <div class="stat-box"><div class="val">${d.stories || 'N/A'}</div><div class="lbl">Floors</div></div>
@@ -4885,6 +4899,7 @@ ${d.occupancy ? `<div class="stat-box"><div class="val">${d.occupancy}%</div><di
 <div class="section section-white">
 <div class="section-title">Building Intelligence</div>
 <div class="section-sub">Violations, compliance, and risk signals</div>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 92, caption: 'Building context used alongside public-record checks' })}
 <div class="intel-grid">
 <div class="intel-card"><div class="val ${d.violationsTotal > 20 ? 'red' : d.violationsTotal > 5 ? 'orange' : 'green'}">${d.violationsTotal}</div><div class="lbl">HPD Violations</div></div>
 <div class="intel-card"><div class="val ${d.violationsOpen > 10 ? 'red' : d.violationsOpen > 0 ? 'orange' : 'green'}">${d.violationsOpen}</div><div class="lbl">Open Violations</div></div>

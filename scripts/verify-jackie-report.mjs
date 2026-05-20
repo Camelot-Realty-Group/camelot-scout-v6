@@ -257,7 +257,7 @@ const forbiddenTokens = [
   ['old Camelot Madison office', '477 Madison Avenue'],
   ['old Camelot 501 Madison office', '501 Madison Avenue'],
   ['old Camelot Canal office', '343 Canal Street'],
-  ['old David email in report contact blocks', 'dgoldoff@camelot.nyc'],
+  ['old Valerie email in report contact blocks', 'valerie@camelot.nyc'],
 ];
 
 for (const [label, token] of forbiddenTokens) {

@@ -48,6 +48,47 @@ export interface ServicePushResult {
   warnings?: string[];
 }
 
+const LOCAL_INTEGRATION_QUEUE_KEY = 'camelot:scout-integration-local-queue';
+
+function getLocalQueue(): unknown[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(LOCAL_INTEGRATION_QUEUE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function queueLocalIntegrationLead(payload: unknown) {
+  if (typeof window === 'undefined') return 0;
+  const queue = getLocalQueue();
+  const next = [...queue, { queuedAt: new Date().toISOString(), payload }];
+  try {
+    window.localStorage.setItem(LOCAL_INTEGRATION_QUEUE_KEY, JSON.stringify(next.slice(-250)));
+  } catch {
+    return queue.length;
+  }
+  return next.length;
+}
+
+function clientOnlyIntegrationStatus(): IntegrationStatus {
+  return {
+    scout: {
+      configured: false,
+      apiUrlSet: false,
+      workspaceSet: false,
+      localQueueSize: getLocalQueue().length,
+    },
+    hubspot: {
+      configured: false,
+      dealsEnabled: false,
+      associationEndpoint: 'client-only mode',
+    },
+    timestamp: new Date().toISOString(),
+  };
+}
+
 export function parseContactName(fullName?: string) {
   const parts = String(fullName || '')
     .trim()
@@ -228,20 +269,65 @@ export function buildIntegrationLeadPayload(building: Building) {
 }
 
 export async function getIntegrationStatus(): Promise<IntegrationStatus> {
-  const response = await fetch('/api/integrations/status');
-  if (!response.ok) throw new Error(`Integration status failed: ${response.status}`);
-  return response.json();
+  try {
+    const response = await fetch('/api/integrations/status');
+    if (!response.ok) {
+      if (response.status === 404 || response.status === 405) return clientOnlyIntegrationStatus();
+      throw new Error(`Integration status failed: ${response.status}`);
+    }
+    return response.json();
+  } catch (err) {
+    if (err instanceof TypeError) return clientOnlyIntegrationStatus();
+    throw err;
+  }
 }
 
 export async function pushBuildingToIntegrations(building: Building): Promise<IntegrationPushResult> {
-  const response = await fetch('/api/integrations/push-building', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(buildIntegrationLeadPayload(building)),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok && !data?.quality) {
-    throw new Error(data?.error || `Integration push failed: ${response.status}`);
+  const payload = buildIntegrationLeadPayload(building);
+  try {
+    const response = await fetch('/api/integrations/push-building', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok && !data?.quality) {
+      if (response.status === 404 || response.status === 405) {
+        const localQueueSize = queueLocalIntegrationLead(payload);
+        return {
+          status: 'partial',
+          quality: payload.quality,
+          routing: payload.routing,
+          scout: {
+            status: 'skipped',
+            message: `Scout API is not available on the static Render site. Lead saved to local queue (${localQueueSize}).`,
+          },
+          hubspot: {
+            status: 'skipped',
+            message: 'HubSpot server endpoint is not available on the static Render site. Export CSV or deploy API server to sync.',
+          },
+        };
+      }
+      throw new Error(data?.error || `Integration push failed: ${response.status}`);
+    }
+    return data;
+  } catch (err) {
+    if (err instanceof TypeError) {
+      const localQueueSize = queueLocalIntegrationLead(payload);
+      return {
+        status: 'partial',
+        quality: payload.quality,
+        routing: payload.routing,
+        scout: {
+          status: 'skipped',
+          message: `Network/API unavailable. Lead saved to local queue (${localQueueSize}).`,
+        },
+        hubspot: {
+          status: 'skipped',
+          message: 'HubSpot sync unavailable from this static client session.',
+        },
+      };
+    }
+    throw err;
   }
-  return data;
 }
