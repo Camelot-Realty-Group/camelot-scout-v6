@@ -8,28 +8,40 @@ import {
   ClipboardCheck,
   Clock,
   Copy,
+  Database,
   Download,
-  ExternalLink,
   FileText,
   Globe2,
+  Layers3,
+  ListChecks,
   LockKeyhole,
   Mail,
   Megaphone,
+  Newspaper,
   PenLine,
   PlayCircle,
   RefreshCw,
   Search,
   ShieldCheck,
   Sparkles,
+  Target,
   UploadCloud,
+  Users,
+  type LucideIcon,
 } from 'lucide-react';
 import {
   buildContentExport,
+  CAMELOT_BRAND_SYSTEM,
   CAMELOT_CONTENT_RULES,
   CONTENT_CADENCE,
   CONTENT_ENGINE_PROMPT,
   CONTENT_INTEGRATIONS,
   CONTENT_LIBRARY,
+  CONTENT_MODULES,
+  CONTENT_RECIPIENTS,
+  CONTENT_THEMES,
+  CTA_PLANS,
+  DATABASE_TABLES,
   type ContentItem,
   type ContentStatus,
 } from '@/lib/content-engine';
@@ -63,7 +75,7 @@ export default function ContentEngine() {
     const approved = items.filter((item) => item.status === 'approved').length;
     const scheduled = items.filter((item) => item.status === 'scheduled').length;
     const safety = items.filter((item) => item.safetyFlags.includes('No personal cell') || item.safetyFlags.includes('Office phone only')).length;
-    return { pending, approved, scheduled, safety };
+    return { pending, approved, scheduled, safety, modules: CONTENT_MODULES.length };
   }, [items]);
 
   const setStatus = (id: string, status: ContentStatus) => {
@@ -142,8 +154,72 @@ export default function ContentEngine() {
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <MetricCard icon={ClipboardCheck} label="Pending Approval" value={stats.pending} detail="David/Sam review required" />
           <MetricCard icon={CheckCircle2} label="Approved" value={stats.approved} detail="Ready for scheduling" />
-          <MetricCard icon={CalendarDays} label="Scheduled" value={stats.scheduled} detail="Queued by channel cadence" />
+          <MetricCard icon={Layers3} label="Automation Modules" value={stats.modules} detail="SEO, social, dashboard, outreach, CTA" />
           <MetricCard icon={ShieldCheck} label="Safety Locks" value={`${stats.safety}/${items.length}`} detail="No cell number + CTA checks" />
+        </section>
+
+        <section className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs uppercase tracking-[0.22em] text-camelot-gold font-bold">Automation Blueprint</div>
+                <h2 className="font-heading text-2xl text-slate-950 mt-1">Six Modules Inside Camelot OS</h2>
+                <p className="text-sm text-slate-600 mt-2 max-w-3xl">
+                  Merlin Content now carries the research, editorial, approval, publishing, tracking, outreach, and CTA architecture. Each module is independently schedulable, but they share one approval gate.
+                </p>
+              </div>
+              <Newspaper className="text-camelot-gold flex-shrink-0" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+              {CONTENT_MODULES.map((module) => (
+                <div key={module.id} className="rounded-xl border border-slate-200 bg-[#FFFEFB] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-slate-950">{module.name}</h3>
+                      <p className="text-xs font-semibold text-camelot-gold mt-1">{module.schedule}</p>
+                    </div>
+                    <ListChecks size={18} className="text-camelot-gold flex-shrink-0" />
+                  </div>
+                  <p className="text-sm text-slate-600 leading-relaxed mt-3">{module.objective}</p>
+                  <div className="mt-3 rounded-lg bg-slate-50 border border-slate-100 p-3 text-xs text-slate-600">
+                    Gate: {module.safetyGate}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <h2 className="font-heading text-2xl text-slate-950 flex items-center gap-2">
+                <Users size={22} className="text-camelot-gold" /> Review Routing
+              </h2>
+              <div className="mt-4 space-y-3">
+                {CONTENT_RECIPIENTS.map((recipient) => (
+                  <div key={recipient.email} className="rounded-xl border border-slate-200 bg-[#FFFEFB] p-3">
+                    <div className="font-bold text-slate-950">{recipient.name}</div>
+                    <div className="text-xs text-camelot-gold font-semibold">{recipient.role}</div>
+                    <div className="text-sm text-slate-600 mt-1">{recipient.email}</div>
+                    <div className="text-xs text-slate-500 mt-1">{recipient.note}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-camelot-navy rounded-2xl p-6 text-white shadow-sm">
+              <h2 className="font-heading text-2xl flex items-center gap-2">
+                <Target size={22} className="text-camelot-gold" /> Brand Position
+              </h2>
+              <p className="text-sm text-white/80 leading-relaxed mt-3">{CAMELOT_BRAND_SYSTEM.positioning}</p>
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                {CAMELOT_BRAND_SYSTEM.colors.slice(0, 4).map((color) => (
+                  <div key={color.hex} className="rounded-lg border border-white/10 bg-white/5 p-2">
+                    <div className="h-4 rounded" style={{ backgroundColor: color.hex }} />
+                    <div className="text-[11px] text-white/70 mt-1">{color.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="grid grid-cols-1 xl:grid-cols-[0.95fr_1.45fr] gap-6">
@@ -221,7 +297,7 @@ export default function ContentEngine() {
                 <div>
                   <div className="text-xs uppercase tracking-[0.22em] text-camelot-gold font-bold">{selected.channel} Preview</div>
                   <h2 className="font-heading text-3xl text-slate-950 mt-1">{selected.title}</h2>
-                  <p className="text-sm text-slate-500 mt-2">{selected.contentType} · {selected.audience} · {formatDateTime(selected.scheduledAt)}</p>
+                  <p className="text-sm text-slate-500 mt-2">{selected.contentType} | {selected.audience} | {formatDateTime(selected.scheduledAt)}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button onClick={() => setStatus(selected.id, 'approved')} className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
@@ -273,7 +349,7 @@ export default function ContentEngine() {
                   Camelot Property Management<br />
                   57 West 57th Street, 4th Floor, New York, NY 10019<br />
                   P: (212) 206-9939 ext. 701<br />
-                  dgoldoff@camelot.nyc · info@camelot.nyc · www.camelot.nyc
+                  dgoldoff@camelot.nyc | info@camelot.nyc | www.camelot.nyc
                 </p>
               </div>
             </div>
@@ -372,6 +448,79 @@ export default function ContentEngine() {
           </div>
         </section>
 
+        <section className="grid grid-cols-1 xl:grid-cols-[0.85fr_1.15fr] gap-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <h2 className="font-heading text-2xl text-slate-950 flex items-center gap-2">
+              <Target size={22} className="text-camelot-gold" /> CTA Plan Matrix
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">CTAs shift by topic, while contact details stay approved and compliant.</p>
+            <div className="mt-5 space-y-3">
+              {CTA_PLANS.map((plan) => (
+                <div key={plan.contentType} className="rounded-xl border border-slate-200 bg-[#FFFEFB] p-4">
+                  <h3 className="font-bold text-slate-950">{plan.contentType}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-sm">
+                    <div className="rounded-lg bg-camelot-gold/10 p-3">
+                      <span className="block text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Primary</span>
+                      <span className="font-semibold text-slate-800">{plan.primary}</span>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <span className="block text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Secondary</span>
+                      <span className="font-semibold text-slate-800">{plan.secondary}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <h2 className="font-heading text-2xl text-slate-950 flex items-center gap-2">
+              <Database size={22} className="text-camelot-gold" /> Database Schema
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">These tables are the backend contract for Phase 2 persistence and scheduling.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+              {DATABASE_TABLES.map((table) => (
+                <div key={table.table} className="rounded-xl border border-slate-200 bg-[#FFFEFB] p-4">
+                  <h3 className="font-bold text-slate-950">{table.table}</h3>
+                  <p className="text-sm text-slate-600 mt-2 leading-relaxed">{table.purpose}</p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {table.fields.slice(0, 6).map((field) => (
+                      <span key={field} className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                        {field}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h2 className="font-heading text-2xl text-slate-950 flex items-center gap-2">
+            <Search size={22} className="text-camelot-gold" /> Content Themes And Source Discipline
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.8fr] gap-6 mt-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {CONTENT_THEMES.map((theme) => (
+                <div key={theme} className="rounded-xl border border-slate-200 bg-[#FFFEFB] p-4 text-sm font-semibold text-slate-700">
+                  {theme}
+                </div>
+              ))}
+            </div>
+            <div className="rounded-2xl border border-camelot-gold/30 bg-[#FFFBF0] p-5">
+              <h3 className="font-bold text-slate-950">Image and SEO rules</h3>
+              <ul className="mt-3 space-y-2 text-sm text-slate-700">
+                <li>Use real source images first, with attribution.</li>
+                <li>AI images are fallback only and must be labeled as illustrations.</li>
+                <li>Deduplicate keywords and topics across a four-week window.</li>
+                <li>WordPress drafts can be prepared, but publishing waits for approval.</li>
+                <li>Facebook and company LinkedIn posts are packaged for Sam when direct API posting is not enabled.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         <section className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <h2 className="font-heading text-2xl text-slate-950 flex items-center gap-2">
             <Search size={22} className="text-camelot-gold" /> Intelligence Roadmap
@@ -388,7 +537,7 @@ export default function ContentEngine() {
   );
 }
 
-function MetricCard({ icon: Icon, label, value, detail }: { icon: typeof Megaphone; label: string; value: string | number; detail: string }) {
+function MetricCard({ icon: Icon, label, value, detail }: { icon: LucideIcon; label: string; value: string | number; detail: string }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
@@ -412,7 +561,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RoadmapCard({ icon: Icon, title, text }: { icon: typeof FileText; title: string; text: string }) {
+function RoadmapCard({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-[#FFFEFB] p-4">
       <div className="w-10 h-10 rounded-xl bg-camelot-gold/10 text-camelot-gold flex items-center justify-center mb-3">

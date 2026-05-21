@@ -55,6 +55,35 @@ It includes:
 - Analytics snapshot
 - Downloadable content plan export
 - Copyable system prompt
+- Six module definitions: SEO and GBP Content Engine, LinkedIn Content Drafter, Content Distribution Engine, Content Dashboard, Cold Calling and Outreach, and CTA Plans
+- Review routing for David, Beth, Sam, and Valerie
+- Brand identity tokens, approved contact block, and source-image rules
+- CTA matrix by topic type
+- Backend database contract for `content`, `keywords`, `distributed_posts`, `engagement_metrics`, `approvals`, `leads`, and `run_log`
+
+## Module Responsibilities
+
+1. SEO and GBP Content Engine: weekly Wednesday research and draft package for long-form articles, GBP posts, X/Buffer copy, SEO HTML, real-image sourcing, Google Docs, WordPress draft attempts, and approval emails.
+2. LinkedIn Content Drafter: weekly Friday package for David's personal profile plus Sam's manual company page and Facebook copy.
+3. Content Distribution Engine: twice-weekly approval scan, approved publishing, manual-paste packaging, confirmation emails, and engagement tracking.
+4. Content Dashboard: daily calendar, keyword tracker, content inventory, topic dedupe view, run history, Google Sheet sync, and summary email.
+5. Cold Calling and Outreach: building-lead queue, public-source triggers, contact enrichment, tailored call scripts, follow-up sequences, and HubSpot/AppFolio handoff.
+6. CTA Plans: dynamic call-to-action selection by content type while enforcing approved Camelot contact details.
+
+## Editorial Rules
+
+- Long-form content should read like investigative/editorial real estate writing, not generic marketing copy.
+- Camelot positioning should be woven into the narrative; do not add a dedicated "How Camelot Handles This" section.
+- Use real source images first, with attribution. AI-generated images are fallback only and must be labeled as illustrations.
+- Deduplicate keywords and topics across a four-week window.
+- Use `Camelot Property Management` as the public company name, with `Camelot Brokerage Services Corp.` referenced where leasing or sales is relevant.
+- David's personal cell number must never be generated. Use the approved office number and extension only.
+
+## WordPress And Social Notes
+
+The frontend tracks WordPress, LinkedIn, Facebook, Instagram, X/Buffer, Google Business Profile, Gmail, Google Sheets, Mailchimp, HubSpot, and vendor integrations as capability records. Actual credentialed publishing should be implemented server-side.
+
+The current WordPress posture assumes WP Engine / WordPress access may require browser-assisted draft creation or manual review when REST application passwords are unavailable. The dashboard should still produce a complete Google Doc, HTML draft, SEO metadata, source links, and approval package so the work is not blocked by WordPress automation.
 
 ## Backend Expansion Plan
 
