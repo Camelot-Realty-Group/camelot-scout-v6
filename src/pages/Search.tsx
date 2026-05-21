@@ -14,7 +14,7 @@ import {
   Search as SearchIcon, MapPin, ChevronDown, ChevronRight, Building2,
   Loader2, Zap, AlertTriangle, DollarSign, Calendar, X, Filter,
   Activity, TrendingUp, Users, Award, User, Home, Landmark, ExternalLink, FileText,
-  Clock, PlayCircle, CheckCircle2, ArrowRight, Bot, BarChart3, ShieldCheck, BriefcaseBusiness, Download,
+  Clock, PlayCircle, CheckCircle2, ArrowRight, Bot, BarChart3, ShieldCheck, BriefcaseBusiness, Download, Megaphone,
 } from 'lucide-react';
 import { detectBuildingOperations, getDoormanLabel, getFrontDeskLabel } from '@/lib/building-ops';
 import { APP_NAME_SHORT, CAMELOT_CONTACT, V10_RELEASE_NOTE } from '@/lib/app-brand';
@@ -513,6 +513,7 @@ export default function Search() {
     { name: 'Jackie', route: '/report-center', icon: Award, text: 'Build client-ready introductions, decks, and full property intelligence reports.' },
     { name: 'Sentinel', route: '/sentinel', icon: BarChart3, text: 'Track market movement, distress, timing, and benchmark signals.' },
     { name: 'Arthur', route: '/arthur', icon: BriefcaseBusiness, text: 'Underwrite investments, produce models, and queue broker follow-up.' },
+    { name: 'Merlin Content', route: '/content-engine', icon: Megaphone, text: 'Generate, approve, schedule, publish, and track Camelot content.' },
     { name: 'Shield', route: '/compliance', icon: ShieldCheck, text: 'Review violations, compliance, DOB/HPD/local-law risk, and next actions.' },
     { name: 'Merlin', route: '/chat', icon: Bot, text: 'Ask questions, summarize work, and coordinate Camelot OS tasks.' },
   ];

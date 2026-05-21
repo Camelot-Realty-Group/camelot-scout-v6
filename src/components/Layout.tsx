@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   Menu,
   X,
+  Megaphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/store';
@@ -75,6 +76,7 @@ const navigation: NavSection[] = [
       { label: 'Reports', href: '/reports', icon: <FileText size={18} /> },
       { label: 'Sentinel — Market', href: '/sentinel', icon: <Eye size={18} /> },
       { label: 'Arthur — Underwriting', href: '/arthur', icon: <BarChart3 size={18} /> },
+      { label: 'Merlin Content', href: '/content-engine', icon: <Megaphone size={18} /> },
     ],
   },
   {
@@ -287,3 +289,4 @@ export default function Layout({ children, onStartTour }: LayoutProps) {
     </div>
   );
 }
+
