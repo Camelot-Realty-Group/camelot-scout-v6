@@ -642,7 +642,18 @@ export default function Tutorials() {
   const [expandedTutorial, setExpandedTutorial] = useState<string | null>(null);
 
   const toggleTutorial = (id: string) => {
-    setExpandedTutorial((prev) => (prev === id ? null : id));
+    setExpandedTutorial((prev) => {
+      const next = prev === id ? null : id;
+      if (next) {
+        window.setTimeout(() => {
+          document.getElementById(`tutorial-${next}`)?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }, 80);
+      }
+      return next;
+    });
   };
 
   return (
@@ -697,7 +708,7 @@ export default function Tutorials() {
                   <p className="text-sm text-gray-500 leading-relaxed">{tutorial.description}</p>
                   <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#F8F6EF] px-3 py-1 text-[11px] font-semibold text-camelot-gold">
                     <PlayCircle size={12} />
-                    Video tutorial ready
+                    Open tutorial
                   </div>
                 </div>
               </div>
@@ -741,9 +752,9 @@ export default function Tutorials() {
                     <PlayCircle size={20} />
                   </div>
                   <div>
-                    <div className="font-semibold text-slate-950">Video walkthrough slot</div>
+                    <div className="font-semibold text-slate-950">Tutorial walkthrough</div>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      Upload a matching video into <code className="bg-white px-1.5 py-0.5 rounded">public/tutorials/{tutorial.id}.mp4</code> to turn this written guide into a playable V10 walkthrough.
+                      This opens the written training now and is wired for a future uploaded video at <code className="bg-white px-1.5 py-0.5 rounded">public/tutorials/{tutorial.id}.mp4</code>.
                     </p>
                   </div>
                 </div>
