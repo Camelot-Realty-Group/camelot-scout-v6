@@ -75,7 +75,7 @@ export default function LegalReportTerms() {
             <div>
               <p className="font-semibold text-slate-800">Questions About a Report</p>
               <p>David A. Goldoff, Founder & President</p>
-              <p>(212) 206-9939 ext. 701 | (646) 523-9068</p>
+              <p>(212) 206-9939 ext. 701</p>
               <div className="mt-2 flex flex-wrap gap-3">
                 <a className="inline-flex items-center gap-2 font-semibold text-camelot-gold hover:underline" href="mailto:info@camelot.nyc">
                   <Mail size={14} />

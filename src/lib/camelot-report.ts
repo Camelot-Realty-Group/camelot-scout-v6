@@ -1094,7 +1094,7 @@ const CAMELOT = {
   shortName: 'Camelot Realty Group',
   address: '57 West 57th Street, Suite 410, New York, NY 10019',
   phone: '(212) 206-9939',
-  mobile: '(646) 523-9068',
+  mobile: '(212) 206-9939 ext. 701',
   email: 'info@camelot.nyc',
   infoEmail: 'info@camelot.nyc',
   web: 'www.camelot.nyc',
@@ -4037,7 +4037,7 @@ Camelot's first job is to create control: file transfer, court-order review, res
 <a class="stat" href="tel:+12122069939;ext=701" style="text-decoration:none"><div class="val">Call</div><div class="lbl">212-206-9939 x701</div></a>
 <a class="stat" href="https://www.camelot.nyc" target="_blank" rel="noopener" style="text-decoration:none"><div class="val">Web</div><div class="lbl">www.camelot.nyc</div></a>
 </div>
-<p style="margin-top:44px;color:rgba(255,255,255,.65)">David A. Goldoff, Founder & President<br>646-523-9068 | info@camelot.nyc</p>
+<p style="margin-top:44px;color:rgba(255,255,255,.65)">David A. Goldoff, Founder & President<br>212-206-9939 ext. 701 | info@camelot.nyc</p>
 <div class="footer">Camelot Property Management Services Corp. | Florida receivership management report</div><div class="page">11</div>
 </section>
 </main>
@@ -6585,7 +6585,7 @@ Camelot combines senior attention, practical technology, in-house accounting, an
 
 <!-- Contact -->
 <div class="contact-name">${CAMELOT.principal}, ${CAMELOT.title}</div>
-<div class="contact-info">${CAMELOT.phone} | ${CAMELOT.mobile}<br><a href="mailto:${CAMELOT.email}">${CAMELOT.email}</a> | <a href="mailto:${CAMELOT.infoEmail}">${CAMELOT.infoEmail}</a><br><a href="https://${CAMELOT.web}">${CAMELOT.web}</a></div>
+<div class="contact-info">${CAMELOT.phone} ext. 701<br><a href="mailto:${CAMELOT.email}">${CAMELOT.email}</a> | <a href="mailto:${CAMELOT.infoEmail}">${CAMELOT.infoEmail}</a><br><a href="https://${CAMELOT.web}">${CAMELOT.web}</a></div>
 <div class="address">${CAMELOT.address}</div>
 <div style="font-size:9px;color:rgba(255,255,255,0.2);margin-top:12px">${CAMELOT.license1} | ${CAMELOT.license2}</div>
 
@@ -7024,7 +7024,7 @@ function generateProposal() {
   '<strong>Camelot Property Management Services Corp.</strong><br>' +
   'Att: Sam Lodge, Office Manager<br>' +
   '57 West 57th Street, Suite 410, New York, NY 10019<br>' +
-  'Email: <a href="mailto:management@camelot.nyc" style="color:#A89035">management@camelot.nyc</a> &nbsp;|&nbsp; Tel: (212) 206-9939</p>' +
+  'Email: <a href="mailto:info@camelot.nyc" style="color:#A89035">info@camelot.nyc</a> &nbsp;|&nbsp; Tel: (212) 206-9939</p>' +
   '</div>' +
 
   '<div class="hr"></div>' +

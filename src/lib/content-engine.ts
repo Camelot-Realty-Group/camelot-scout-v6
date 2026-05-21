@@ -112,7 +112,7 @@ export const CONTENT_RECIPIENTS = [
   { name: 'David A. Goldoff', role: 'Final approver', email: 'dgoldoff@camelot.nyc', note: 'Approval required before publishing' },
   { name: 'Beth Goldoff', role: 'Co-recipient', email: 'bethgoldoff@me.com', note: 'Prefer links over attachments; 20MB limit' },
   { name: 'Sam Lodge', role: 'Executive Office Manager and Operations', email: 'sam@camelot.nyc', note: 'Manual LinkedIn company page and Facebook posting' },
-  { name: 'Valerie Anne Fiume', role: 'Director of Co-ops and Condo Management', email: 'valerie@camelot.nyc', note: 'Management context and review' },
+  { name: 'Valerie Anne Fiume', role: 'Director of Co-ops and Condo Management', email: 'info@camelot.nyc', note: 'Management context and review' },
 ];
 
 export const CONTENT_MODULES: ContentModule[] = [

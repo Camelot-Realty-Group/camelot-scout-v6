@@ -90,7 +90,7 @@ const CAMELOT = {
   shortName: 'Camelot Property Management Services Corp.',
   address: '57 West 57th Street, Suite 410, New York, NY 10019',
   phone: '(212) 206-9939 x 701',
-  mobile: '(646) 523-9068',
+  mobile: '(212) 206-9939 ext. 701',
   email: 'info@camelot.nyc',
   web: 'www.camelot.nyc',
   principal: 'David A. Goldoff',
@@ -598,7 +598,7 @@ ${input.specialTerms ? `
 </div>
 
 <div style="margin-top:20px;background:#EDE9DF;border-radius:6px;padding:12px 16px;text-align:center;font-size:11px;color:#555">
-<strong>Digital Signature Option:</strong> This agreement can be executed electronically via DocuSign. Upon generation, a copy will be sent to <strong>management@camelot.nyc</strong> for processing. To request a DocuSign link, contact Camelot at ${CAMELOT.phone}.
+<strong>Digital Signature Option:</strong> This agreement can be executed electronically via DocuSign. Upon generation, a copy will be sent to <strong>info@camelot.nyc</strong> for processing. To request a DocuSign link, contact Camelot at ${CAMELOT.phone}.
 </div>
 </div>
 
