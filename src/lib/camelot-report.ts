@@ -3374,13 +3374,16 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const isValidEmbeddedImageSrc = (src: string) =>
     /^data:image\/(?:png|jpe?g|webp|gif|svg\+xml);base64,/i.test(src)
     && src.split(',').slice(1).join(',').replace(/\s/g, '').length > 80
-    && !/undefined|null|\[object Object\]/i.test(src);
+    && !/undefined|null|NaN|\[object Object\]/i.test(src);
   const isBrokenImageSrc = (src: string) => {
     const cleanSrc = String(src || '').trim();
     if (!cleanSrc) return true;
     if (/^data:image\//i.test(cleanSrc)) return !isValidEmbeddedImageSrc(cleanSrc);
-    return /undefined|null|\[object Object\]|New%20York%2C%20NY%2C%20New%20York%2C%20NY/i.test(cleanSrc);
+    return /undefined|null|NaN|\[object Object\]|New%20York%2C%20NY%2C%20New%20York%2C%20NY/i.test(cleanSrc);
   };
+  const summarizeImageSrc = (src: string) => /^data:image\//i.test(src)
+    ? src.replace(/^(data:image\/[a-z0-9.+-]+;base64,).*/i, '$1[embedded-image]')
+    : src;
   const isHoaRecovery = isHoaExecutiveRecoveryReport(d);
   const isFloridaReceivership = isFloridaReceivershipReport(d);
   const isKnownStaffedProperty = /one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`);
@@ -3536,12 +3539,12 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       ? 'Closing page includes Camelot values language, Zoom, Google Meet, phone, email, and current office address'
       : `Missing closing contact token(s): ${missingClosingTokens.join(', ')}`,
   });
-  const imageSources = [...html.matchAll(/<img[^>]+src=["']([^"']*)["']/gi)].map(m => m[1]);
+  const imageSources = [...html.matchAll(/<img\b[^>]*?\s+src=(["'])(.*?)\1/gi)].map(m => m[2]);
   const badImages = imageSources.filter(isBrokenImageSrc);
   checks.push({
     name: 'Picture Links',
     status: badImages.length === 0 ? 'pass' : 'fail',
-    detail: badImages.length === 0 ? `${imageSources.length} image link(s) checked` : `Broken/dirty image src: ${badImages.slice(0, 2).join(', ')}`,
+    detail: badImages.length === 0 ? `${imageSources.length} image link(s) checked` : `Broken/dirty image src: ${badImages.slice(0, 2).map(summarizeImageSrc).join(', ')}`,
   });
   if (/one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`)) {
     const oneMuseumAssets = imageSources.filter(src => src.includes('./images/one-museum-mile/'));
