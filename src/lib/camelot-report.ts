@@ -3656,6 +3656,22 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
         ? `Missing NY ownership-hunt source(s): ${nyOwnershipHuntMissing.join(', ')}`
         : `NY ownership hunts include ${nyOwnershipHuntSummary()}`,
   });
+  const ownershipFinancialSourceTokens = [
+    'ACRIS official deed, mortgage, and party records',
+    'NYC Department of Finance / PROS tax, assessment, exemption, abatement, and lien records',
+    'https://a836-acris.nyc.gov/CP/',
+    'https://a806-pros.nyc.gov/PROS/',
+  ];
+  const missingOwnershipFinancialSourceTokens = ownershipFinancialSourceTokens.filter(token => !html.includes(token));
+  checks.push({
+    name: 'Ownership & Financial Official Sources',
+    status: isHoaRecovery || isFloridaReceivership || missingOwnershipFinancialSourceTokens.length === 0 ? 'pass' : 'fail',
+    detail: isHoaRecovery || isFloridaReceivership
+      ? 'Non-NY report mode uses state/county/town tax, clerk, assessor, and official-record equivalents'
+      : missingOwnershipFinancialSourceTokens.length
+        ? `Ownership & Financial History must include ACRIS and NYC DOF/PROS source token(s): ${missingOwnershipFinancialSourceTokens.join(', ')}`
+        : 'Ownership & Financial History includes ACRIS plus NYC Department of Finance / PROS taxation records',
+  });
   const requiredCommercialSources = isHoaRecovery
     ? [
         'Connecticut Secretary of the State business/entity search path',
@@ -5304,7 +5320,22 @@ ${(() => {
 <!-- PAGE 5: OWNERSHIP & FINANCIAL -->
 <div class="section section-cream">
 <div class="section-title">Ownership &amp; Financial History</div>
-<div class="section-sub">ACRIS deed and mortgage records</div>
+<div class="section-sub">ACRIS official deed, mortgage, and party records plus NYC Department of Finance / PROS tax, assessment, exemption, abatement, and lien records</div>
+<div style="background:#fff;border:1px solid #D5D0C6;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:12px 14px;margin:12px 0 16px">
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#A89035;font-weight:800;margin-bottom:6px">Required Official Source Stack</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:#F8F5EC;border-radius:6px;padding:10px">
+<div style="font-size:11px;font-weight:800;color:#2C3240;margin-bottom:4px">ACRIS</div>
+<div style="font-size:10px;color:#555;line-height:1.5">Official NYC recorded documents: deeds, mortgages, assignments, satisfactions, liens, party names, signatories, and entity trails.</div>
+<a href="https://a836-acris.nyc.gov/CP/" target="_blank" rel="noopener" style="font-size:10px;color:#A89035;text-decoration:underline;display:inline-block;margin-top:5px">Search NYC ACRIS</a>
+</div>
+<div style="background:#F8F5EC;border-radius:6px;padding:10px">
+<div style="font-size:11px;font-weight:800;color:#2C3240;margin-bottom:4px">NYC Department of Finance / Taxation</div>
+<div style="font-size:10px;color:#555;line-height:1.5">Official DOF / PROS tax and finance records: owner/tax-lot profile, assessed value, market value, exemptions, abatements, tax bills, and lien-sale indicators.</div>
+<a href="https://a806-pros.nyc.gov/PROS/" target="_blank" rel="noopener" style="font-size:10px;color:#A89035;text-decoration:underline;display:inline-block;margin-top:5px">Search NYC DOF / PROS</a>
+</div>
+</div>
+</div>
 <div class="info-grid">
 <div><div class="label">Last Sale Date</div><div class="value">${d.lastSaleDate ? new Date(d.lastSaleDate).toLocaleDateString() : (d.propertyType.toLowerCase().includes('condo') ? 'Unit-level sales; whole-building sale not applicable' : 'Not found in ACRIS scan')}</div></div>
 <div><div class="label">Last Sale Price</div><div class="value" style="font-weight:700;color:#A89035">${d.lastSalePrice ? fmtMoney(d.lastSalePrice) : (d.propertyType.toLowerCase().includes('condo') ? 'Review recent unit comps' : 'Not found')}</div></div>
@@ -5312,7 +5343,12 @@ ${(() => {
 <div><div class="label">Seller</div><div class="value">${d.lastSaleSeller || (d.propertyType.toLowerCase().includes('condo') ? 'Unit-level ACRIS records' : 'Not found')}</div></div>
 <div><div class="label">Deeds on Record</div><div class="value">${d.deedCount}</div></div>
 <div><div class="label">Mortgages on Record</div><div class="value">${d.mortgageCount}</div></div>
+<div><div class="label">DOF Market Value</div><div class="value">${d.dofTaxMarketValue || d.marketValue ? fmtMoney(d.dofTaxMarketValue || d.marketValue) : 'To verify in DOF / PROS'}</div></div>
+<div><div class="label">DOF Assessed Value</div><div class="value">${d.dofTaxAssessedValue || d.assessedValue ? fmtMoney(d.dofTaxAssessedValue || d.assessedValue) : 'To verify in DOF / PROS'}</div></div>
+<div><div class="label">Tax / Lien Review</div><div class="value">${d.taxLienSourceStatus || (d.taxLienRecordCount ? `${d.taxLienRecordCount} DOF lien row(s)` : 'DOF tax and lien search required')}</div></div>
+<div><div class="label">Abatement / Exemption</div><div class="value">${d.abatementSourceStatus || d.abatementType || 'DOF exemption / abatement review required'}</div></div>
 </div>
+<div style="font-size:10px;color:#777;line-height:1.55;margin-top:12px">Camelot treats PropertyShark, StreetEasy, broker materials, board files, and other sources as helpful cross-checks, but New York ownership and financial history must always be reconciled against ACRIS and NYC Department of Finance / taxation records before it is relied on in a board-facing proposal.</div>
 </div>
 
 <!-- PAGE 5B: BUILDING CONTACTS & STAKEHOLDERS -->
