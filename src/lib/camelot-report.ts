@@ -355,6 +355,8 @@ function cleanBuildingName(value: string, address: string, managementCompany?: s
     cleaned = cleaned.replace(new RegExp(`\\b${escaped}\\b`, 'ig'), '').trim();
   }
   cleaned = cleaned
+    .replace(/_/g, ' ')
+    .replace(/\b20\d{2}\b\s*$/g, '')
     .replace(/\bAKAM\b/ig, '')
     .replace(/\b(?:Management|Managed\s+By|Mgmt)\b\s*:?\s*$/ig, '')
     .replace(/^[\s,:;\-–—|]+|[\s,:;\-–—|]+$/g, '')
@@ -365,6 +367,12 @@ function cleanBuildingName(value: string, address: string, managementCompany?: s
 
 // Neighborhood Market Data (Q1 2026 — from Camelot Market Report)
 // ============================================================
+
+function hasExact22East22Subject(...values: Array<string | null | undefined>): boolean {
+  const key = values.map(value => String(value || '')).join(' ').toLowerCase();
+  if (/(^|[^0-9])220\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key)) return false;
+  return /(^|[^0-9])22\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key);
+}
 
 function dedupeText(items: Array<string | null | undefined>): string[] {
   const seen = new Set<string>();
@@ -1591,7 +1599,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       ],
     };
   }
-  if (/22\s+e(ast)?\s+22/i.test(key) || /22\s+east\s+22nd/i.test(key)) {
+  if (hasExact22East22Subject(address, candidateName)) {
     return {
       canonicalAddress: '22 East 22nd Street, New York, NY 10010',
       buildingName: '22 East 22nd Street',
@@ -2590,6 +2598,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   }
 
   const preKnownFacts = getKnownPropertyFacts(address);
+  const isLocked22East22 = preKnownFacts?.canonicalAddress === '22 East 22nd Street, New York, NY 10010';
   const lookupAddress = preKnownFacts?.canonicalAddress || address;
   const [raw, geo, buildingPhotos, streetEasy] = await Promise.all([
     withReportTimeout(fetchFullBuildingReport(lookupAddress, borough), {} as Awaited<ReturnType<typeof fetchFullBuildingReport>>, 18000),
@@ -2617,7 +2626,9 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   ).catch(() => null) : null;
 
   const dof = raw.dof;
-  const knownFacts = getKnownPropertyFacts(lookupAddress, streetEasy?.name || raw.energy?.propertyName || '') || preKnownFacts;
+  const knownFacts = isLocked22East22
+    ? preKnownFacts
+    : getKnownPropertyFacts(lookupAddress, streetEasy?.name || raw.energy?.propertyName || '') || preKnownFacts;
   const reportAddress = knownFacts?.canonicalAddress || lookupAddress;
 
   // Reconcile unit count across sources. DOF/PLUTO can return a tax-lot or
@@ -3240,6 +3251,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const isFloridaReceivership = isFloridaReceivershipReport(d);
   const isKnownStaffedProperty = /one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`);
   const is201East79 = /201\s+e(ast)?\s+79/i.test(`${d.buildingName} ${d.address}`);
+  const is22East22 = hasExact22East22Subject(d.address, d.buildingName);
   const requiredSlides = isFloridaReceivership
     ? [
         'Florida Receivership Property Management Takeover',
@@ -3420,6 +3432,20 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       detail: foundBad201Tokens.length
         ? `Rejected Brooklyn/two-family mismatch token(s): ${foundBad201Tokens.join(', ')}`
         : `Using verified Manhattan co-op profile: ${d.units} units, ${d.stories} floors, BBL ${d.bbl}`,
+    });
+  }
+  if (is22East22) {
+    const bad22Tokens = ['220 East 22nd', '122 Units', '122-unit', 'Walk-Up Apartment'];
+    const foundBad22Tokens = bad22Tokens.filter(token => html.includes(token));
+    checks.push({
+      name: 'Known Property Guard: 22 East 22nd',
+      status: d.address === '22 East 22nd Street, New York, NY 10010'
+        && d.units === 19
+        && d.propertyType === 'Co-operative / Tenancy-in-Common'
+        && foundBad22Tokens.length === 0 ? 'pass' : 'fail',
+      detail: foundBad22Tokens.length
+        ? `Rejected 220 East 22nd / 122-unit mismatch token(s): ${foundBad22Tokens.join(', ')}`
+        : `Using locked small-building profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
     });
   }
   const sourceConflictWarning =
