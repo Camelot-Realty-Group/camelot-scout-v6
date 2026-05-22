@@ -304,6 +304,7 @@ export interface CommercialAmenityIntel {
 interface KnownPropertyFacts {
   canonicalAddress?: string;
   buildingName?: string;
+  borough?: string;
   bbl?: string;
   buildingClass?: string;
   buildingArea?: number;
@@ -631,6 +632,7 @@ const NEIGHBORHOOD_MARKET_DATA: Record<string, NeighborhoodMarketData> = {
   'inwood': { condoPSF: 560, coopPSF: 440, rentalPSFYr: 37, median1BR: 2100, median2BR: 2850, daysOnMarket: 22, investScore: 8.6, liveScore: 7.2, familyScore: 7.8, workScore: 6.4, momentum: 'Very Strong', opexRange: '$15–27/sqft/yr' },
   'sunnyside': { condoPSF: 660, coopPSF: 430, rentalPSFYr: 41, median1BR: 2400, median2BR: 3100, daysOnMarket: 15, investScore: 8.8, liveScore: 7.6, familyScore: 8.2, workScore: 7.2, momentum: 'Very Strong', opexRange: '$13–24/sqft/yr' },
   'woodside': { condoPSF: 660, coopPSF: 430, rentalPSFYr: 41, median1BR: 2400, median2BR: 3100, daysOnMarket: 15, investScore: 8.8, liveScore: 7.6, familyScore: 8.2, workScore: 7.2, momentum: 'Very Strong', opexRange: '$13–24/sqft/yr' },
+  'jackson heights': { condoPSF: 650, coopPSF: 430, rentalPSFYr: 41, median1BR: 2350, median2BR: 3150, daysOnMarket: 16, investScore: 8.2, liveScore: 8.4, familyScore: 8.5, workScore: 7.4, momentum: 'Stable / Strong', opexRange: '$14-26/sqft/yr' },
   'greenpoint': { condoPSF: 1020, coopPSF: 720, rentalPSFYr: 55, median1BR: 3200, median2BR: 4400, daysOnMarket: 13, investScore: 8.4, liveScore: 8.6, familyScore: 7.9, workScore: 7.4, momentum: 'Strong', opexRange: '$17–28/sqft/yr' },
   'long island city': { condoPSF: 1090, coopPSF: 680, rentalPSFYr: 57, median1BR: 3450, median2BR: 4700, daysOnMarket: 11, investScore: 8.7, liveScore: 8.0, familyScore: 7.2, workScore: 8.8, momentum: 'Very Strong', opexRange: '$15–27/sqft/yr' },
   'lic': { condoPSF: 1090, coopPSF: 680, rentalPSFYr: 57, median1BR: 3450, median2BR: 4700, daysOnMarket: 11, investScore: 8.7, liveScore: 8.0, familyScore: 7.2, workScore: 8.8, momentum: 'Very Strong', opexRange: '$15–27/sqft/yr' },
@@ -883,10 +885,14 @@ function calculateTieredPricing(units: number, borough: string, isRentStabilized
   }
 
   const u = units || 1;
+  const minimumFeeRule = getCamelotMinimumFeeRule(borough);
+  const classicMonthly = Math.max(classicBase * u, minimumFeeRule.minimum);
+  const intelligenceMonthly = Math.max(intelBase * u, minimumFeeRule.preferred);
+  const premierMonthly = Math.max(premierBase * u, minimumFeeRule.preferred + 500);
   return {
-    classic: { perUnit: classicBase, monthly: classicBase * u, annual: classicBase * u * 12 },
-    intelligence: { perUnit: intelBase, monthly: intelBase * u, annual: intelBase * u * 12 },
-    premier: { perUnit: premierBase, monthly: premierBase * u, annual: premierBase * u * 12 },
+    classic: { perUnit: Math.round(classicMonthly / u), monthly: classicMonthly, annual: classicMonthly * 12 },
+    intelligence: { perUnit: Math.round(intelligenceMonthly / u), monthly: intelligenceMonthly, annual: intelligenceMonthly * 12 },
+    premier: { perUnit: Math.round(premierMonthly / u), monthly: premierMonthly, annual: premierMonthly * 12 },
     recommended: 'intelligence',
     units: u,
   };
@@ -947,6 +953,7 @@ function detectNeighborhood(address: string, borough: string): string {
     ['bushwick', /bushwick/i],
     ['sunnyside', /sunnyside/i],
     ['woodside', /woodside/i],
+    ['jackson heights', /jackson\s*heights|37-?40\s+85th|37-?34\s+85th|85th\s+st.*11372/i],
     ['astoria', /astoria/i],
     ['long island city', /long\s*island\s*city|lic\b/i],
     ['jersey city', /jersey\s*city/i],
@@ -1537,6 +1544,86 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       professionalNotes: [
         'Public sources vary around 160, 167, and 168 units and 20-21 floors; Camelot uses 167 units and 20 floors unless offering-plan or board records confirm otherwise.',
         'If NYC lookup returns Brooklyn BBL 3062630070, Camelot rejects that record as an address-resolution mismatch for the Manhattan 201 East 79th Street report.',
+      ],
+    };
+  }
+  if (/37[-\s]?40\s+85th|37[-\s]?34\s+85th|85th\s+st.*jackson\s+heights|85th\s+street.*11372/i.test(key)) {
+    return {
+      canonicalAddress: '37-40 85th Street, Jackson Heights, NY 11372',
+      buildingName: '37-40 85th Street',
+      borough: 'Queens',
+      units: 18,
+      stories: 4,
+      yearBuilt: 1921,
+      propertyType: 'Co-operative',
+      neighborhoodName: 'Jackson Heights',
+      imageUrls: [
+        '/images/37-40-85th/front-door.jpg',
+        '/images/37-40-85th/85th-street.jpg',
+        '/images/37-40-85th/rear-building-garden.jpg',
+        '/images/37-40-85th/rear-garden.jpg',
+        '/images/37-40-85th/red-brick-garages.jpg',
+        '/images/37-40-85th/street-view-context.png',
+      ],
+      description: '37-40 85th Street is a small pre-war Jackson Heights co-operative / residential community with garden-style operating considerations, common exterior areas, and a scope that requires hands-on accounting, board support, vendor oversight, and maintenance coordination.',
+      amenities: [
+        'Pre-war brick residential setting',
+        'Shared rear garden / courtyard context',
+        'Resident entrance and front-door condition to verify',
+        'Garages / parking context to verify',
+        'Superintendent / building staff support to verify',
+        'Laundry, storage, sublet, alteration, and transfer policies to verify',
+      ],
+      commercialSignals: [
+        'No commercial tenant roster should be published until verified through offering plan, signage, PropertyShark, ACRIS, HPD MDR, or board records.',
+        'Small co-op governance, accounting controls, maintenance collection, and superintendent payroll support are the primary operating signals.',
+      ],
+      revenueOpportunities: [
+        'Laundry, storage, garage or parking policy and recoverable-fee schedule review.',
+        'Move-in/move-out, sales package, alteration, sublet, refinancing, closing, and document fee schedule review.',
+        'Vendor rebidding for insurance, repairs, supplies, extermination, landscaping, snow and seasonal work.',
+        'Preventive maintenance calendar, arrears workflow, attorney coordination, and accountant/tax package process.',
+      ],
+      landmarks: [
+        'Jackson Heights Historic District / garden apartment context: nearby',
+        'Travers Park and 78th Street Plaza: nearby',
+        'Roosevelt Avenue / 74th Street-Broadway transit hub: nearby',
+        '37th Avenue retail corridor: nearby',
+        'Queens Boulevard and Northern Boulevard access: nearby',
+      ],
+      locationTitle: 'Jackson Heights Garden Co-op Positioning',
+      locationCopy: 'The property sits in the Jackson Heights residential market, where garden-style co-op character, transit access, and local vendor responsiveness are central to resident experience and long-term value.',
+      lifestyleTitle: 'Small Co-op Governance, Accounting & Service Discipline',
+      lifestyleCopy: 'An 18-unit co-op needs clean monthly financials, maintenance collection discipline, superintendent/payroll coordination, vendor oversight, attorney/accountant cooperation, and practical repairs management without large-firm overhead.',
+      brandingTitle: '37-40 85th Street Jackson Heights Co-op Profile',
+      brandingDescription: 'Known-property guard: Jackie treats 37-40 / 37-34 85th Street as an approximately 18-unit Jackson Heights co-op / residential building and uses uploaded building photos before Google fallback.',
+      researchSources: [
+        'User-uploaded property photographs for 37-40 / 37-34 85th Street',
+        'PropertyShark report supplied by Camelot for 37-34 85th St, Jackson Heights, NY 11372',
+        'NYC DOF / ACRIS ownership, mortgage, and tax-lot records',
+        'HPD MDR / HPD Online registration, complaints, and violations',
+        'DOB BIS / DOB NOW permits, boiler, gas, facade, OATH/ECB and complaint records',
+        'Offering plan, proprietary lease, building questionnaire, board records, current budget, prior management report, and audited financials requested before formal proposal',
+      ],
+      currentManagement: 'Management to verify through HPD MDR, PropertyShark, board materials, and building records',
+      boardMembers: [
+        { name: '37-40 85th Street board / ownership authority', title: 'Co-op Board / Ownership Authority' },
+      ],
+      buildingStaff: [
+        { role: 'Managing Agent', name: 'To verify through HPD MDR / board records' },
+        { role: 'Superintendent / building staff', name: 'Payroll, workers comp, and staffing coverage to verify' },
+      ],
+      professionalSources: [
+        'HPD MDR',
+        'ACRIS',
+        'DOB BIS / DOB NOW',
+        'NYC DOF / PROS',
+        'PropertyShark report supplied by Camelot',
+        'Co-op attorney, accountant, budget, audit, and prior managing-agent records',
+      ],
+      professionalNotes: [
+        'Formal proposal should be priced after reviewing prior management report, audited financials or latest budget, staffing, arrears, attorney/accountant needs, and requested service cadence.',
+        'Primary scope includes billing and collecting maintenance, bill payment, vendor invoice review, bookkeeping, monthly and annual financial reports, lawyer/accountant cooperation, superintendent payroll/workers comp support, and arranging repairs.',
       ],
     };
   }
@@ -2612,11 +2699,12 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   const preKnownFacts = getKnownPropertyFacts(address);
   const isLocked22East22 = preKnownFacts?.canonicalAddress === '22 East 22nd Street, New York, NY 10010';
   const lookupAddress = preKnownFacts?.canonicalAddress || address;
+  const lookupBorough = preKnownFacts?.borough || borough;
   const [raw, geo, buildingPhotos, streetEasy] = await Promise.all([
-    withReportTimeout(fetchFullBuildingReport(lookupAddress, borough), {} as Awaited<ReturnType<typeof fetchFullBuildingReport>>, 18000),
-    withReportTimeout(geocodeAddress(lookupAddress + (borough ? ', ' + borough + ', New York' : ', New York, NY')), null, 6000),
+    withReportTimeout(fetchFullBuildingReport(lookupAddress, lookupBorough), {} as Awaited<ReturnType<typeof fetchFullBuildingReport>>, 18000),
+    withReportTimeout(geocodeAddress(lookupAddress + (lookupBorough ? ', ' + lookupBorough + ', New York' : ', New York, NY')), null, 6000),
     withReportTimeout(findBuildingPhotos(lookupAddress, lookupAddress).catch(() => null), null, 6000),
-    withReportTimeout(fetchStreetEasyBuilding(lookupAddress, borough).catch(() => null), null, 3000),
+    withReportTimeout(fetchStreetEasyBuilding(lookupAddress, lookupBorough).catch(() => null), null, 3000),
   ]);
 
   // Fetch neighborhood intelligence (crime, 311, landmarks)
@@ -2642,6 +2730,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     ? preKnownFacts
     : getKnownPropertyFacts(lookupAddress, streetEasy?.name || raw.energy?.propertyName || '') || preKnownFacts;
   const reportAddress = knownFacts?.canonicalAddress || lookupAddress;
+  const effectiveBorough = knownFacts?.borough || lookupBorough || '';
 
   // Reconcile unit count across sources. DOF/PLUTO can return a tax-lot or
   // partial-building count, so a tiny DOF value must not block stronger signals.
@@ -2741,10 +2830,10 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   // This gets recalculated properly in calculateTieredPricing with building class, value, and address awareness
   const effectiveBuildingClass = knownFacts?.buildingClass || dof?.buildingClass || '';
   const effectiveMarketValue = knownFacts?.marketValue || dof?.marketValue || 0;
-  const tier = calculateTieredPricing(units || 1, borough || '', raw.rentStabilization?.isStabilized || false, ll97Data?.complianceStatus || 'unknown', effectiveBuildingClass, effectiveMarketValue, reportAddress);
+  const tier = calculateTieredPricing(units || 1, effectiveBorough, raw.rentStabilization?.isStabilized || false, ll97Data?.complianceStatus || 'unknown', effectiveBuildingClass, effectiveMarketValue, reportAddress);
   const feeComparison = calculateMarketFeeComparison({
     units: units || 1,
-    borough: borough || '',
+    borough: effectiveBorough,
     propertyType: knownFacts?.propertyType || classifyBuildingType(effectiveBuildingClass),
     buildingClass: effectiveBuildingClass,
     isRentStabilized: raw.rentStabilization?.isStabilized || false,
@@ -2862,10 +2951,10 @@ export async function buildMasterReport(address: string, borough?: string): Prom
           source: 'StreetEasy public building photos',
         }
     : buildingPhotos ? { ...buildingPhotos, interior: buildingPhotos.interior || [] } : buildingPhotos;
-  const effectiveNeighborhoodName = knownFacts?.neighborhoodName || streetEasy?.neighborhood || detectNeighborhood(reportAddress, borough || '');
+  const effectiveNeighborhoodName = knownFacts?.neighborhoodName || streetEasy?.neighborhood || detectNeighborhood(reportAddress, effectiveBorough);
   const neighborhoodSearchContext = buildNeighborhoodSearchContext({
     address: reportAddress,
-    borough: borough || '',
+    borough: effectiveBorough,
     neighborhoodName: effectiveNeighborhoodName,
     zipCode: zip,
     raw,
@@ -2881,8 +2970,8 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     || raw.taxLiens?.sourceStatus
   );
   const [violationSummary, complaint311Rows] = await Promise.all([
-    searchViolations(reportAddress, borough || 'Manhattan').catch(() => null as ViolationSummary | null),
-    fetch311Complaints(reportAddress, borough || 'Manhattan', 365).catch(() => []),
+    searchViolations(reportAddress, effectiveBorough || 'Manhattan').catch(() => null as ViolationSummary | null),
+    fetch311Complaints(reportAddress, effectiveBorough || 'Manhattan', 365).catch(() => []),
   ]);
   const complaint311Count = complaint311Rows.length || neighborhoodIntel?.complaints311Total || 0;
   const acrisLienClaimCount = countAcrisLienClaimRecords(raw.acris?.records || []);
@@ -2916,7 +3005,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
 
   return {
     address: reportAddress,
-    borough: borough || '',
+    borough: effectiveBorough,
     buildingName,
     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     units,
@@ -2987,7 +3076,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     neighborhoodName: effectiveNeighborhoodName,
     zipCode: neighborhoodSearchContext.zipCode,
     neighborhoodSearchContext,
-    neighborhoodMarketData: lookupNeighborhoodData(effectiveNeighborhoodName || detectNeighborhood(reportAddress, borough || '')),
+    neighborhoodMarketData: lookupNeighborhoodData(effectiveNeighborhoodName || detectNeighborhood(reportAddress, effectiveBorough)),
     registrationDate: raw.registration?.registrationId ? null : null,
     managementDuration: null,
     managementGrade: managementAssessment.grade,
@@ -3109,7 +3198,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     pricePerUnit,
     monthlyFee,
     annualFee,
-    tieredPricing: calculateTieredPricing(units || 1, borough || '', raw.rentStabilization?.isStabilized || false, ll97Data?.complianceStatus || 'unknown', effectiveBuildingClass, effectiveMarketValue, reportAddress),
+    tieredPricing: calculateTieredPricing(units || 1, effectiveBorough, raw.rentStabilization?.isStabilized || false, ll97Data?.complianceStatus || 'unknown', effectiveBuildingClass, effectiveMarketValue, reportAddress),
     feeComparison,
     streetEasy,
     commercialIntel,
@@ -3251,11 +3340,12 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const base = runReportQA(d);
   const checks: QACheckResult['checks'] = [...base.checks];
   const stripEmbeddedImagePayloads = (markup: string) =>
-    markup.replace(/data:image\/[a-z0-9.+-]+;base64,[^"'\s)<>]+/gi, 'data:image/embedded;base64,[embedded-image]');
+    markup.replace(/data:image\/[a-z0-9.+-]+;base64,[^"']*/gi, 'data:image/embedded;base64,[embedded-image]');
   const htmlWithoutEmbeddedImagePayloads = stripEmbeddedImagePayloads(html);
   const isValidEmbeddedImageSrc = (src: string) =>
-    /^data:image\/(?:png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+/=\s]+$/i.test(src)
-    && src.replace(/\s/g, '').length > 80;
+    /^data:image\/(?:png|jpe?g|webp|gif|svg\+xml);base64,/i.test(src)
+    && src.split(',').slice(1).join(',').replace(/\s/g, '').length > 80
+    && !/undefined|null|\[object Object\]/i.test(src);
   const isBrokenImageSrc = (src: string) => {
     const cleanSrc = String(src || '').trim();
     if (!cleanSrc) return true;
@@ -5687,7 +5777,7 @@ ${isSelfManaged ? `
 <h2 class="deck-title" style="color:#0D2E63">Experience Meets Innovation</h2>
 <p style="font-size:16px;color:#777;margin:-18px 0 48px 25px">Decades of hands-on management knowledge, powered by modern technology</p>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px">
-<div class="deck-card" style="border-top:0;min-height:300px"><h4>The Grey Hair</h4><p>Since 2006, Camelot has managed 130+ properties across New York. Our seasoned property managers and in-house CPAs bring real-world knowledge: board politics, insurance claims, vendor negotiations, compliance pressure, and building emergencies. We are independently owned, and David Goldoff personally oversees every property in our portfolio. When you call, you get a decision-maker, not a call center.</p></div>
+<div class="deck-card" style="border-top:0;min-height:300px"><h4>The Grey Hair</h4><p>Since 2006, Camelot has built a 42-building management platform across New York and nearby markets. Our seasoned property managers, accounting team, and executive leadership bring real-world knowledge: board politics, insurance claims, vendor negotiations, compliance pressure, and building emergencies. We are independently owned, and David Goldoff personally oversees the direction of the portfolio. When you call, you get a decision-maker, not a call center.</p></div>
 <div class="deck-card" style="border-top:0;min-height:300px"><h4>The Technology</h4><p>We harness AI, automation, and data to deliver faster, smarter service. Merlin AI handles meeting minutes, maintenance triage, and compliance alerts. ConciergePlus gives residents a white-labeled portal and mobile app for payments, work orders, amenity bookings, and support. Camelot Central gives boards real-time dashboards, utility tracking, compliance status, and financial transparency.</p></div>
 </div>
 </div>

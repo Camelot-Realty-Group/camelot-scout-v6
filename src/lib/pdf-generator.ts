@@ -61,7 +61,20 @@ async function embedPortableImages(html: string): Promise<string> {
 export function openBrochureForPrint(html: string, filename: string): void {
   const win = window.open('', '_blank');
   if (!win) {
-    console.warn('Popup blocked while opening Camelot report preview.');
+    const fallbackHtml = ensureHtmlBase(html);
+    const blob = new Blob([fallbackHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.download = filename.endsWith('.html')
+      ? filename
+      : `${filename.replace(/\.(html|pdf)$/i, '')}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
     return;
   }
   win.document.write(ensureHtmlBase(html));

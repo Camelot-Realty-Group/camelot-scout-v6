@@ -113,7 +113,7 @@ function clientRecipientLabel(d: MasterReportData): string {
 function coverLetterParagraphs(d: MasterReportData): string {
   const building = d.buildingName || d.address;
   const recipient = clientRecipientLabel(d);
-  return `<div style="font-family:'Cormorant Garamond',Georgia,serif;color:#1a2744;font-size:18px;line-height:1.58"><p style="margin-bottom:15px"><strong style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px">Dear ${recipient},</strong> thank you for allowing Camelot the opportunity to discuss <strong>${escapeHtml(building)}</strong> and how we may be able to support your property, residents, staff, and ownership goals. Camelot Property Management is a New York-based, hands-on management company that combines experienced property managers, in-house accounting, compliance discipline, and practical proptech to deliver clearer communication, cleaner reporting, faster response, and better day-to-day control.</p><p style="margin-bottom:22px">We serve our clients by becoming a value-added member of the building team: organizing operations, improving vendor oversight, supporting boards and landlords with timely financials, using automation and resident-facing tools where they make sense, and protecting the property with local knowledge and senior attention. We look forward to speaking with you soon and learning where Camelot can be most useful.</p><div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:#1a2744;line-height:1.7"><strong>Sincerely yours,</strong><br><br>David A. Goldoff<br>President, Camelot Property Management</div></div>`;
+  return `<div style="font-family:'Cormorant Garamond',Georgia,serif;color:#1a2744;font-size:17px;line-height:1.52"><p style="margin-bottom:13px"><strong style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px">Dear ${recipient},</strong> thank you for allowing Camelot the opportunity to discuss <strong>${escapeHtml(building)}</strong> and how we may be able to support your property, residents, staff, and ownership goals. Camelot Property Management is a New York-based, hands-on management company that combines experienced property managers, in-house accounting, compliance discipline, and practical proptech to deliver clearer communication, cleaner reporting, faster response, and better day-to-day control.</p><p style="margin-bottom:13px">Projected fees associated with our services would be quantified once we review, with your permission, the prior property manager report, last audited financials, or latest operating budget. Those materials help us identify strengths, weaknesses, service needs, and cost pressures so we can propose a meaningful budget and economical solution before any formal proposal or agreement.</p><p style="margin-bottom:18px">We serve our clients by becoming a value-added member of the building team: organizing operations, improving vendor oversight, supporting boards and landlords with timely financials, using automation and resident-facing tools where they make sense, and protecting the property with local knowledge and senior attention. We look forward to speaking with you soon and learning where Camelot can be most useful.</p><div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:#1a2744;line-height:1.7"><strong>Sincerely yours,</strong><br><br>David A. Goldoff<br>President, Camelot Property Management</div></div>`;
 }
 
 function fmt$(n: number): string {
@@ -126,6 +126,35 @@ function fmt$(n: number): string {
 function fmtN(n: number | null | undefined): string {
   if (!n) return 'N/A';
   return n.toLocaleString();
+}
+
+function roundToNearest50(n: number): number {
+  return Math.round(n / 50) * 50;
+}
+
+function managementStatusLabel(d: MasterReportData): string {
+  const mgmt = String(d.managementCompany || '').trim();
+  if (mgmt && !/to verify|management to verify|unknown|n\/a/i.test(mgmt)) return mgmt;
+  return 'Management to verify through HPD MDR, PropertyShark, board materials, and building records';
+}
+
+function isOuterBorough(d: MasterReportData): boolean {
+  return /queens|brooklyn|bronx|staten/i.test(`${d.borough || ''} ${d.neighborhoodName || ''} ${d.address || ''}`);
+}
+
+function estimateScopedMonthlyFee(d: MasterReportData): number {
+  const units = Math.max(d.units || 1, 1);
+  const minimum = isOuterBorough(d) ? 1500 : 2000;
+  const assumedMonthlyCharges = isOuterBorough(d) ? 900 : 1250;
+  const budgetBasedMonthly = (units * assumedMonthlyCharges * 12 * 0.06) / 12;
+  const marketBasedMonthly = d.tieredPricing?.intelligence?.monthly || d.monthlyFee || 0;
+  const scopeAdd = /co-?op|cooperative|condo|condominium/i.test(`${d.propertyType || ''}`) ? 350 : 0;
+  return roundToNearest50(Math.max(minimum, budgetBasedMonthly, marketBasedMonthly) + scopeAdd);
+}
+
+function scopedFeeLabel(d: MasterReportData): string {
+  const monthly = estimateScopedMonthlyFee(d);
+  return `${fmt$(monthly)}/mo (${fmt$(monthly * 12)}/yr)`;
 }
 
 function inferBuildingDescription(d: MasterReportData): string {
@@ -577,7 +606,7 @@ export function generatePitchReport(d: MasterReportData): string {
   const bldgDesc = inferBuildingDescription(d);
   const hasViolations = d.violationsTotal > 0;
   const hasLL97 = d.ll97 && d.ll97.period1Penalty > 0;
-  const mgmt = d.managementCompany || 'Self-Managed';
+  const mgmt = managementStatusLabel(d);
   
   // Street view URLs
   // Use address-based Street View (no geocode dependency)
@@ -751,7 +780,7 @@ export function generatePitchReport(d: MasterReportData): string {
         <div style="font-size:15px;color:#4a5568;line-height:2.2">
           ${d.yearBuilt ? `Built c. ${d.yearBuilt}  |  ` : ''}${d.propertyType || 'Residential'}${d.stories ? `  |  ${d.stories} Stories` : ''}<br>
           ${d.units ? `${d.units} Units  |  ${hood}` : hood}<br>
-          ${d.managementCompany ? `Current Management: ${d.managementCompany}` : 'Currently Self-Managed'}<br>
+          Current Management: ${mgmt}<br>
           ${d.marketValue ? `Market Value: ${fmt$(d.marketValue)}` : ''}${d.assessedValue ? `  |  Assessed: ${fmt$(d.assessedValue)}` : ''}<br>
           ${d.dofOwner ? `Owner (DOF): ${d.dofOwner}` : ''}
         </div>
@@ -821,13 +850,13 @@ export function generatePitchReport(d: MasterReportData): string {
     <div style="font-size:17px;font-weight:700;color:#1a2744;margin-bottom:8px">Our mission is simple: to protect, enhance, and elevate the value of every property we manage through transparency, precision, and proactive hands-on care.</div>
     <div class="body-text" style="margin-bottom:24px">Since 2006, Camelot Realty Group has built a reputation as one of New York's premier boutique property management firms — blending hands-on service, financial expertise, and innovative technology to deliver exceptional results.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:20px;margin-bottom:20px">
-      <div class="stat-box"><div class="stat-val">130+</div><div class="stat-label">Properties Managed</div></div>
-      <div class="stat-box"><div class="stat-val">$500M+</div><div class="stat-label">Transactions Closed</div></div>
+      <div class="stat-box"><div class="stat-val">42</div><div class="stat-label">Buildings Managed</div></div>
+      <div class="stat-box"><div class="stat-val">$240M</div><div class="stat-label">Assets Under Management</div></div>
       <div class="stat-box"><div class="stat-val">18+</div><div class="stat-label">Years in Business</div></div>
-      <div class="stat-box"><div class="stat-val">$1.5B+</div><div class="stat-label">Assets Under Management</div></div>
+      <div class="stat-box"><div class="stat-val">NYC</div><div class="stat-label">Local Team</div></div>
     </div>
     <div style="font-size:14px;color:#B8973A;margin-bottom:4px">⭐ RED Awards 2025: Property Management Company of the Year  |  REBNY 2025: David Goldoff Leadership Award</div>
-    <div style="font-size:13px;color:#6b7280">Member: REBNY | SPONY | NYARM | IREM | BOMA | NARPM | NY Apartment Association</div>
+    <div style="font-size:13px;color:#6b7280">New Yorkers servicing New Yorkers, with coverage and relationships across Manhattan, Queens, Brooklyn, the Bronx, Westchester, New Jersey, and South Florida, including Midtown Manhattan, Long Island City, and Florham Park.</div>
   </div>
 </div>
 
@@ -838,10 +867,10 @@ export function generatePitchReport(d: MasterReportData): string {
     <div class="section-title">Core Services</div>
     <div class="body-text" style="margin-bottom:20px">Comprehensive management with ${d.propertyType ? d.propertyType.toLowerCase() : 'residential'} expertise and hands-on capital project oversight.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="gold-card"><div class="sub-heading" style="font-size:17px">Property & Asset Management</div><div style="font-size:14px;color:#4a5568">Twice-monthly site visits, vendor coordination, proactive inspections, cost reduction. Buildings treated like owner-managed assets.</div></div>
-      <div class="gold-card"><div class="sub-heading" style="font-size:17px">In-House CPA & Financials</div><div style="font-size:14px;color:#4a5568">Dedicated CPAs — never outsourced. Monthly board-ready reports, 5-year capital planning, mortgage financing guidance.</div></div>
-      <div class="gold-card"><div class="sub-heading" style="font-size:17px">Compliance & Risk Management</div><div style="font-size:14px;color:#4a5568">HPD, RPIE, boiler registration, fire safety, LL97 compliance. Free engineering advisory on building envelope and local law issues.</div></div>
-      <div class="gold-card"><div class="sub-heading" style="font-size:17px">Technology Platform</div><div style="font-size:14px;color:#4a5568">Camelot OS + ConciergePlus + Merlin AI — real-time compliance monitoring, resident portal, AI meeting minutes, zero bank fees.</div></div>
+      <div class="gold-card"><div class="sub-heading" style="font-size:17px">Property & Asset Management</div><div style="font-size:14px;color:#4a5568">Site visits, vendor coordination, maintenance and repair arranging, superintendent support, board communication, and practical owner-style oversight.</div></div>
+      <div class="gold-card"><div class="sub-heading" style="font-size:17px">In-House CPA & Financials</div><div style="font-size:14px;color:#4a5568">Billing and collection of maintenance, vendor invoice review and payment, monthly and annual financial reports, budget support, and accountant/audit coordination.</div></div>
+      <div class="gold-card"><div class="sub-heading" style="font-size:17px">Compliance & Risk Management</div><div style="font-size:14px;color:#4a5568">HPD, DOB, OATH/ECB, boiler, gas, fire safety, insurance, lead paint, LL97 screening, and attorney coordination with clear calendars and accountability.</div></div>
+      <div class="gold-card"><div class="sub-heading" style="font-size:17px">Value-Added Team</div><div style="font-size:14px;color:#4a5568">Affiliated engineering guidance, bonded contractor relationships, insurance brokerage coordination, shared-revenue ideas, and technology through Camelot OS, MDS, and ConciergePlus.</div></div>
     </div>
   </div>
 </div>
@@ -857,13 +886,13 @@ export function generatePitchReport(d: MasterReportData): string {
       <div class="stat-box"><div style="font-weight:700;color:#1a2744;font-size:15px;margin-bottom:4px">SEPTEMBER</div><div style="font-size:13px;color:#B8973A;font-weight:600">HPD Registration</div><div style="font-size:12px;color:#6b7280;margin-top:4px">Multi-family compliance and status.</div></div>
       <div class="stat-box"><div style="font-weight:700;color:#1a2744;font-size:15px;margin-bottom:4px">DECEMBER</div><div style="font-size:13px;color:#B8973A;font-weight:600">Budgeting</div><div style="font-size:12px;color:#6b7280;margin-top:4px">Capital calls and operating plans.</div></div>
     </div>
-    ${hasLL97 || d.permitsCount > 0 ? `
+    ${true ? `
     <div class="sub-heading">Building-Specific Compliance Needs — ${d.buildingName || d.address}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       ${hasLL97 ? `<div class="gold-card"><strong>LL97 Energy Compliance</strong><br><span style="font-size:14px;color:#4a5568">Estimated penalty: ${fmt$(d.ll97!.period1Penalty)}/year. Camelot develops and executes a compliance roadmap.</span></div>` : ''}
       ${d.violationsOpen > 0 ? `<div class="gold-card"><strong>Violation Resolution</strong><br><span style="font-size:14px;color:#4a5568">${d.violationsOpen} open violations to resolve. Systematic remediation with certified contractors.</span></div>` : ''}
       ${d.permitsCount > 0 ? `<div class="gold-card"><strong>Capital Project Oversight</strong><br><span style="font-size:14px;color:#4a5568">${d.permitsCount} active DOB permits. Full project management, vendor bidding, timeline control.</span></div>` : ''}
-      <div class="gold-card"><strong>FISP / Facade Compliance</strong><br><span style="font-size:14px;color:#4a5568">Cycle tracking, engineer coordination, sidewalk shed management.</span></div>
+      <div class="gold-card"><strong>Building-Specific Local Law Review</strong><br><span style="font-size:14px;color:#4a5568">HPD MDR, DOB BIS/NOW, OATH/ECB, LL152 gas piping, boiler/elevator applicability, fire safety, lead-paint rules for pre-war buildings, insurance inspections, and FISP/LL97 applicability are verified against the building size and use.</span></div>
     </div>` : ''}
   </div>
 </div>
@@ -926,7 +955,7 @@ export function generatePitchReport(d: MasterReportData): string {
     <div class="body-text" style="margin-bottom:20px">Flat-rate, all-inclusive — no percentage fees, no hidden surcharges, no surprises.</div>
     <table class="fee-table">
       <tr><th>Management Service Component</th><th>Camelot Inclusion</th></tr>
-      <tr><td><strong>Annual Management Fee</strong></td><td class="gold">${d.units && d.tieredPricing ? fmt$(d.tieredPricing.classic.monthly) + '/mo' : '$TBD — Custom flat rate after scope review'}</td></tr>
+      <tr><td><strong>Estimated Management Fee</strong><br><span style="font-size:12px;color:#6b7280">Subject to review of prior management report, latest budget, audited financials, staffing, arrears, and requested scope.</span></td><td class="gold">${scopedFeeLabel(d)}</td></tr>
       <tr><td><strong>Online Maintenance Payments</strong></td><td class="gold">ZERO Bank Fees (paper still supported)</td></tr>
       <tr><td><strong>Technology Platform</strong></td><td>Included — Camelot OS + ConciergePlus + Merlin AI</td></tr>
       <tr><td><strong>Initial Building Inspection</strong></td><td class="gold">FREE ($2,500 value)</td></tr>
