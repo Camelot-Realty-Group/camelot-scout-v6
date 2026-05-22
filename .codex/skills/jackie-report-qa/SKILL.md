@@ -19,7 +19,7 @@ metadata:
 
 ## NY Ownership Hunt Skill (Additive)
 
-When a New York building-data bot, report, acquisition screen, outreach sequence, or ownership/contact search needs people, comps, entities, principals, debt clues, lenders, brokers, signatories, guarantors, or decision-makers, add this source stack to the normal official-source workflow. This list supplements other sources; it never replaces ACRIS, DOF, HPD, DOB, OATH/ECB, court, tax, board, offering-plan, or property-specific records.
+When a New York building-data bot, report, acquisition screen, outreach sequence, or ownership/contact search needs people, comps, entities, principals, debt clues, lenders, brokers, signatories, guarantors, or decision-makers, add this source stack to the normal official-source workflow. This list supplements other sources; it never replaces ACRIS, DOF, HPD, DOB, OATH/ECB, court, tax, board, offering-plan, or property-specific records. Keep this skill source-driven: do not hard-code example property addresses, sample buildings, tenant names, or one-off search-result examples into the skill.
 
 | Source | Website | Importance | Best Use Case | Weakness |
 | --- | --- | --- | --- | --- |

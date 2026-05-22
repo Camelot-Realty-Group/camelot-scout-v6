@@ -302,8 +302,20 @@ const forbiddenTokens = [
   ['old Valerie email in report contact blocks', 'valerie@camelot.nyc'],
 ];
 
+const forbiddenNyOwnershipSkillExamples = [
+  ['property-specific ownership-hunt address example', new RegExp(['260\\s+Eli', 'zabeth|Eli', 'zabeth\\s+Street'].join(''), 'i')],
+  ['property-specific ownership-hunt neighborhood example', new RegExp(['\\bNo', 'lita\\b'].join(''), 'i')],
+  ['property-specific ownership-hunt tenant example', new RegExp(['260\\s+Sample\\s+', 'Sale|T-Shirt\\s+Girls'].join(''), 'i')],
+];
+
 for (const [label, token] of forbiddenTokens) {
   if (source.includes(token)) failures.push(`${label}: forbidden token still present`);
+}
+
+for (const [label, pattern] of forbiddenNyOwnershipSkillExamples) {
+  if (pattern.test(nyResearchSourcesSource) || pattern.test(jackieReportQaSkillSource)) {
+    failures.push(`${label}: NY ownership hunt skill must stay source-driven and cannot include property-specific example addresses`);
+  }
 }
 
 if (failures.length) {
