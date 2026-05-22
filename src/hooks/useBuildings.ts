@@ -441,7 +441,7 @@ export function useBuildings() {
     } finally {
       store.setLoading(false);
     }
-  }, []);
+  }, [store]);
 
   const saveBuildingToSupabase = useCallback(async (building: Partial<Building>) => {
     if (!isSupabaseConfigured()) {
@@ -477,7 +477,7 @@ export function useBuildings() {
       console.error('Failed to save building:', err);
       throw err;
     }
-  }, []);
+  }, [store]);
 
   const moveToPipeline = useCallback(async (id: string, stage: PipelineStage) => {
     store.updateBuilding(id, {
@@ -491,7 +491,7 @@ export function useBuildings() {
         .update({ pipeline_stage: stage, pipeline_moved_at: new Date().toISOString() })
         .eq('id', id);
     }
-  }, []);
+  }, [store]);
 
   const archiveBuilding = useCallback(async (id: string, reason?: string) => {
     store.updateBuilding(id, {
@@ -510,7 +510,7 @@ export function useBuildings() {
         })
         .eq('id', id);
     }
-  }, []);
+  }, [store]);
 
   const restoreBuilding = useCallback(async (id: string) => {
     store.updateBuilding(id, {
@@ -525,7 +525,7 @@ export function useBuildings() {
         .update({ status: 'active', archive_reason: null, archived_at: null })
         .eq('id', id);
     }
-  }, []);
+  }, [store]);
 
   // Get filtered and sorted buildings
   const getFilteredBuildings = useCallback(() => {
@@ -586,7 +586,7 @@ export function useBuildings() {
     });
 
     return result;
-  }, [store.buildings, store.filters]);
+  }, [store]);
 
   return {
     buildings: store.buildings,

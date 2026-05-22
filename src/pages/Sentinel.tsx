@@ -33,12 +33,12 @@ export default function Sentinel() {
   };
 
   const handlePreview = () => {
-    const html = generateFullSentinelReport();
+    const html = generateFullSentinelReport(input);
     openBrochureForPrint(html, `Camelot-Market-Report-${input.quarter}-${input.year}`);
   };
 
   const handleDownload = () => {
-    const html = generateFullSentinelReport();
+    const html = generateFullSentinelReport(input);
     downloadAsHTML(html, `Camelot-Market-Report-${input.quarter}-${input.year}.html`);
     toast.success('Report downloaded');
   };
@@ -80,7 +80,7 @@ export default function Sentinel() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sentinel</h1>
-          <p className="text-gray-500 text-sm">Quarterly Market Intelligence — Generate branded NYC market reports for clients and social media</p>
+          <p className="text-gray-500 text-sm">Quarterly Market Intelligence — Generate branded Q1-Q4 market reports with images, maps, charts, source stacks, and board-ready pricing context</p>
         </div>
       </div>
 
@@ -88,7 +88,7 @@ export default function Sentinel() {
       <div className="grid grid-cols-4 gap-4">
         {[
           { icon: Building2, label: 'Tracked Buildings', value: '6' },
-          { icon: MapPin, label: 'Markets', value: 'NYC+' },
+          { icon: MapPin, label: 'Markets', value: 'NY / CT / NJ / FL' },
           { icon: TrendingUp, label: 'Unit Mix Rules', value: String(SENTINEL_UNIT_MIX_BENCHMARKS.length) },
           { icon: DollarSign, label: 'Fee Benchmarks', value: String(SENTINEL_MANAGEMENT_FEE_BENCHMARKS.length) },
         ].map(({ icon: Icon, label, value }) => (
@@ -265,6 +265,36 @@ export default function Sentinel() {
               type="number" value={input.year} onChange={e => update({ year: parseInt(e.target.value) || 2026 })}
               className="w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50"
             />
+          </div>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+            {[
+              { q: 'Q1', title: 'Baseline', desc: 'Budget, tax, insurance, winter compliance, early velocity.' },
+              { q: 'Q2', title: 'Spring Market', desc: 'Listing season, leasing acceleration, project starts.' },
+              { q: 'Q3', title: 'Summer Pulse', desc: 'Rental heat, stale listings, vendor drift, pre-budget checks.' },
+              { q: 'Q4', title: 'Year-End Close', desc: 'Budget adoption, lien cleanup, winter readiness, next-year plan.' },
+            ].map(item => (
+              <div key={item.q} className={cn('rounded-lg border p-3', input.quarter === item.q ? 'border-teal-600 bg-teal-50' : 'border-gray-200 bg-gray-50')}>
+                <div className="font-bold text-gray-900">{item.q} · {item.title}</div>
+                <div className="text-gray-500 mt-1">{item.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Visual + Data Requirements */}
+        <div className="p-6">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Quarterly Report Visual Standard</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {[
+              { title: 'Images', body: 'Subject-property photo, nearby landmark or major avenue, portfolio proof, and real city context.' },
+              { title: 'Graphs & Charts', body: 'Condo/co-op $/SF, rental rates, DOM, inventory, rate sensitivity, and unit-mix velocity.' },
+              { title: 'Source Stack', body: 'RealtyMX, StreetEasy, Zillow, ACRIS/county clerk, DOF/tax, PLUTO/zoning, DOB/HPD/OATH or local equivalents.' },
+            ].map(item => (
+              <div key={item.title} className="rounded-xl border bg-slate-50 p-4">
+                <div className="font-bold text-gray-900">{item.title}</div>
+                <p className="text-xs text-gray-500 mt-1">{item.body}</p>
+              </div>
+            ))}
           </div>
         </div>
 

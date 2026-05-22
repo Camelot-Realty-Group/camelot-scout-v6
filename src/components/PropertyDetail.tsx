@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type {
   Building, Contact, Activity, ContactRole, ContactCategory,
   CONTACT_ROLE_LABELS, CONTACT_ROLE_CATEGORY, CONTACT_CATEGORY_COLORS, BuildingOperations,
@@ -248,14 +248,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const [nycData, setNycData] = useState<any>(null);
   const [notes, setNotes] = useState(building.notes || '');
 
-  // Fetch NYC data on mount
-  useEffect(() => {
-    if (building.address && !nycData) {
-      fetchNYCData();
-    }
-  }, [building.address]);
-
-  const fetchNYCData = async () => {
+  const fetchNYCData = useCallback(async () => {
     setIsFetchingNYC(true);
     try {
       const data = await fetchFullBuildingReport(building.address, building.borough);
@@ -267,7 +260,14 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     } finally {
       setIsFetchingNYC(false);
     }
-  };
+  }, [building.address, building.borough]);
+
+  // Fetch NYC data on mount
+  useEffect(() => {
+    if (building.address && !nycData) {
+      fetchNYCData();
+    }
+  }, [building.address, fetchNYCData, nycData]);
 
   const [reportLoading, setReportLoading] = useState(false);
 
@@ -1480,7 +1480,7 @@ function NYDOSSection({ managementCompany }: { managementCompany?: string }) {
   const [isSearching, setIsSearching] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (!managementCompany) return;
     setIsSearching(true);
     try {
@@ -1492,14 +1492,14 @@ function NYDOSSection({ managementCompany }: { managementCompany?: string }) {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [managementCompany]);
 
   // Auto-search on mount if management company is known
   useEffect(() => {
     if (managementCompany && managementCompany !== 'Unknown' && !searched) {
       handleSearch();
     }
-  }, [managementCompany]);
+  }, [handleSearch, managementCompany, searched]);
 
   if (!managementCompany || managementCompany === 'Unknown') return null;
 

@@ -94,12 +94,6 @@ export default function Proposals() {
   const [savedProposals, setSavedProposals] = useState<SavedProposal[]>([]);
   const [loadingProposals, setLoadingProposals] = useState(false);
 
-  // Load buildings on mount
-  useEffect(() => {
-    loadBuildings();
-    loadSavedProposals();
-  }, []);
-
   // Filtered buildings for picker
   const filteredBuildings = useMemo(() => {
     if (!searchQuery.trim()) return buildings.filter((b) => b.status === 'active');
@@ -169,6 +163,12 @@ export default function Proposals() {
     }
   }, []);
 
+  // Load buildings on mount
+  useEffect(() => {
+    loadBuildings();
+    loadSavedProposals();
+  }, [loadBuildings, loadSavedProposals]);
+
   // Generate proposal
   const handleGenerate = useCallback(async () => {
     if (!selectedBuilding) return;
@@ -211,7 +211,7 @@ export default function Proposals() {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedBuilding, contactName, contactEmail, rentStabilized, ll97Services, sections, customPricing]);
+  }, [selectedBuilding, contactName, contactEmail, rentStabilized, ll97Services, sections, customPricing, loadSavedProposals]);
 
   // Preview PDF inline
   const handlePreview = useCallback(async () => {

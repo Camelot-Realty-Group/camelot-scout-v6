@@ -1591,6 +1591,71 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       ],
     };
   }
+  if (/22\s+e(ast)?\s+22/i.test(key) || /22\s+east\s+22nd/i.test(key)) {
+    return {
+      canonicalAddress: '22 East 22nd Street, New York, NY 10010',
+      buildingName: '22 East 22nd Street',
+      units: 19,
+      stories: 6,
+      yearBuilt: 1900,
+      propertyType: 'Co-operative / Tenancy-in-Common',
+      neighborhoodName: 'Flatiron / Madison Square',
+      description: '22 East 22nd Street is a small pre-war residential building in the Flatiron / Madison Square market. Camelot treats the property as a 19-unit co-op or tenancy-in-common candidate unless board, offering-plan, land-record, or ownership records confirm a different legal structure.',
+      amenities: [
+        'Pre-war walk-up operating profile',
+        'Board / ownership records to verify',
+        'Superintendent / porter coverage to verify',
+        'Laundry, storage, roof, basement, and common-area use to verify',
+      ],
+      commercialSignals: [
+        'No commercial tenant roster should be published until verified through signage, offering-plan records, ACRIS, PropertyShark, or board materials.',
+        'Small-building co-op / TIC structure requires ownership and governance confirmation before board-facing release.',
+      ],
+      revenueOpportunities: [
+        'Laundry, storage, alteration, sublet, move-in/move-out, application, and resale package fee schedule review.',
+        'Vendor rebidding and preventive maintenance schedule review for a small pre-war building.',
+        'Insurance, facade, roof, Local Law, boiler, and life-safety compliance review.',
+      ],
+      landmarks: [
+        'Madison Square Park: nearby',
+        'Flatiron Building / Ladies Mile Historic District context: nearby',
+        '23rd Street subway corridor: nearby',
+        'Broadway / Fifth Avenue retail and office corridor: immediate area',
+        'Union Square / NoMad / Gramercy residential market: nearby',
+      ],
+      locationTitle: 'Flatiron / Madison Square Positioning',
+      locationCopy: 'The property sits in a high-demand Manhattan residential and mixed-use corridor near Madison Square Park, Fifth Avenue, Broadway, and the 23rd Street transit spine.',
+      lifestyleTitle: 'Small-Building Governance & Cost Control',
+      lifestyleCopy: 'A 19-unit co-op or TIC-style ownership profile needs precise governance records, disciplined cost control, and practical compliance planning rather than large-building assumptions.',
+      brandingTitle: '22 East 22nd Street Small-Building Profile',
+      brandingDescription: 'Known-property guard: Jackie must not treat 22 East 22nd Street as a 122-unit walk-up apartment building. Use 19 units and co-op / tenancy-in-common review language until source documents confirm otherwise.',
+      researchSources: [
+        'User-provided property identity correction: 19-unit co-op or tenancy-in-common candidate',
+        'NYC DOF / ACRIS ownership and tax-lot records must be cross-checked for legal ownership structure',
+        'HPD MDR / DOB / HPD Online / OATH-ECB / DOF / ACRIS / PropertyShark source stack should be reviewed before board-facing release',
+        'Offering plan, proprietary lease, TIC agreement, board records, or bank questionnaire should be requested for final unit count and governance confirmation',
+      ],
+      currentManagement: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
+      boardMembers: [
+        { name: '22 East 22nd Street ownership / board authority', title: 'Co-op / TIC governance to verify' },
+      ],
+      buildingStaff: [
+        { role: 'Managing Agent', name: 'To verify through HPD MDR / board records' },
+        { role: 'Superintendent / Porter', name: 'Building staff coverage to verify' },
+      ],
+      professionalSources: [
+        'ACRIS deed, mortgage, UCC, lien, and ownership-document review',
+        'NYC DOB BIS/NOW permits, complaints, facade, boiler, elevator, and OATH/ECB records',
+        'HPD Online registration, complaints, violations, and MDR contact records',
+        'DOF property tax, abatements, liens, and assessment records',
+        'Offering plan / bank questionnaire / board records for final governance structure',
+      ],
+      professionalNotes: [
+        'Public systems can confuse tax-lot, energy, HPD, and ownership signals for small Manhattan buildings. Jackie must use the known 19-unit profile unless primary source records prove otherwise.',
+        'Do not publish the property as 122 units or as a conventional large walk-up apartment building.',
+      ],
+    };
+  }
   if (/corinthian/i.test(key) || /330\s+e(ast)?\s+38/i.test(key) || /38th?.*(1st|first)\s+ave/i.test(key)) {
     return {
       canonicalAddress: '330 East 38th Street, New York, NY 10016',
@@ -3159,6 +3224,18 @@ export function runReportQA(d: MasterReportData): QACheckResult {
 export function validateJackieReport(d: MasterReportData, html: string): QACheckResult {
   const base = runReportQA(d);
   const checks: QACheckResult['checks'] = [...base.checks];
+  const stripEmbeddedImagePayloads = (markup: string) =>
+    markup.replace(/data:image\/[a-z0-9.+-]+;base64,[^"'\s)<>]+/gi, 'data:image/embedded;base64,[embedded-image]');
+  const htmlWithoutEmbeddedImagePayloads = stripEmbeddedImagePayloads(html);
+  const isValidEmbeddedImageSrc = (src: string) =>
+    /^data:image\/(?:png|jpe?g|webp|gif|svg\+xml);base64,[a-z0-9+/=\s]+$/i.test(src)
+    && src.replace(/\s/g, '').length > 80;
+  const isBrokenImageSrc = (src: string) => {
+    const cleanSrc = String(src || '').trim();
+    if (!cleanSrc) return true;
+    if (/^data:image\//i.test(cleanSrc)) return !isValidEmbeddedImageSrc(cleanSrc);
+    return /undefined|null|\[object Object\]|New%20York%2C%20NY%2C%20New%20York%2C%20NY/i.test(cleanSrc);
+  };
   const isHoaRecovery = isHoaExecutiveRecoveryReport(d);
   const isFloridaReceivership = isFloridaReceivershipReport(d);
   const isKnownStaffedProperty = /one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`);
@@ -3207,8 +3284,8 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   for (const token of forbidden) {
     checks.push({
       name: `Render Token: ${token}`,
-      status: html.includes(token) ? 'fail' : 'pass',
-      detail: html.includes(token) ? `Generated HTML contains ${token}` : 'Clean',
+      status: htmlWithoutEmbeddedImagePayloads.includes(token) ? 'fail' : 'pass',
+      detail: htmlWithoutEmbeddedImagePayloads.includes(token) ? `Generated HTML contains ${token}` : 'Clean',
     });
   }
   if (isFloridaReceivership) {
@@ -3313,13 +3390,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       : `Missing closing contact token(s): ${missingClosingTokens.join(', ')}`,
   });
   const imageSources = [...html.matchAll(/<img[^>]+src=["']([^"']*)["']/gi)].map(m => m[1]);
-  const badImages = imageSources.filter(src =>
-    !src ||
-    src.includes('undefined') ||
-    src.includes('null') ||
-    src.includes('[object Object]') ||
-    src.includes('New%20York%2C%20NY%2C%20New%20York%2C%20NY')
-  );
+  const badImages = imageSources.filter(isBrokenImageSrc);
   checks.push({
     name: 'Picture Links',
     status: badImages.length === 0 ? 'pass' : 'fail',

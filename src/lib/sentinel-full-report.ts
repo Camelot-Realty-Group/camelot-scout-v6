@@ -4,13 +4,63 @@
  * 50KB self-contained HTML with Leaflet maps, Chart.js charts, 12 neighborhood cards
  */
 
-export function generateFullSentinelReport(): string {
+import { DEFAULT_SENTINEL_INPUT, type SentinelInput } from './sentinel-report';
+
+const QUARTER_META: Record<SentinelInput['quarter'], { period: string; published: string; focus: string; playbook: string }> = {
+  Q1: {
+    period: 'January 1 - March 31',
+    published: 'April',
+    focus: 'New-year pricing reset, operating-budget pressure, winter compliance, insurance renewals, and early rental velocity.',
+    playbook: 'Use Q1 to set the baseline: board budgets, carrying costs, tax assessments, insurance pressure, and the first read on buyer/renter demand.',
+  },
+  Q2: {
+    period: 'April 1 - June 30',
+    published: 'July',
+    focus: 'Spring listing season, leasing acceleration, capital project starts, facade/roof planning, and mid-year budget variance checks.',
+    playbook: 'Use Q2 to compare listings against closed trades, watch spring price cuts, and prepare boards for summer maintenance and project execution.',
+  },
+  Q3: {
+    period: 'July 1 - September 30',
+    published: 'October',
+    focus: 'Summer leasing, back-to-school buyer movement, heat/energy load, staffing coverage, and pre-budget season vendor benchmarking.',
+    playbook: 'Use Q3 to identify stale listings, unit-mix softness, operating-cost drift, and where boards need to rebid vendors before next year.',
+  },
+  Q4: {
+    period: 'October 1 - December 31',
+    published: 'January',
+    focus: 'Year-end valuation, budget adoption, tax/lien cleanup, holiday staffing, winter readiness, and next-year capital planning.',
+    playbook: 'Use Q4 to close the loop: what changed, what needs board action, and what the next year should prioritize by value, risk, and cost.',
+  },
+};
+
+function reportQuarter(input?: SentinelInput) {
+  return input?.quarter || DEFAULT_SENTINEL_INPUT.quarter;
+}
+
+function reportYear(input?: SentinelInput) {
+  return input?.year || DEFAULT_SENTINEL_INPUT.year;
+}
+
+function reportMeta(input?: SentinelInput) {
+  const quarter = reportQuarter(input);
+  return QUARTER_META[quarter];
+}
+
+export function generateFullSentinelReport(input: SentinelInput = DEFAULT_SENTINEL_INPUT): string {
+  const quarter = reportQuarter(input);
+  const year = reportYear(input);
+  const meta = reportMeta(input);
+  const insight1 = input.insight1 || DEFAULT_SENTINEL_INPUT.insight1;
+  const insight2 = input.insight2 || DEFAULT_SENTINEL_INPUT.insight2;
+  const insight3 = input.insight3 || DEFAULT_SENTINEL_INPUT.insight3;
+  const insight4 = input.insight4 || DEFAULT_SENTINEL_INPUT.insight4;
+  const insight5 = input.insight5 || DEFAULT_SENTINEL_INPUT.insight5;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Camelot Realty Group — Q1 2026 Market Report · Public Edition</title>
+<title>Camelot Realty Group — ${quarter} ${year} Market Report · Public Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -129,6 +179,13 @@ export function generateFullSentinelReport(): string {
   .chart-card { background: var(--white); border: 1px solid #e0dbd0; padding: 24px; }
   .chart-title { font-family: 'Lora', serif; font-size: 1rem; color: var(--navy); margin-bottom: 4px; }
   .chart-sub { font-size: .75rem; color: var(--muted); margin-bottom: 16px; }
+  .visual-grid { display:grid; grid-template-columns:1.2fr .8fr; gap:28px; align-items:stretch; margin-top:32px; }
+  .visual-hero { min-height:320px; background:linear-gradient(110deg,rgba(13,34,64,.88),rgba(13,34,64,.35)),url('/images/one-museum-mile/roof-deck-central-park.webp') center/cover; color:white; padding:34px; display:flex; flex-direction:column; justify-content:flex-end; }
+  .visual-hero h3 { color:white; font-size:1.7rem; margin-bottom:8px; }
+  .visual-card { border:1px solid #e0dbd0; background:white; padding:22px; }
+  .image-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px; }
+  .image-strip img { width:100%; height:112px; object-fit:cover; border:1px solid #ddd; }
+  .source-pill { display:inline-block; border:1px solid rgba(184,151,58,.45); color:var(--navy); background:rgba(184,151,58,.08); padding:7px 10px; margin:4px; font-size:.72rem; border-radius:999px; }
 
   /* ---- NOTE BOX ---- */
   .intel-note {
@@ -201,11 +258,11 @@ export function generateFullSentinelReport(): string {
   <div class="hero-tagline">Boutique. By Design. Powered by Intelligence.</div>
   <div class="hero-logo">Camelot Realty Group</div>
   <h1>New York City<br><em>Residential Market</em><br>Report</h1>
-  <div class="hero-quarter">Q1 2026 — January 1 – March 31, 2026</div>
+  <div class="hero-quarter">${quarter} ${year} — ${meta.period}, ${year}</div>
   <div class="hero-meta">
     <div><strong>Data Sources:</strong> RealtyMX API · ACRIS · NYC DOF · StreetEasy · REBNY RLS</div>
     <div><strong>Portfolio:</strong> 6 confirmed buildings · 243+ units tracked</div>
-    <div><strong>Published:</strong> April 2026</div>
+    <div><strong>Published:</strong> ${meta.published} ${year}</div>
     <div><strong>Prepared by:</strong> Sentinel / Camelot OS</div>
   </div>
 </section>
@@ -221,26 +278,54 @@ export function generateFullSentinelReport(): string {
 <!-- FIVE INSIGHTS -->
 <section class="section">
   <div class="section-label">Quarterly Intelligence</div>
-  <h2 class="section-title">Q1 2026 <em>Market Insights</em></h2>
+  <h2 class="section-title">${quarter} ${year} <em>Market Insights</em></h2>
   <div class="gold-rule"></div>
   <p class="section-sub">Five data points that define the New York City residential market this quarter, drawn from Camelot's RealtyMX intelligence account, ACRIS public records, and third-party market reports.</p>
   <div class="insights-grid">
-    <div class="insight-card"><div class="insight-num">Insight 01 · Building Performance</div><div class="insight-text">5 of 6 tracked buildings beat their neighborhood median $/sqft</div></div>
-    <div class="insight-card"><div class="insight-num">Insight 02 · Rental Velocity</div><div class="insight-text">Sub-$3,500/mo 1-BRs clearing in under 14 days — demand outpacing supply</div></div>
-    <div class="insight-card"><div class="insight-num">Insight 03 · Rate Sensitivity</div><div class="insight-text">Every 50bps rate drop unlocks 8–10% more buying power</div></div>
-    <div class="insight-card"><div class="insight-num">Insight 04 · Rent vs. Buy</div><div class="insight-text">Rent-vs-buy break-even: 20 yrs in Sunnyside, 38+ yrs in Tribeca</div></div>
-    <div class="insight-card"><div class="insight-num">Insight 05 · Neighborhood Value Spectrum</div><div class="insight-text">$/sqft ranges from $660 (Sunnyside) to $2,100 (Tribeca/SoHo)</div></div>
+    <div class="insight-card"><div class="insight-num">Insight 01 · Building Performance</div><div class="insight-text">${insight1}</div></div>
+    <div class="insight-card"><div class="insight-num">Insight 02 · Rental Velocity</div><div class="insight-text">${insight2}</div></div>
+    <div class="insight-card"><div class="insight-num">Insight 03 · Rate Sensitivity</div><div class="insight-text">${insight3}</div></div>
+    <div class="insight-card"><div class="insight-num">Insight 04 · Rent vs. Buy</div><div class="insight-text">${insight4}</div></div>
+    <div class="insight-card"><div class="insight-num">Insight 05 · Neighborhood Value Spectrum</div><div class="insight-text">${insight5}</div></div>
   </div>
 </section>
 
 <!-- EXECUTIVE SUMMARY -->
 <section class="section alt">
   <div class="section-label">Executive Summary</div>
-  <h2 class="section-title">Q1 2026 <em>Market Overview</em></h2>
+  <h2 class="section-title">${quarter} ${year} <em>Market Overview</em></h2>
   <div class="gold-rule"></div>
+  <p class="section-sub"><strong>${quarter} focus:</strong> ${meta.focus}</p>
+  <p class="section-sub"><strong>Board playbook:</strong> ${meta.playbook}</p>
   <p class="section-sub">The New York City residential real estate market entered 2026 with continued inventory constraints, rising renter demand, and a rate environment that continues to suppress sales volume while keeping rental pricing power firmly with landlords.</p>
   <p class="section-sub">Manhattan rentals remain strong, with median rents in key submarkets — Chelsea, Murray Hill, Harlem, Hell's Kitchen — holding above prior-year levels. The outer boroughs continue to attract residents priced out of core Manhattan. Sunnyside and Woodside in Queens demonstrate particularly strong absorption.</p>
   <p class="section-sub">The co-op and condo sales market remains selective, with buyers favoring pre-war buildings with strong financials and low flip ratios. Dollar-per-square-foot metrics are the primary lens through which this report analyzes building value — enabling building-level comparisons across Camelot's managed portfolio.</p>
+</section>
+
+<!-- VISUAL MARKET BOARD -->
+<section class="section">
+  <div class="section-label">Visual Market Board</div>
+  <h2 class="section-title">Images, Charts & <em>Source Proof</em></h2>
+  <div class="gold-rule"></div>
+  <p class="section-sub">Sentinel reports should never read like a memo alone. Every quarter needs a visual layer: neighborhood imagery, actual building photos, maps, major avenues, charts, and source notes that show where the market read came from.</p>
+  <div class="visual-grid">
+    <div class="visual-hero">
+      <div class="section-label" style="color:var(--gold)">Market Imagery Standard</div>
+      <h3>Use real neighborhoods and real buildings.</h3>
+      <p style="color:rgba(255,255,255,.8);max-width:560px">For client-facing reports, Sentinel should pull the subject-property image first, then nearby landmark/corridor images, then portfolio assets. Generic copy without visuals should be treated as incomplete.</p>
+    </div>
+    <div class="visual-card">
+      <h4 style="color:var(--navy);margin-bottom:12px">Quarterly visual checklist</h4>
+      <p><span class="source-pill">Subject property image</span><span class="source-pill">Street or avenue context</span><span class="source-pill">Neighborhood map</span><span class="source-pill">Pricing chart</span><span class="source-pill">DOM chart</span><span class="source-pill">Unit-mix table</span><span class="source-pill">Source citations</span></p>
+      <div class="intel-note"><strong>Rule:</strong> Q1-Q4 reports must include at least one map, two data charts, one city/neighborhood image, one building image, and a visible source stack.</div>
+    </div>
+  </div>
+  <div class="image-strip">
+    <img src="/images/one-museum-mile/building-picture.webp" alt="NYC building benchmark">
+    <img src="/images/one-museum-mile/roof-deck-skyline.webp" alt="NYC skyline and roof deck">
+    <img src="/images/case-studies/949-park.jpg" alt="Camelot portfolio building">
+    <img src="/images/three-horizons-east/aerial-overview.jpg" alt="South Florida expansion market context">
+  </div>
 </section>
 
 <!-- MAP -->
@@ -525,27 +610,27 @@ export function generateFullSentinelReport(): string {
 <!-- CHARTS -->
 <section class="section alt">
   <div class="section-label">Market Analytics</div>
-  <h2 class="section-title">Data Visualization: <em>Q1 2026 Key Indicators</em></h2>
+  <h2 class="section-title">Data Visualization: <em>${quarter} ${year} Key Indicators</em></h2>
   <div class="gold-rule"></div>
   <div class="charts-grid">
     <div class="chart-card">
       <div class="chart-title">Sale Price $/Sqft by Submarket</div>
-      <div class="chart-sub">Condo vs. Co-op · Q1 2026</div>
+      <div class="chart-sub">Condo vs. Co-op · ${quarter} ${year}</div>
       <canvas id="chart-ppsf"></canvas>
     </div>
     <div class="chart-card">
       <div class="chart-title">Median Rental Rates by Submarket</div>
-      <div class="chart-sub">1BR and 2BR · Q1 2026</div>
+      <div class="chart-sub">1BR and 2BR · ${quarter} ${year}</div>
       <canvas id="chart-rent"></canvas>
     </div>
     <div class="chart-card">
       <div class="chart-title">Average Days on Market</div>
-      <div class="chart-sub">Rental Listings · Q1 2026</div>
+      <div class="chart-sub">Rental Listings · ${quarter} ${year}</div>
       <canvas id="chart-dom"></canvas>
     </div>
     <div class="chart-card">
       <div class="chart-title">Rental $/Sqft/Year by Submarket</div>
-      <div class="chart-sub">Annual Rental Yield Benchmark · Q1 2026</div>
+      <div class="chart-sub">Annual Rental Yield Benchmark · ${quarter} ${year}</div>
       <canvas id="chart-yield"></canvas>
     </div>
   </div>
@@ -582,7 +667,7 @@ export function generateFullSentinelReport(): string {
           <td><strong>Improving</strong></td>
         </tr>
         <tr class="current-row">
-          <td><strong>6.75% (Q1 2026 actual)</strong></td>
+          <td><strong>6.75% (${quarter} ${year} actual)</strong></td>
           <td>$5,186/mo</td>
           <td>$62,232</td>
           <td>$222,257</td>
@@ -793,7 +878,7 @@ export function generateFullSentinelReport(): string {
     </div>
     <div>
       <div><strong>Report Frequency:</strong> Quarterly (Q1–Q4)</div>
-      <div><strong>Published:</strong> April 2026</div>
+      <div><strong>Published:</strong> ${meta.published} ${year}</div>
       <div><strong>Data Engine:</strong> Sentinel / Camelot OS</div>
       <div><strong>Market Data:</strong> RealtyMX API · ACRIS · StreetEasy · REBNY RLS</div>
     </div>
