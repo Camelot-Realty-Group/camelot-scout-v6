@@ -1749,7 +1749,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       lifestyleTitle: 'Small-Building Governance & Cost Control',
       lifestyleCopy: 'A 19-unit co-op or TIC-style ownership profile needs precise governance records, disciplined cost control, and practical compliance planning rather than large-building assumptions.',
       brandingTitle: '22 East 22nd Street Small-Building Profile',
-      brandingDescription: 'Known-property guard: Jackie must not treat 22 East 22nd Street as a 122-unit walk-up apartment building. Use 19 units and co-op / tenancy-in-common review language until source documents confirm otherwise.',
+      brandingDescription: 'Known-property guard: Jackie must not treat 22 East 22nd Street as the larger neighboring East 22nd Street rental profile. Use 19 units and co-op / tenancy-in-common review language until source documents confirm otherwise.',
       researchSources: [
         'User-provided property identity correction: 19-unit co-op or tenancy-in-common candidate',
         'NYC DOF / ACRIS ownership and tax-lot records must be cross-checked for legal ownership structure',
@@ -2091,7 +2091,7 @@ function isHoaExecutiveRecoveryOpportunity(address: string, borough?: string): b
 }
 
 function isHoaExecutiveRecoveryReport(d: MasterReportData): boolean {
-  return d.reportFocus?.selectedFocus?.includes('hoa_recovery') || d.raw?.proposalMode === 'hoa_executive_recovery' || isHoaExecutiveRecoveryOpportunity(`${d.address} ${d.buildingName}`, d.borough);
+  return d.raw?.proposalMode === 'hoa_executive_recovery' || isHoaExecutiveRecoveryOpportunity(`${d.address} ${d.buildingName}`, d.borough);
 }
 
 function isFloridaAddress(address: string, borough?: string): boolean {
