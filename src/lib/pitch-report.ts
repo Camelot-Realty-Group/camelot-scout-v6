@@ -420,6 +420,46 @@ function jackson85thMissingDocumentsSlide(): string {
   return `<div class="slide slide-cream"><div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div><div class="pad"><div class="section-title">Documents Needed Before Final Proposal</div><p class="body-text" style="margin-bottom:14px">Camelot can give the board a preliminary range now, but the final proposal and management agreement should be tied to the building's actual budget, records, staffing burden, compliance status, and requested meeting cadence.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${docs.map(item => `<div class="gold-card" style="padding:14px 16px;min-height:104px"><div class="check-item" style="font-size:12px;line-height:1.42"><div class="check-icon">✓</div>${item}</div></div>`).join('')}</div><div class="source-note">Document request list for Samantha and the Lyndon Court board.</div></div></div>`;
 }
 
+function bullets(items: string[]): string {
+  return items.map(item => `<div class="check"><span>✓</span><div>${item}</div></div>`).join('');
+}
+
+function jackson85thTwoColumnSlide(title: string, intro: string, leftTitle: string, leftItems: string[], rightTitle: string, rightItems: string[], source = 'Prepared from Camelot call notes, PropertyShark materials, and Camelot management standards.'): string {
+  return `<div class="slide slide-cream">${logoBadge()}<div class="pad"><div class="section-title">${title}</div><p class="body-text" style="margin-bottom:18px">${intro}</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:18px"><div class="gold-card"><div class="sub-heading">${leftTitle}</div>${bullets(leftItems)}</div><div class="gold-card"><div class="sub-heading">${rightTitle}</div>${bullets(rightItems)}</div></div><div class="source-note">${source}</div></div></div>`;
+}
+
+function generateJackson85thBoardDeck(d: MasterReportData): string {
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const title = 'Camelot Board Meeting Deck - Lyndon Court';
+  const snapshotRows = [
+    ['Property', 'Lyndon Court'],
+    ['Address', '37-34 85th Street, Jackson Heights, NY 11372'],
+    ['Type', 'Walk-up cooperative'],
+    ['Units', 'HPD / PropertyShark-style sources show 18; DOF-style residential count may show 17; reconcile during transition'],
+    ['Built / Stories', '1921 / 4 stories'],
+    ['Historic Context', 'Jackson Heights Historic District'],
+    ['Current Management', 'Garden Heights Property Management appears in records; verify'],
+    ['Initial HPD Signal', 'PropertyShark materials show 8 HPD violations; verify current open/closed status'],
+  ];
+  const slides = `
+<div class="slide slide-dark"><div style="position:absolute;inset:0;opacity:.42"><img src="${bestExteriorImage(d)}" alt="Lyndon Court" style="width:100%;height:100%;object-fit:cover"></div><div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(34,47,58,.98),rgba(34,47,58,.68))"></div><div class="pad" style="position:relative;z-index:2">${logoBadge()}<div style="height:100%;display:flex;flex-direction:column;justify-content:center;max-width:800px"><div class="eyebrow">Board Meeting Deck · Camelot Property Management</div><h1 class="hero-title">Lyndon Court</h1><p style="font-size:24px;color:rgba(255,255,255,.88);line-height:1.4;margin:16px 0 8px">37-34 85th Street, Jackson Heights, NY 11372</p><p style="font-size:17px;color:rgba(255,255,255,.72)">A practical management proposal for a historic Jackson Heights cooperative.</p><div style="display:flex;gap:18px;margin-top:34px"><div><div class="stat-val">17-18</div><div class="stat-label" style="color:rgba(255,255,255,.65)">Units to reconcile</div></div><div><div class="stat-val">4</div><div class="stat-label" style="color:rgba(255,255,255,.65)">Stories</div></div><div><div class="stat-val">1921</div><div class="stat-label" style="color:rgba(255,255,255,.65)">Built</div></div></div></div><div class="source-note" style="color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.18)">Prepared for Samantha Hosein and the Lyndon Court Board · ${today}</div></div></div>
+<div class="slide slide-cream">${logoBadge()}<div class="pad"><div class="section-title">Executive Letter</div><div class="gold-card" style="padding:30px 38px;max-width:900px"><p class="body-text" style="margin-bottom:14px">Dear Samantha Hosein and Board Members, thank you for taking the time to speak with Valerie, Vincent, and the Camelot team about Lyndon Court. We understand this is a small Jackson Heights co-op with recent capital-project fatigue, rising cost pressure, mortgage and tax-abatement considerations, and a need for more consistent vendor, superintendent, accounting, and board support.</p><p class="body-text" style="margin-bottom:14px">Before setting a formal proposal or management agreement, Camelot would like to review the latest financials, budget, management report, mortgage statements, insurance, vendor list, and compliance files. Those records let us quantify a fair fee structure and separate base management from items that should be billed by Schedule A / Schedule B1-style scope.</p><p class="body-text">Sincerely yours,<br><br><strong>David A. Goldoff</strong><br>President, Camelot Property Management<br>57 West 57th Street, Suite 410, New York, NY 10019<br>Office: (212) 206-9939 x701 · dgoldoff@camelot.nyc · info@camelot.nyc</p></div><div class="source-note">Client-facing cover letter prepared from the May 2026 management interview notes.</div></div></div>
+<div class="slide slide-cream">${logoBadge()}<div class="pad"><div class="section-title">Property Snapshot</div><div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:18px"><div class="gold-card"><table>${snapshotRows.map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`).join('')}</table></div><div>${propertyImageCard(d, 'Uploaded Lyndon Court property image', 255)}${propertyPhotoGallery(d, 8)}</div></div><div class="source-note">Certain public records conflict on unit count; Camelot will reconcile HPD, DOF, PropertyShark, corporate records, proprietary lease, and board records during transition.</div></div></div>
+${jackson85thWhatWeHeardSlide()}
+${jackson85thTwoColumnSlide('Camelot Positioning', 'The winning answer is not that Camelot is bigger. The answer is that Lyndon Court gets senior attention with better accounting, vendor discipline, compliance tracking, and transition control.', 'Boutique Attention', ['Senior-led management for small buildings', 'Board-safe communication and practical meeting cadence', 'Local Queens familiarity with Manhattan-level reporting discipline'], 'Deeper Bench', ['Accounting, collections, attorney and accountant coordination', 'Vendor, insurance, staffing, and compliance oversight', 'Technology used where useful, not forced onto residents'])}
+${jackson85thScopeSlide(d)}
+${jackson85thTwoColumnSlide('Accounting & Reporting', 'The board should see clean money movement and plain-English monthly reporting, not a pile of disconnected statements.', 'Monthly Financial Package', ['Balance sheet', 'Income statement with budget comparison', 'Cash disbursements and AP register', 'Bank reconciliation and arrears report'], 'Board Support', ['Budget variance comments', 'Action-item management report', 'Audit and tax package coordination', 'Mortgage/refinance readiness support'])}
+${jackson85thTwoColumnSlide('Compliance & Risk Management', 'Compliance should be calendarized and source-backed. Camelot will not overstate obligations before records are verified.', 'Initial Source Stack', ['HPD registration and violation review', 'DOB BIS / DOB NOW and ECB/OATH review', 'Insurance certificates and vendor licensing', 'Fire-safety, lead-paint, boiler, and notices as applicable'], 'Historic Building Sensitivity', ['Jackson Heights Historic District context', 'Exterior work reviewed with LPC sensitivity if applicable', 'Local Law 11 / FISP only if verified as applicable', 'Open items tracked in a board-facing calendar'])}
+${jackson85thTwoColumnSlide('Maintenance, Vendors & Superintendent Review', 'Camelot will not recommend staffing just to add cost. The goal is to evaluate what Lyndon Court actually needs.', 'Coverage Questions', ['Cleaning and garbage/recycling cadence', 'Snow and seasonal support', 'Minor repair and handyman needs', 'Emergency access and response protocol'], 'Vendor Control', ['COIs, W-9s, contracts, and scope review', 'Preferred-vendor pricing where useful', 'Repair logs and photo-backed updates', 'Board approval workflow for larger work'])}
+${jackson85thFinancialContextSlide(d)}
+${jackson85thTwoColumnSlide('Technology & Communication', 'The technology plan should make board work easier without overwhelming shareholders.', 'Resident / Shareholder Flow', ['Maintenance request intake and tracking', 'Email and phone escalation paths', 'Board packet and action log', 'Document repository for building records'], 'Board Visibility', ['Monthly reporting calendar', 'AP approval controls', 'Vendor tracker', 'Compliance and renewal calendar'])}
+${jackson85thThirtyDaySlide()}
+${jackson85thTwoColumnSlide('90-Day Stabilization Plan', 'After the first month, Camelot should move from intake to measurable operating stabilization.', 'Operational Reviews', ['Vendor review and insurance review', 'Budget and reserve review', 'Staffing / superintendent recommendation', 'Arrears and collections workflow'], 'Board Deliverables', ['Compliance calendar', 'Mortgage/refinance coordination checklist', 'Resident/shareholder communication improvements', '90-day priority plan'])}
+${jackson85thPricingOptionsSlide()}
+<div class="slide slide-cream">${logoBadge()}<div class="pad"><div class="section-title">Next Steps</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:18px"><div class="gold-card"><div class="sub-heading">Close the Information Gap</div>${bullets(['Board reviews this proposal and fee structure', 'Camelot receives latest financials, budget, management report, insurance, mortgage, vendor, and superintendent materials', 'Camelot prepares final proposal, agreement, and Schedule A / B1 fee menu'])}</div><div class="gold-card"><div class="sub-heading">Meet and Decide</div>${bullets(['Schedule a 30-minute board Zoom or in-person meet-and-greet', 'Confirm expectations, meeting cadence, transition date, and references', 'Begin 30-day onboarding after signed agreement and bank/accounting setup'])}</div></div><div style="margin-top:16px">${iframeCard(directionsEmbedUrl(d), 'Camelot route to Lyndon Court', 'Camelot HQ to Lyndon Court route context', 210)}</div><div class="source-note">References available under separate cover after permission is confirmed.</div></div></div>`;
+  return deckShell(title, slides);
+}
+
 function intelligenceSourceCards(): string {
   const sources = [
     { icon: '🏛', title: 'NYC Records', copy: 'HPD, DOB, DOF, ECB/OATH, ACRIS, LL84/LL97' },
@@ -669,11 +709,9 @@ ${onboardingChecklistSlide()}
 
 export function generateBoardMeetingDeck(d: MasterReportData): string {
   if (isHoaExecutiveOpportunity(d)) return generateHoaBoardMeetingDeck(d);
+  if (isJacksonHeights85th(d)) return generateJackson85thBoardDeck(d);
   const base = generatePitchReport(d);
-  const jacksonInsert = isJacksonHeights85th(d)
-    ? `${jackson85thWhatWeHeardSlide()}\n${jackson85thScopeSlide(d)}\n${jackson85thFinancialContextSlide(d)}\n${jackson85thThirtyDaySlide()}\n${jackson85thPricingOptionsSlide()}\n${jackson85thMissingDocumentsSlide()}\n${jackson85thReferencesSlide()}`
-    : '';
-  const insert = `${jacksonInsert}\n${executiveTeamSlide()}`;
+  const insert = `${executiveTeamSlide()}`;
   return base.replace('<!-- SLIDE 13: Next Steps (Dark) -->', `${insert}\n<!-- SLIDE 13: Next Steps (Dark) -->`)
     .replace('Property Intelligence Report', 'Board Meeting Deck')
     .replace('<!-- SLIDE 14: Thank You (Dark) -->', '<!-- SLIDE 15: Thank You (Dark) -->');

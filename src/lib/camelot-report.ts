@@ -1603,9 +1603,9 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       lifestyleTitle: 'Small Co-op Governance, Accounting & Service Discipline',
       lifestyleCopy: 'An approximately 17- to 18-unit co-op needs clean monthly financials, maintenance collection discipline, superintendent/payroll coordination, vendor oversight, attorney/accountant cooperation, and practical repairs management without large-firm overhead.',
       brandingTitle: 'Lyndon Court Jackson Heights Co-op Profile',
-      brandingDescription: 'Known-property guard: Jackie treats Lyndon Court / 37-34 / 37-40 85th Street as an approximately 17- to 18-unit Jackson Heights walk-up co-op and uses uploaded building photos before Google fallback.',
+      brandingDescription: 'Known-property guard: Jackie treats Lyndon Court at 37-34 85th Street as an approximately 17- to 18-unit Jackson Heights walk-up co-op and uses uploaded building photos before Google fallback.',
       researchSources: [
-        'User-uploaded property photographs for 37-40 / 37-34 85th Street',
+        'User-uploaded Lyndon Court / 37-34 85th Street property photographs',
         'PropertyShark report supplied by Camelot for 37-34 85th St, Jackson Heights, NY 11372',
         'NYC DOF / ACRIS ownership, mortgage, and tax-lot records',
         'HPD MDR / HPD Online registration, complaints, and violations',
