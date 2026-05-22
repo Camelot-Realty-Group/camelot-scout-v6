@@ -3518,7 +3518,8 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
     detail: 'Brand logo reference verified',
   });
   const closingTokens = [
-    'A New York management partner built for board confidence',
+    'New Yorkers for New Yorkers',
+    'Jacqueline Kennedy',
     'https://zoom.us/start/videomeeting',
     'tel:+12122069939;ext=701',
     'Call 212-206-9939 x701',
@@ -6804,22 +6805,25 @@ ${buildPortfolioSection(d)}
 <!-- Content -->
 <div style="position:relative;z-index:1">
 
-<!-- Values note -->
-<div style="margin-bottom:26px;max-width:545px;margin-left:238px">
-<div style="font-family:'Cardo',Georgia,serif;font-size:36px;color:#D5B24A;line-height:1.2;font-weight:600;letter-spacing:0.2px;text-shadow:0 2px 12px rgba(0,0,0,0.22)">A New York management partner built for board confidence.</div>
-<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(168,144,53,0.25);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:11.5px;color:rgba(255,255,255,0.72);line-height:1.7;font-style:normal">
-Camelot combines senior attention, practical technology, in-house accounting, and hands-on property management so boards have clearer answers, faster response, and a stronger operating partner. We welcome the opportunity to meet in person, by Zoom, Google Meet, or phone to discuss the next step for ${d.buildingName}.
+<!-- Jacqueline Kennedy / Camelot note -->
+<div style="display:grid;grid-template-columns:150px 1fr;gap:28px;align-items:center;max-width:690px;margin:0 auto 28px;text-align:left">
+<div style="width:150px;height:190px;border:1px solid rgba(168,144,53,0.48);background:rgba(255,255,255,0.08);box-shadow:0 18px 42px rgba(0,0,0,0.28);overflow:hidden">
+<img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Jackie_Kennedy_Color_Portrait.jpg?width=520" alt="Jacqueline Kennedy portrait" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML='<div style=&quot;height:190px;display:flex;align-items:center;justify-content:center;background:#2C3240;color:#A89035;font-size:10px;font-weight:800;text-align:center;padding:12px&quot;>Jacqueline Kennedy</div>'">
+</div>
+<div>
+<div style="font-family:'Cardo',Georgia,serif;font-style:italic;font-size:30px;color:#fff;line-height:1.42;font-weight:400;letter-spacing:0.2px;text-shadow:0 2px 12px rgba(0,0,0,0.22)">&ldquo;one brief shining moment&rdquo;</div>
+<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:13px;color:#A89035;font-weight:700;margin-top:10px">Jacqueline Kennedy</div>
+<div style="font-size:9px;color:rgba(255,255,255,0.38);letter-spacing:1px;text-transform:uppercase;margin-top:3px">Life interview reference &nbsp;&middot;&nbsp; Camelot</div>
+<div style="font-family:'Cardo',Georgia,serif;font-size:31px;color:#D5B24A;line-height:1.18;font-weight:600;letter-spacing:0.2px;text-shadow:0 2px 12px rgba(0,0,0,0.22);margin-top:18px;text-align:center">New Yorkers for New Yorkers.<br>A management partner for a New Yorker&rsquo;s state of mind.</div>
+<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(168,144,53,0.25);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:11.5px;color:rgba(255,255,255,0.72);line-height:1.7;font-style:normal;text-align:center">
+Camelot combines senior attention, practical technology, in-house accounting, and hands-on property management so clients have clearer answers, faster response, and a stronger operating partner.
+</div>
 </div>
 </div>
 <!-- Divider -->
 <div style="width:80px;height:2px;background:#A89035;margin:0 auto 28px;opacity:0.5"></div>
 
 <!-- Next Steps -->
-<div style="margin-bottom:24px">
-<div class="wordmark" style="margin-bottom:4px">C &nbsp;A &nbsp;M &nbsp;E &nbsp;L &nbsp;O &nbsp;T</div>
-<div class="pm-sub" style="margin-bottom:0">Realty Group</div>
-</div>
-
 <h2 style="font-size:28px;margin-bottom:12px">Next Steps</h2>
 <div class="tagline" style="margin-bottom:24px">We welcome the opportunity to discuss ${d.buildingName}&rsquo;s<br>needs and refine our proposal to fit your building.</div>
 
@@ -6853,11 +6857,13 @@ Camelot combines senior attention, practical technology, in-house accounting, an
 </div>
 
 <div class="deck-slide dark">
-<div class="brand-logo" style="width:230px"><img src="https://www.camelot.nyc/wp-content/uploads/2015/03/Camelot-logo-footer-white.png" alt="Camelot Realty Group" style="width:100%;height:auto" onerror="this.style.display='none'"></div>
-<div class="thank-wordmark">CAMELOT</div>
-<div style="color:#B8973A;font-size:18px;margin-bottom:76px">Property Management</div>
-<h2 class="deck-title center" style="font-size:54px;margin-bottom:26px">Thank You</h2>
-<p style="font-size:20px;line-height:1.45;max-width:560px">We look forward to serving the ${safe(d.buildingName)} community.</p>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:520px;text-align:center;padding:40px 64px">
+<img src="https://www.camelot.nyc/wp-content/uploads/2015/03/Camelot-logo-footer-white.png" alt="Camelot Realty Group" style="width:310px;max-width:72%;height:auto;margin-bottom:54px" onerror="this.style.display='none'">
+<h2 class="deck-title center" style="font-size:58px;margin-bottom:24px">Thank You</h2>
+<p style="font-size:20px;line-height:1.45;max-width:650px;margin-bottom:22px">We look forward to serving the ${safe(d.buildingName)} community.</p>
+<div style="width:92px;height:2px;background:#B8973A;margin:4px auto 22px"></div>
+<p style="font-size:16px;line-height:1.7;max-width:680px;color:rgba(255,255,255,0.72)">Hands-on property management, disciplined financial oversight, practical technology, and New York accountability for buildings that want clearer reporting, faster response, and senior attention.</p>
+</div>
 </div>
 
 </div>
