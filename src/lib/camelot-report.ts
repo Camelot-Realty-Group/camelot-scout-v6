@@ -1549,13 +1549,14 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
   }
   if (/37[-\s]?40\s+85th|37[-\s]?34\s+85th|85th\s+st.*jackson\s+heights|85th\s+street.*11372/i.test(key)) {
     return {
-      canonicalAddress: '37-40 85th Street, Jackson Heights, NY 11372',
-      buildingName: '37-40 85th Street',
+      canonicalAddress: '37-34 85th Street, Jackson Heights, NY 11372',
+      buildingName: 'Lyndon Court',
       borough: 'Queens',
-      units: 16,
+      buildingArea: 18900,
+      units: 18,
       stories: 4,
       yearBuilt: 1921,
-      propertyType: 'Co-operative',
+      propertyType: 'Walk-up cooperative',
       neighborhoodName: 'Jackson Heights',
       imageUrls: [
         '/images/37-40-85th/front-door.jpg',
@@ -1565,9 +1566,10 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
         '/images/37-40-85th/red-brick-garages.jpg',
         '/images/37-40-85th/street-view-context.png',
       ],
-      description: '37-40 85th Street is a small pre-war Jackson Heights co-operative / residential community with garden-style operating considerations, common exterior areas, and a scope that requires hands-on accounting, board support, vendor oversight, superintendent coverage review, refinancing preparation, and maintenance coordination.',
+      description: 'Lyndon Court at 37-34 85th Street is a small pre-war Jackson Heights walk-up cooperative with garden-style operating considerations, common exterior areas, historic-district sensitivity, and a scope that requires hands-on accounting, board support, vendor oversight, superintendent coverage review, refinancing preparation, and maintenance coordination.',
       amenities: [
         'Pre-war brick residential setting',
+        'Jackson Heights Historic District setting',
         'Shared rear garden / courtyard context',
         'Resident entrance and front-door condition to verify',
         'Garages / parking context to verify',
@@ -1577,6 +1579,8 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       commercialSignals: [
         'No commercial tenant roster should be published until verified through offering plan, signage, PropertyShark, ACRIS, HPD MDR, or board records.',
         'Small co-op governance, accounting controls, maintenance collection, and superintendent payroll support are the primary operating signals.',
+        'Public records conflict on unit count: HPD / PropertyShark-style materials show 18 Class A units while DOF-style residential count may show 17; reconcile during transition.',
+        'PropertyShark-style materials indicate 8 HPD violations and prior mortgage-related documents; verify current status from HPD, ACRIS, DOB, and board records before publishing as final diligence.',
       ],
       revenueOpportunities: [
         'Parking fee review and garage / parking policy update where permitted by governing documents.',
@@ -1597,9 +1601,9 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       locationTitle: 'Jackson Heights Garden Co-op Positioning',
       locationCopy: 'The property sits in the Jackson Heights residential market, where garden-style co-op character, transit access, and local vendor responsiveness are central to resident experience and long-term value.',
       lifestyleTitle: 'Small Co-op Governance, Accounting & Service Discipline',
-      lifestyleCopy: 'A 16-unit co-op needs clean monthly financials, maintenance collection discipline, superintendent/payroll coordination, vendor oversight, attorney/accountant cooperation, and practical repairs management without large-firm overhead.',
-      brandingTitle: '37-40 85th Street Jackson Heights Co-op Profile',
-      brandingDescription: 'Known-property guard: Jackie treats 37-40 / 37-34 85th Street as a small approximately 16-unit Jackson Heights co-op / residential building and uses uploaded building photos before Google fallback.',
+      lifestyleCopy: 'An approximately 17- to 18-unit co-op needs clean monthly financials, maintenance collection discipline, superintendent/payroll coordination, vendor oversight, attorney/accountant cooperation, and practical repairs management without large-firm overhead.',
+      brandingTitle: 'Lyndon Court Jackson Heights Co-op Profile',
+      brandingDescription: 'Known-property guard: Jackie treats Lyndon Court / 37-34 / 37-40 85th Street as an approximately 17- to 18-unit Jackson Heights walk-up co-op and uses uploaded building photos before Google fallback.',
       researchSources: [
         'User-uploaded property photographs for 37-40 / 37-34 85th Street',
         'PropertyShark report supplied by Camelot for 37-34 85th St, Jackson Heights, NY 11372',
@@ -1608,12 +1612,13 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
         'DOB BIS / DOB NOW permits, boiler, gas, facade, OATH/ECB and complaint records',
         'Offering plan, proprietary lease, building questionnaire, board records, current budget, prior management report, and audited financials requested before formal proposal',
       ],
-      currentManagement: 'Management to verify through HPD MDR, PropertyShark, board materials, and building records',
+      currentManagement: 'Garden Heights Property Management appears in records; verify against HPD MDR, PropertyShark, board materials, and current management agreement',
       boardMembers: [
-        { name: '37-40 85th Street board / ownership authority', title: 'Co-op Board / Ownership Authority' },
+        { name: 'Samantha Hosein', title: 'Board member / shareholder contact' },
+        { name: 'Lyndon Court board / ownership authority', title: 'Co-op Board / Ownership Authority' },
       ],
       buildingStaff: [
-        { role: 'Managing Agent', name: 'To verify through HPD MDR / board records' },
+        { role: 'Managing Agent', name: 'Garden Heights Property Management appears in records; verify' },
         { role: 'Superintendent / building staff', name: 'Payroll, workers comp, and staffing coverage to verify' },
       ],
       professionalSources: [
@@ -1627,11 +1632,12 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       professionalNotes: [
         'Formal proposal should be priced after reviewing prior management report, audited financials or latest budget, staffing, arrears, attorney/accountant needs, and requested service cadence.',
         'Primary scope includes billing and collecting maintenance, bill payment, vendor invoice review, bookkeeping, monthly and annual financial reports, lawyer/accountant cooperation, superintendent payroll/workers comp support, and arranging repairs.',
-        'May 2026 board discussion notes: Samantha is evaluating management options for a small Jackson Heights co-op after a period of heavy capital projects and board fatigue; final decisions rest with the board.',
+        'May 2026 board discussion notes: Samantha Hosein is evaluating management options for Lyndon Court after a period of heavy capital projects and board fatigue; final decisions rest with the board.',
         'The board asked for a detailed fee menu / Schedule B1-style summary, at least five references, Local Law 11 / compliance information, and guidance around refinancing preparation.',
         'Known budget pressures to review include two mortgages totaling approximately $2M at roughly 4%-5%, a future refinance window, and a tax abatement scheduled to expire at year-end.',
         'Operating opportunities discussed include parking fee increases, washer/dryer or laundry revenue, insurance bidding / deductible review, vendor pricing, and possible assessment planning.',
         'Staffing issue to evaluate: the building has not had a consistent on-site superintendent for a long time; Camelot should assess whether porter, handyman, or superintendent support is the right fit.',
+        'Suggested pricing: Lean Base $1,500/month, Recommended $1,750/month, Enhanced Transition $2,000/month for first 90 days then $1,750/month, plus a $1,500 onboarding fee that may be credited if the board approves within 30 days and provides complete transition records.',
       ],
     };
   }
