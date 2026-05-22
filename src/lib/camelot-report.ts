@@ -1134,6 +1134,39 @@ const CAMELOT = {
   license2: 'Camelot Realty Group LLC #10491200104',
 };
 
+const CAMELOT_PROFILE = {
+  foundedYear: 2006,
+  buildingsManaged: 42,
+  assetsUnderManagement: '$240M+',
+  assetsUnderManagementNote: 'internal estimate; confirm against current Camelot OS / accounting roster before final publication',
+  unitsTracked: '5,351+',
+  unitsTrackedNote: 'current and prior client unit records tracked by Camelot OS',
+};
+
+const CAMELOT_ASSOCIATION_LINKS = [
+  { name: 'NYARM', fullName: 'New York Association of Realty Managers', url: 'https://www.nyarm.com', logo: 'https://www.nyarm.com/logo.gif' },
+  { name: 'REBNY', fullName: 'Real Estate Board of New York', url: 'https://www.rebny.com', logo: './images/associations/rebny-logo.jpeg' },
+  { name: 'SPONY', fullName: 'Small Property Owners of New York', url: 'https://www.spony.org', logo: 'https://spony.org/static/logo_sm.png' },
+  { name: 'IREM', fullName: 'IREM Greater New York Chapter', url: 'https://iremnyc.org', logo: 'https://iremnyc.org/images/design/IREM_Greater_NYC_Logo.jpg' },
+  { name: 'BOMA New York', fullName: 'Building Owners and Managers Association of Greater New York', url: 'https://www.bomany.org', logo: 'https://www.bomany.org/uploads/1/4/2/9/142998385/boma-ny-logo-white-08-19-2024-rgb-4x.webp' },
+  { name: 'NARPM', fullName: 'National Association of Residential Property Managers', url: 'https://www.narpm.org', logo: 'https://www.narpm.org/wp-content/themes/narpm-new/static/images/logo.png' },
+  { name: 'NYAA', fullName: 'New York Apartment Association', url: 'https://www.housing.org', logo: 'https://images.squarespace-cdn.com/content/v1/657b6aee60f6b65fba14db24/b52a2ade-0bb2-4458-9b70-afbaaed428e4/NYAA+Logo.png?format=1500w' },
+  { name: 'CNYC', fullName: 'Council of New York Cooperatives and Condominiums', url: 'https://www.cnyc.com', logo: 'https://www.cnyc.com/images/logo_cnyc.gif' },
+];
+
+function camelotAssociationLogoGrid(): string {
+  return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px">
+${CAMELOT_ASSOCIATION_LINKS.map(a => `<a href="${a.url}" target="_blank" rel="noopener" style="height:78px;background:#fff;border:1px solid #D5D0C6;border-radius:8px;padding:9px;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden">
+<img src="${a.logo}" alt="${a.fullName}" style="max-width:100%;max-height:38px;object-fit:contain;display:block" onerror="this.style.display='none'">
+<span style="font-size:9px;color:#2C3240;font-weight:800;text-align:center;line-height:1.15">${a.name}</span>
+</a>`).join('')}
+</div>`;
+}
+
+function camelotAssociationTextLine(): string {
+  return 'NYARM, REBNY, SPONY, IREM, BOMA New York, NARPM, NYAA, CNYC, NY Chamber of Commerce, Queens Chamber of Commerce, Queens & Bronx Buildings Association, Metropolitan Resident Managers Association, New York Resident Managers Association, Scandinavian Building Managers Guild, and licensed REBNY managing agent / brokerage relationships.';
+}
+
 const LEGAL_TERMS_URL = 'https://camelot-scout-v6.onrender.com/#/legal-report-terms';
 const GOOGLE_MAPS_REPORT_KEY = 'AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8';
 
@@ -5844,13 +5877,15 @@ ${isSelfManaged ? `
 <div class="mission-stmt">&ldquo;To protect, enhance, and elevate the value of every property we manage through transparency, precision, and proactive hands-on care.&rdquo;</div>
 <p style="font-size:12px;color:#555;line-height:1.7;margin-bottom:20px">Since 2006, Camelot Realty Group has built a reputation as one of New York\u2019s premier boutique property management firms \u2014 blending hands-on service, financial expertise, and innovative technology. We manage condominiums, cooperatives, multifamily rentals, and mixed-use properties across Manhattan, Brooklyn, Queens, Bronx, Westchester, NJ, CT, and Florida. We are independently owned and operated.</p>
 <div class="about-stats">
-<div class="about-stat"><div class="val">42</div><div class="lbl">Buildings Managed</div></div>
-<div class="about-stat"><div class="val">$240M+</div><div class="lbl">Assets Under Mgmt</div></div>
-<div class="about-stat"><div class="val">18+</div><div class="lbl">Years in Business</div></div>
-<div class="about-stat"><div class="val">5,351+</div><div class="lbl">Units Tracked</div></div>
+<div class="about-stat"><div class="val">${CAMELOT_PROFILE.buildingsManaged}</div><div class="lbl">Buildings Managed</div></div>
+<div class="about-stat"><div class="val">${CAMELOT_PROFILE.assetsUnderManagement}</div><div class="lbl">Assets Under Mgmt*</div></div>
+<div class="about-stat"><div class="val">Since ${CAMELOT_PROFILE.foundedYear}</div><div class="lbl">Founded</div></div>
+<div class="about-stat"><div class="val">${CAMELOT_PROFILE.unitsTracked}</div><div class="lbl">Units Tracked</div></div>
 </div>
+<div style="font-size:9px;color:#888;text-align:center;margin-top:8px">*${CAMELOT_PROFILE.assetsUnderManagementNote}. Units tracked reflect ${CAMELOT_PROFILE.unitsTrackedNote}.</div>
 <div style="font-size:11px;color:#A89035;text-align:center;margin-top:16px;font-weight:500">\u2B50 RED Awards 2025: Property Management Company of the Year</div>
-<div style="font-size:10px;color:#999;text-align:center;margin-top:8px">Member: REBNY | SPONY | NYARM | IREM | BOMA | NARPM | NY Apartment Association</div>
+${camelotAssociationLogoGrid()}
+<div style="font-size:10px;color:#777;text-align:center;margin-top:10px;line-height:1.55">Associated with: ${camelotAssociationTextLine()}</div>
 </div>
 
 <!-- PAGE 9B: COMMUNITY & INDUSTRY PARTNERSHIPS -->
@@ -6730,8 +6765,8 @@ Tribeca: $2,100/sf · $5,200 1BR
 \u2714 5 of 6 buildings above market<br>
 \u2714 10.55% avg rent growth<br>
 \u2714 96% portfolio occupancy<br>
-\u2714 42 buildings managed<br>
-\u2714 $240M+ AUM
+\u2714 ${CAMELOT_PROFILE.buildingsManaged} buildings managed<br>
+\u2714 ${CAMELOT_PROFILE.assetsUnderManagement} AUM*
 </div>
 <div style="background:#0D2240;border-radius:4px;padding:6px;text-align:center;margin-top:6px">
 <div style="font-size:12px;font-weight:800;color:#B8973A">5/6</div>
@@ -6874,8 +6909,8 @@ ${buildPortfolioSection(d)}
 </div>
 
 <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:14px;color:#A89035;text-align:center;margin-top:16px;font-weight:600">RED Awards 2025: Property Management Company of the Year</div>
-<div style="font-size:11px;color:#888;text-align:center;margin-top:6px">REBNY 2025: David Goldoff Leadership Award &nbsp;\u00B7&nbsp; 42 Properties &nbsp;\u00B7&nbsp; $240M+ AUM &nbsp;\u00B7&nbsp; 18+ Years</div>
-<div style="font-size:10px;color:#999;text-align:center;margin-top:8px">Member: REBNY \u00B7 SPONY \u00B7 NYARM \u00B7 IREM \u00B7 BOMA \u00B7 NARPM \u00B7 NY Apartment Association</div>
+<div style="font-size:11px;color:#888;text-align:center;margin-top:6px">REBNY 2025: David Goldoff Leadership Award &nbsp;\u00B7&nbsp; ${CAMELOT_PROFILE.buildingsManaged} Buildings &nbsp;\u00B7&nbsp; ${CAMELOT_PROFILE.assetsUnderManagement} AUM internal estimate &nbsp;\u00B7&nbsp; Founded ${CAMELOT_PROFILE.foundedYear}</div>
+<div style="font-size:10px;color:#999;text-align:center;margin-top:8px">Associated with: ${camelotAssociationTextLine()} &nbsp;\u00B7&nbsp; Licensed REBNY Managing Agent &amp; Brokerage</div>
 </div>
 
 <!-- PAGE 24: CONFIDENTIALITY (CONDENSED) -->
