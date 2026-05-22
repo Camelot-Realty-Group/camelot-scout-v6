@@ -1232,8 +1232,17 @@ function buildPortfolioSection(d: MasterReportData): string {
   const tableRows = nearby.map(b => {
     const distLabel = b.distance > 0 ? `${b.distance.toFixed(1)} mi` : (b.distance === -1 ? b.borough : '');
     const distSpan = distLabel ? ` <span style="color:#A89035;font-size:10px;font-weight:600">(${distLabel})</span>` : '';
+    const streetViewLocation = `${b.address}, ${b.borough}, NY`;
+    const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(streetViewLocation)}`;
+    const image = b.image || `https://maps.googleapis.com/maps/api/streetview?size=220x140&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
+    const fallbackImage = `https://maps.googleapis.com/maps/api/streetview?size=220x140&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
     return `<tr>
-<td style="font-weight:700">${b.address}</td>
+<td style="width:92px;padding:6px">
+  <a href="${streetViewUrl}" target="_blank" rel="noopener" style="display:block;width:84px;height:54px;border:1px solid #D5D0C6;background:#EDE9DF;overflow:hidden;text-decoration:none">
+    <img src="${image}" alt="${b.address} portfolio property image" style="width:100%;height:100%;object-fit:cover;display:block" onerror="if(this.src!=='${fallbackImage}'){this.src='${fallbackImage}'}else{this.parentElement.innerHTML='<div style=&quot;height:54px;display:flex;align-items:center;justify-content:center;background:#3A4B5B;color:#A89035;font-size:8px;font-weight:800;text-align:center;padding:6px&quot;>Street View</div>'}">
+  </a>
+</td>
+<td style="font-weight:700"><a href="${streetViewUrl}" target="_blank" rel="noopener" style="color:#0D2E63;text-decoration:none">${b.address}</a><br><span style="color:#A89035;font-size:9px;font-weight:600">${b.image ? 'Verified Camelot image' : 'Google Street View reference'}</span></td>
 <td>${b.type}</td>
 <td>${b.neighborhood}${distSpan}</td>
 <td style="color:#A89035;font-weight:600">Active</td>
@@ -1242,10 +1251,11 @@ function buildPortfolioSection(d: MasterReportData): string {
   }).join('\n');
 
   const portfolioImageStrip = nearby.map(b => {
-    const searchUrl = `https://streeteasy.com/search?search=${encodeURIComponent(b.address + ' New York NY')}`;
-    const image = b.image || `https://maps.googleapis.com/maps/api/streetview?size=360x220&location=${encodeURIComponent(b.address + ', ' + b.borough + ', NY')}&key=${GOOGLE_MAPS_REPORT_KEY}`;
-    const fallbackImage = `https://maps.googleapis.com/maps/api/streetview?size=360x220&location=${encodeURIComponent(b.address + ', ' + b.borough + ', NY')}&key=${GOOGLE_MAPS_REPORT_KEY}`;
-    return `<a href="${searchUrl}" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:1px solid #D5D0C6;box-shadow:0 5px 12px rgba(44,50,64,0.07);overflow:hidden;display:block;min-height:112px">
+    const streetViewLocation = `${b.address}, ${b.borough}, NY`;
+    const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(streetViewLocation)}`;
+    const image = b.image || `https://maps.googleapis.com/maps/api/streetview?size=360x220&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
+    const fallbackImage = `https://maps.googleapis.com/maps/api/streetview?size=360x220&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
+    return `<a href="${streetViewUrl}" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:1px solid #D5D0C6;box-shadow:0 5px 12px rgba(44,50,64,0.07);overflow:hidden;display:block;min-height:112px">
 <div style="height:78px;background:#EDE9DF;overflow:hidden"><img src="${image}" alt="${b.address} building reference image" style="width:100%;height:100%;object-fit:cover;display:block" onerror="if(this.src!=='${fallbackImage}'){this.src='${fallbackImage}'}else{this.parentElement.innerHTML='<div style=&quot;height:78px;display:flex;align-items:center;justify-content:center;background:#3A4B5B;color:#A89035;font-size:9px;font-weight:800;text-align:center;padding:8px&quot;>${b.address}</div>'}"></div>
 <div style="padding:7px 8px;font-size:8.5px;line-height:1.3;color:#3A4B5B;font-weight:700">${b.address}<br><span style="color:#A89035;font-weight:600">${b.image ? 'Verified Camelot image' : 'Google Street View reference'}</span></div>
 </a>`;
@@ -1278,6 +1288,7 @@ ${portfolioImageStrip}
 </div>
 <table class="compare-table">
 <thead><tr>
+<th style="background:#3A4B5B;color:#fff">Photo</th>
 <th style="background:#3A4B5B;color:#fff">Building</th>
 <th style="background:#3A4B5B;color:#fff">Type</th>
 <th style="background:#3A4B5B;color:#fff">Neighborhood</th>
