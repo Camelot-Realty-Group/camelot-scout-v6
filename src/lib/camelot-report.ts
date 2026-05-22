@@ -2910,17 +2910,15 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     ll97Status: ll97Data?.complianceStatus || 'unknown',
     pricePerUnit: tier.intelligence.perUnit,
   });
-  // Jackie prices Camelot at 15% below the applicable market midpoint.
-  let pricePerUnit = feeComparison.camelotMonthlyPerUnit;
-  const monthlyFeeBeforeMinimum = pricePerUnit * (units || 1);
-  const monthlyFee = Math.max(monthlyFeeBeforeMinimum, feeComparison.minimumMonthlyFee);
-  if (monthlyFee !== monthlyFeeBeforeMinimum) {
-    pricePerUnit = Math.ceil(monthlyFee / Math.max(units || 1, 1));
-    feeComparison.camelotMonthlyPerUnit = pricePerUnit;
-    feeComparison.camelotAnnualPerUnit = pricePerUnit * 12;
-    feeComparison.floorApplied = true;
-  }
-  const annualFee = monthlyFee * 12;
+  // Jackie now uses Camelot Intelligence as the recommended starting package.
+  // Market comparison remains context, but proposal pricing must come from the
+  // Intelligence tier so the deck, proposal, agreement, and pricing matrix agree.
+  const pricePerUnit = tier.intelligence.perUnit;
+  const monthlyFee = tier.intelligence.monthly;
+  const annualFee = tier.intelligence.annual;
+  feeComparison.camelotMonthlyPerUnit = pricePerUnit;
+  feeComparison.camelotAnnualPerUnit = pricePerUnit * 12;
+  feeComparison.floorApplied = monthlyFee === getCamelotMinimumFeeRule(effectiveBorough).preferred;
 
   // Scout scoring (simplified)
   let score = 0;
@@ -3268,7 +3266,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     pricePerUnit,
     monthlyFee,
     annualFee,
-    tieredPricing: calculateTieredPricing(units || 1, effectiveBorough, raw.rentStabilization?.isStabilized || false, ll97Data?.complianceStatus || 'unknown', effectiveBuildingClass, effectiveMarketValue, reportAddress),
+    tieredPricing: tier,
     feeComparison,
     streetEasy,
     commercialIntel,
@@ -3967,7 +3965,8 @@ ONGOING SERVICES:
 • ConciergePlus resident portal and BankUnited online banking services with zero bank fees
 
 PROPOSED INVESTMENT:
-• Management Fee: $${d.monthlyFee.toLocaleString()}/month ($${d.pricePerUnit}/unit)
+• Recommended Package: Camelot Intelligence
+• Intelligence Management Fee: $${d.monthlyFee.toLocaleString()}/month ($${d.pricePerUnit}/unit)
 • Online Banking Services: BankUnited preferred banking workflow with zero bank fees
 • Technology Platform: Camelot Intelligence package
 • Building Inspection: $500 introductory inspection ($2,500 value)
@@ -4083,9 +4082,10 @@ export function generateCSVExport(d: MasterReportData): string {
     ['Neighborhood Median 1BR Rent', d.neighborhoodMarketData ? `$${d.neighborhoodMarketData.median1BR}` : 'N/A'],
     ['Neighborhood Median 2BR Rent', d.neighborhoodMarketData ? `$${d.neighborhoodMarketData.median2BR}` : 'N/A'],
     ['Neighborhood Invest Score', d.neighborhoodMarketData ? String(d.neighborhoodMarketData.investScore) : 'N/A'],
-    ['Proposed Price/Unit', `$${d.pricePerUnit}`],
-    ['Proposed Monthly Fee', `$${d.monthlyFee.toLocaleString()}`],
-    ['Proposed Annual Fee', `$${d.annualFee.toLocaleString()}`],
+    ['Recommended Package', 'Camelot Intelligence'],
+    ['Intelligence Price/Unit', `$${d.pricePerUnit}`],
+    ['Intelligence Monthly Fee', `$${d.monthlyFee.toLocaleString()}`],
+    ['Intelligence Annual Fee', `$${d.annualFee.toLocaleString()}`],
   ];
   return rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
 }
@@ -6412,7 +6412,7 @@ ${[
 <div class="section-sub">Projected annual value creation — based on Camelot portfolio benchmarks</div>
 
 <div class="stats-row">
-<div class="stat-box"><div class="val gold">$${d.monthlyFee.toLocaleString()}/mo</div><div class="lbl">Proposed Mgmt Fee ($${d.pricePerUnit}/unit)</div></div>
+<div class="stat-box"><div class="val gold">$${d.monthlyFee.toLocaleString()}/mo</div><div class="lbl">Recommended Intelligence Fee ($${d.pricePerUnit}/unit)</div></div>
 <div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.vendorBidSavings.toLocaleString()}/yr</div><div class="lbl">Vendor Bid Savings</div></div>
 <div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.revenueRecovery.toLocaleString()}/yr</div><div class="lbl">Collections / Revenue Recovery</div></div>
 <div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.year1Value.toLocaleString()}/yr</div><div class="lbl">Year 1 Value Target</div></div>
@@ -7244,7 +7244,7 @@ function generateProposal() {
   '<h2>Financial Terms</h2>' +
   '<p class="section-intro">The proposed fee is based on the full property profile: address, asset type, unit count, square footage, current service burden, reporting expectations, technology needs, and transition complexity. Ancillary items are governed by Schedule A to the management agreement.</p>' +
   '<div class="fee-box">' +
-  '<strong>Base Management Fee:</strong> <span class="price">$' + d.monthlyFee.toLocaleString() + ' per month</span> (<span class="price">$' + d.annualFee.toLocaleString() + ' annually</span>)<br>' +
+  '<strong>Camelot Intelligence Management Fee:</strong> <span class="price">$' + d.monthlyFee.toLocaleString() + ' per month</span> (<span class="price">$' + d.annualFee.toLocaleString() + ' annually</span>)<br>' +
   '<strong>Property Basis:</strong> ' + addressClean + ' &middot; ' + unitDesc + ' &middot; ' + titleCase(d.propertyType) + ' &middot; ' + squareFeetLabel + ' &middot; ' + blockLotLabel + '<br>' +
   '<strong>Fee Basis:</strong> Flat fee based on building type, size, and service tier. Annual escalation of <span class="price">3%&ndash;5%</span> as agreed upon by board and management.<br>' +
   '<strong>Ancillary Fees:</strong> As outlined in Schedule A of the management agreement<br>' +

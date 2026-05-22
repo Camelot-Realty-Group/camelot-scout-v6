@@ -283,7 +283,7 @@ export function localQueryEngine(
       resp += `- Current management: ${target.current_management || 'to verify'}\n`;
       resp += `- Score: ${target.score}/100, Grade ${target.grade}, ${target.open_violations_count || 0} open violations\n\n`;
     }
-    resp += `**Proposal logic:** position Camelot as 15% below the relevant market management-fee benchmark while keeping ancillary services separate: lease renewals, sales packages, closings, alteration agreement review, after-hours meetings, project management over threshold, and state/local compliance work. Label all fee assumptions until the budget, audited financials, prior management report, rent roll, and service scope are reviewed.\n\n`;
+    resp += `**Proposal logic:** start with the Camelot Intelligence package as the recommended pricing matrix because it includes the technology, automation, reporting, board support, and operating intelligence the market now expects. Classic and Premier remain alternatives, but the first recommendation should not waive the technology platform or price from the older benchmark-discount model. Keep ancillary services separate: lease renewals, sales packages, closings, alteration agreement review, after-hours meetings, project management over threshold, and state/local compliance work. Label all fee assumptions until the budget, audited financials, prior management report, rent roll, and service scope are reviewed.\n\n`;
     resp += `**Board-safe message:** Camelot can be creative with staffing, automation, accounting, reporting, and vendor oversight, but the formal proposal should wait for financials and a verified operating picture.`;
     return resp;
   }

@@ -23,6 +23,9 @@ const acquisitionPipelineFile = resolve(root, 'src/lib/acquisition-pipeline.ts')
 const arthurPageFile = resolve(root, 'src/pages/Arthur.tsx');
 const arthurUnderwritingFile = resolve(root, 'src/lib/arthur-underwriting.ts');
 const nyResearchSourcesFile = resolve(root, 'src/lib/ny-research-sources.ts');
+const aiClientFile = resolve(root, 'src/lib/ai-client.ts');
+const agreementsFile = resolve(root, 'src/pages/Agreements.tsx');
+const excaliburFile = resolve(root, 'src/lib/excalibur.ts');
 const jackieReportQaSkillFile = resolve(root, '.codex/skills/jackie-report-qa/SKILL.md');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
@@ -40,12 +43,15 @@ const acquisitionPipelineSource = readFileSync(acquisitionPipelineFile, 'utf8');
 const arthurPageSource = readFileSync(arthurPageFile, 'utf8');
 const arthurUnderwritingSource = readFileSync(arthurUnderwritingFile, 'utf8');
 const nyResearchSourcesSource = readFileSync(nyResearchSourcesFile, 'utf8');
+const aiClientSource = readFileSync(aiClientFile, 'utf8');
+const agreementsSource = readFileSync(agreementsFile, 'utf8');
+const excaliburSource = readFileSync(excaliburFile, 'utf8');
 const jackieReportQaSkillSource = readFileSync(jackieReportQaSkillFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${jackieReportQaSkillSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${jackieReportQaSkillSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -273,6 +279,12 @@ const requiredTokens = [
   ['Intelligence recommended investment row', 'Recommended Package'],
   ['Intelligence package is default recommendation', 'Recommended starting point: <strong>Camelot Intelligence</strong>'],
   ['Technology priced inside Intelligence', 'Priced inside the recommended Intelligence package'],
+  ['Jackie master fee sourced from Intelligence', 'Jackie now uses Camelot Intelligence as the recommended starting package'],
+  ['Jackie email uses Intelligence fee', 'Intelligence Management Fee'],
+  ['Proposal agreement uses Intelligence fee', 'Camelot Intelligence Management Fee'],
+  ['AI proposal logic starts with Intelligence', 'Camelot Intelligence package as the recommended pricing matrix'],
+  ['Agreement default tier is Intelligence', "selectedTier: 'intelligence'"],
+  ['Agreement tier list starts with Intelligence recommendation', 'Recommended: AI portal, zero bank fees, market reports'],
   ['Portfolio street view embeds', 'portfolioStreetViewEmbed'],
   ['Portfolio visual helper', 'portfolioVisual'],
   ['949 Park actual case study page', 'https://www.camelot.nyc/case-studies/949-park-ave-condominium/'],

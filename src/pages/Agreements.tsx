@@ -83,8 +83,8 @@ export default function Agreements() {
   };
 
   const tierOptions: Array<{ key: AgreementInput['selectedTier']; label: string; desc: string }> = [
+    { key: 'intelligence', label: 'Camelot Intelligence ⭐', desc: 'Recommended: AI portal, zero bank fees, market reports' },
     { key: 'classic', label: 'Camelot Classic', desc: 'Full management, standard tech' },
-    { key: 'intelligence', label: 'Camelot Intelligence ⭐', desc: 'AI portal, zero bank fees, market reports' },
     { key: 'premier', label: 'Camelot Premier', desc: 'White-glove, dedicated PM, insurance rebid' },
   ];
 
