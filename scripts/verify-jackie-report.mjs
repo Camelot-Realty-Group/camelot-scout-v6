@@ -51,6 +51,7 @@ const requiredTokens = [
   ['22 East 22nd known profile', "canonicalAddress: '22 East 22nd Street, New York, NY 10010'"],
   ['22 East 22nd unit count', 'units: 19'],
   ['22 East 22nd co-op TIC type', "propertyType: 'Co-operative / Tenancy-in-Common'"],
+  ['22 East 22nd verified image asset', './images/22-east-22nd/22East22ndStreet_NYC.jpg'],
   ['22 East 22nd no 122-unit guard', 'Do not publish the property as 122 units'],
   ['22 East 22nd exact-address lock', 'hasExact22East22Subject'],
   ['22 East 22nd release guard', 'Known Property Guard: 22 East 22nd'],

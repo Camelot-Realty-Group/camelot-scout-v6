@@ -1608,6 +1608,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       yearBuilt: 1900,
       propertyType: 'Co-operative / Tenancy-in-Common',
       neighborhoodName: 'Flatiron / Madison Square',
+      imageUrls: ['./images/22-east-22nd/22East22ndStreet_NYC.jpg'],
       description: '22 East 22nd Street is a small pre-war residential building in the Flatiron / Madison Square market. Camelot treats the property as a 19-unit co-op or tenancy-in-common candidate unless board, offering-plan, land-record, or ownership records confirm a different legal structure.',
       amenities: [
         'Pre-war walk-up operating profile',
@@ -3103,7 +3104,10 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     commercialIntel,
     buildingPhotos: effectiveBuildingPhotos,
     neighborhoodIntel,
-    raw,
+    raw: {
+      ...raw,
+      knownFacts: knownFacts || null,
+    },
   };
 }
 
