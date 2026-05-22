@@ -7122,7 +7122,7 @@ function generateProposal() {
   var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Services \u2014 ' + buildingNameClean + '</title>' +
   '<style>' +
   '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }' +
-  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.65; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: .82in .72in .72in; }' +
+  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.65; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1.16in .72in .72in; }' +
   'h1 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 800; color: #111; text-align: center; margin: 20px 0 4px 0; letter-spacing: 1.2px; }' +
   'h2 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 800; color: #A89035; margin: 18px 0 7px 0; padding-bottom: 4px; border-bottom: 1.5px solid #A89035; text-transform: uppercase; letter-spacing: 0.7px; }' +
   'h3 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 800; color: #111; margin: 13px 0 4px 0; }' +
@@ -7135,9 +7135,11 @@ function generateProposal() {
   '.fee-box { background: #F5F0E5; border-left: 3px solid #A89035; padding: 12px 16px; margin: 10px 0; }' +
   '.fee-box strong { color: #A89035; }' +
   '.price { color:#111; font-weight:900; text-decoration: underline; text-decoration-color:#A89035; text-underline-offset: 2px; }' +
-  '.proposal-header { position: fixed; top: 0; left: 0; right: 0; height: .56in; padding: .13in .55in .08in; border-bottom: 1px solid #D5D0C6; background: #fff; display:flex; align-items:center; justify-content:space-between; z-index: 10; }' +
-  '.proposal-header img { width: 132px; height:auto; display:block; }' +
-  '.proposal-header .hdr-text { font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:8.6px; letter-spacing:1.2px; color:#A89035; text-transform:uppercase; text-align:right; }' +
+  '.proposal-header { position: fixed; top: 0; left: 0; right: 0; height: .9in; padding: .11in .55in .1in; border-bottom: 1px solid #D5D0C6; background: #fff; display:flex; align-items:center; justify-content:space-between; gap:18px; z-index: 10; }' +
+  '.proposal-header .brand-box { width: 1.9in; height: .68in; background:#C9A12C; overflow:hidden; border:1px solid #B48D22; display:flex; align-items:center; justify-content:center; }' +
+  '.proposal-header .brand-box img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }' +
+  '.proposal-header .hdr-contact { font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:8.8px; line-height:1.45; letter-spacing:.35px; color:#2C3240; text-align:right; }' +
+  '.proposal-header .hdr-contact strong { color:#A89035; text-transform:uppercase; letter-spacing:1.2px; }' +
   '.proposal-footer { position: fixed; bottom: 0; left: 0; right: 0; height: .42in; padding: .08in .55in; border-top: 1px solid #D5D0C6; background:#fff; display:flex; align-items:center; justify-content:space-between; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:8.5px; color:#777; z-index:10; }' +
   '.proposal-footer .page-num::after { content: counter(page); }' +
   '.fact-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin: 10px 0 12px; padding:10px 12px; background:#F8F6EF; border:1px solid #D5D0C6; }' +
@@ -7150,21 +7152,16 @@ function generateProposal() {
   '.phase-title { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700; color: #3A4B5B; font-size: 11px; margin-bottom: 4px; }' +
   '.page-break { page-break-before: always; }' +
   '.signature-page { min-height: 8.2in; display:flex; flex-direction:column; justify-content:center; }' +
-  '@media print { @page { size: letter; margin: .58in .55in .5in; } body { padding: .28in 0 .28in; max-width: none; font-size: 11px; } .proposal-header,.proposal-footer{position:fixed} }' +
+  '@media print { @page { size: letter; margin: 1in .55in .5in; } body { padding: .2in 0 .28in; max-width: none; font-size: 11px; } .proposal-header,.proposal-footer{position:fixed} }' +
   '</style></head><body>' +
-  '<div class="proposal-header"><img src="./images/camelot-logo.png" alt="Camelot Property Management" onerror="this.style.display=&quot;none&quot;"><div class="hdr-text">Proposal of Property Management Services<br>' + buildingNameClean + '</div></div>' +
+  '<div class="proposal-header"><div class="brand-box"><img src="./images/camelot-gold-logo.png" alt="Camelot Realty Group" onerror="this.style.display=&quot;none&quot;"></div><div class="hdr-contact"><strong>Camelot Property Management Services Corp.</strong><br>57 West 57th Street, Suite 410, New York, NY 10019<br>Office: (212) 206-9939 x701 &middot; info@camelot.nyc<br>www.camelot.nyc</div></div>' +
   '<div class="proposal-footer"><span>Camelot Property Management Services Corp. &middot; ' + addressClean + '</span><span>Page <span class="page-num"></span></span></div>' +
 
   /* ══════════════════════════════════════════════════════════════ */
   /* COVER */
-  '<div style="text-align:center;margin-bottom:20px">' +
-  '<div class="cover-title">C A M E L O T</div>' +
-  '<div style="font-size:9px;color:#A89035;letter-spacing:1.5px">P R O P E R T Y &nbsp; M A N A G E M E N T</div>' +
-  '</div>' +
-
   '<h1>' + buildingNameClean + '</h1>' +
-  '<div style="text-align:center;font-size:11px;color:#3A4B5B;font-weight:700;letter-spacing:0.5px;margin-bottom:16px">PROPOSAL OF PROPERTY MANAGEMENT SERVICES</div>' +
-  '<div style="text-align:center;font-size:10px;color:#888">Prepared by Camelot Property Management Services Corp.</div>' +
+  '<div style="text-align:center;font-size:11px;color:#3A4B5B;font-weight:700;letter-spacing:0.5px;margin-bottom:10px">PROPOSAL OF PROPERTY MANAGEMENT SERVICES</div>' +
+  '<div style="text-align:center;font-size:10.5px;color:#555;line-height:1.65;margin-bottom:18px">Prepared for the ' + boardLabel + '<br><strong>' + buildingNameClean + '</strong><br>' + addressClean + '</div>' +
 
   '<div class="hr"></div>' +
 

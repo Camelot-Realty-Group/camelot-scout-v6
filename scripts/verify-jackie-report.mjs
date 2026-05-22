@@ -282,6 +282,8 @@ const requiredTokens = [
   ['Jackie master fee sourced from Intelligence', 'Jackie now uses Camelot Intelligence as the recommended starting package'],
   ['Jackie email uses Intelligence fee', 'Intelligence Management Fee'],
   ['Proposal agreement uses Intelligence fee', 'Camelot Intelligence Management Fee'],
+  ['Proposal uses corporate gold logo', 'camelot-gold-logo.png'],
+  ['Proposal header uses contact block', 'hdr-contact'],
   ['AI proposal logic starts with Intelligence', 'Camelot Intelligence package as the recommended pricing matrix'],
   ['Agreement default tier is Intelligence', "selectedTier: 'intelligence'"],
   ['Agreement tier list starts with Intelligence recommendation', 'Recommended: AI portal, zero bank fees, market reports'],
