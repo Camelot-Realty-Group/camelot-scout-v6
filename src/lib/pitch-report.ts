@@ -99,6 +99,36 @@ function isHoaExecutiveOpportunity(d: MasterReportData): boolean {
   return d.reportFocus?.selectedFocus?.includes('hoa_recovery') || d.raw?.proposalMode === 'hoa_executive_recovery' || /hills\s+of\s+monroe|monroe,\s*ct|homeowners association|hoa/i.test(`${d.buildingName} ${d.address} ${d.propertyType}`);
 }
 
+function isJacksonHeights85th(d: MasterReportData): boolean {
+  return /37[-\s]?40\s+85th|37[-\s]?34\s+85th|85th\s+st.*jackson\s+heights|85th\s+street.*11372/i.test(`${d.buildingName || ''} ${d.address || ''}`);
+}
+
+const JACKSON_85TH_SCOPE_INCLUDED = [
+  'Bill for and collect maintenance, assessments, shareholder charges, and approved building fees',
+  'Review, code, and pay mortgage obligations, co-op bills, recurring expenses, and vendor invoices',
+  'Bookkeeping plus monthly and annual financial reports for board review',
+  'Coordinate with the co-op attorney on collections, governance, notices, and legal follow-up',
+  'Coordinate with the co-op accountant on tax return, audit, and year-end package preparation',
+  'Manage superintendent / staff payroll, workers comp coordination, and coverage evaluation',
+  'Arrange maintenance, repairs, vendor walkthroughs, emergency response, and board updates',
+];
+
+const JACKSON_85TH_SEPARATE_SCOPE = [
+  'Underlying mortgage refinancing preparation and lender package support after financial review',
+  'Local Law 11 / FISP, DOB, HPD, OATH/ECB, boiler, fire-safety, and insurance compliance roadmap',
+  'Insurance rebid and deductible review to test controllable savings',
+  'Parking, laundry / washer-dryer, move-in/out, sublet, alteration, sale, closing, and document fee schedule review',
+  'Project-management scope for capital work, major repairs, or board-approved special assignments',
+  'At least five reference contacts supplied under separate cover after permission is confirmed',
+];
+
+const JACKSON_85TH_TRANSITION_STEPS: Array<[string, string[]]> = [
+  ['Days 1-7', ['Collect prior management report, latest budget, audit, bank statements, mortgage statements, arrears, vendor contracts, insurance, house rules, shareholder roster, minutes, and open legal/compliance files.', 'Confirm board authority, banking workflow, emergency contacts, superintendent coverage, and current management transition timing.']],
+  ['Days 8-15', ['Set up accounting controls, maintenance billing, AP approval workflow, MDS reporting structure, document folders, vendor COIs, W-9s, and recurring expense calendar.', 'Begin insurance, mortgage, tax abatement, and vendor-cost review so pricing and savings opportunities are tied to real documents.']],
+  ['Days 16-23', ['Review Local Law 11 / FISP, HPD, DOB, OATH/ECB, boiler, fire-safety, lead-paint, insurance inspection, and repair obligations against the building size and records.', 'Evaluate porter / handyman / superintendent options and prepare a practical staffing recommendation for the board.']],
+  ['Days 24-30', ['Deliver a board transition memo with fee menu, Schedule B1-style inclusions/exclusions, refinance prep checklist, reference package, vendor priorities, and compliance roadmap.', 'Hold a board meet-and-greet by Zoom or in person to align scope before final contract execution.']],
+];
+
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch] || ch));
 }
@@ -112,6 +142,9 @@ function clientRecipientLabel(d: MasterReportData): string {
 
 function coverLetterParagraphs(d: MasterReportData): string {
   const building = d.buildingName || d.address;
+  if (isJacksonHeights85th(d)) {
+    return `<div style="font-family:'Cormorant Garamond',Georgia,serif;color:#1a2744;font-size:17px;line-height:1.5"><p style="margin-bottom:12px"><strong style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px">Dear Samantha and Board Members,</strong> thank you for taking the time to speak with Valerie, Vincent, and the Camelot team about <strong>${escapeHtml(building)}</strong>. We understand this is a small Jackson Heights co-op with a shared garden, recent capital-project fatigue, rising cost pressure, mortgage and tax-abatement considerations, and a need for more consistent vendor, superintendent, accounting, and board support.</p><p style="margin-bottom:12px">Before we set a formal proposal or management agreement, Camelot would like to review the most recent financial report, management report, audit, operating budget, mortgage statements, insurance information, vendor list, and any Local Law 11 / compliance files. With your permission, those records let us quantify a fee structure that is fair to the building, identify refinancing and savings opportunities, and separate base management from items that should be billed separately or paid by the applicable shareholder.</p><p style="margin-bottom:16px">Our goal is to make the transition feel organized instead of burdensome: cleaner monthly reporting, responsive maintenance coordination, attorney and accountant cooperation, insurance and vendor review, superintendent coverage evaluation, and practical guidance for refinancing preparation. We would welcome a board meet-and-greet by Zoom or in person and will provide references and a Schedule B1-style fee menu for board review.</p><div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:#1a2744;line-height:1.7"><strong>Sincerely yours,</strong><br><br>David A. Goldoff<br>President, Camelot Property Management</div></div>`;
+  }
   const recipient = clientRecipientLabel(d);
   return `<div style="font-family:'Cormorant Garamond',Georgia,serif;color:#1a2744;font-size:17px;line-height:1.52"><p style="margin-bottom:13px"><strong style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px">Dear ${recipient},</strong> thank you for allowing Camelot the opportunity to discuss <strong>${escapeHtml(building)}</strong> and how we may be able to support your property, residents, staff, and ownership goals. Camelot Property Management is a New York-based, hands-on management company that combines experienced property managers, in-house accounting, compliance discipline, and practical proptech to deliver clearer communication, cleaner reporting, faster response, and better day-to-day control.</p><p style="margin-bottom:13px">Projected fees associated with our services would be quantified once we review, with your permission, the prior property manager report, last audited financials, or latest operating budget. Those materials help us identify strengths, weaknesses, service needs, and cost pressures so we can propose a meaningful budget and economical solution before any formal proposal or agreement.</p><p style="margin-bottom:18px">We serve our clients by becoming a value-added member of the building team: organizing operations, improving vendor oversight, supporting boards and landlords with timely financials, using automation and resident-facing tools where they make sense, and protecting the property with local knowledge and senior attention. We look forward to speaking with you soon and learning where Camelot can be most useful.</p><div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:#1a2744;line-height:1.7"><strong>Sincerely yours,</strong><br><br>David A. Goldoff<br>President, Camelot Property Management</div></div>`;
 }
@@ -153,6 +186,9 @@ function estimateScopedMonthlyFee(d: MasterReportData): number {
 }
 
 function scopedFeeLabel(d: MasterReportData): string {
+  if (isJacksonHeights85th(d)) {
+    return '$1,850-$2,250/mo ($22,200-$27,000/yr prelim.)';
+  }
   const monthly = estimateScopedMonthlyFee(d);
   return `${fmt$(monthly)}/mo (${fmt$(monthly * 12)}/yr)`;
 }
@@ -320,6 +356,35 @@ function landmarkLabels(d: MasterReportData): string[] {
     'LPC / neighborhood landmark review',
   ];
   return Array.from(new Set([...known, ...live, ...fallback])).slice(0, 5);
+}
+
+function jackson85thScopeSlide(d: MasterReportData): string {
+  return `<div class="slide slide-cream"><div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div><div class="pad"><div class="section-title">Scope From the Board Discussion</div><p class="body-text" style="margin-bottom:14px">Based on the discussion with Samantha, Camelot should treat this as a small co-op transition proposal: clear base management, transparent add-ons, and a fee menu that the board can actually understand.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="gold-card"><div class="sub-heading" style="font-size:18px">Base Management Scope</div>${JACKSON_85TH_SCOPE_INCLUDED.map(item => `<div class="check-item" style="font-size:12px;line-height:1.35;margin-bottom:7px"><div class="check-icon">✓</div>${item}</div>`).join('')}</div><div class="gold-card"><div class="sub-heading" style="font-size:18px">Separate / Confirmed After Records Review</div>${JACKSON_85TH_SEPARATE_SCOPE.map(item => `<div class="check-item" style="font-size:12px;line-height:1.35;margin-bottom:7px"><div class="check-icon">✓</div>${item}</div>`).join('')}</div></div><div class="source-note">Sources: May 2026 Camelot / Samantha call notes, Camelot fee structure guide, standard management agreement / Schedule B1 framework, and requested board follow-up materials.</div></div></div>`;
+}
+
+function jackson85thFinancialContextSlide(d: MasterReportData): string {
+  const items = [
+    ['Mortgage Review', 'Two building mortgages of approximately $2M were discussed, with rates around 4%-5% and a refinance window to prepare for. Camelot accounting can help organize the lender package and financial story.'],
+    ['Tax Abatement', 'A tax abatement expiration was flagged as a future budget pressure. The proposal should model what that means before recommending maintenance increases or assessments.'],
+    ['Income Levers', 'Parking, laundry / washer-dryer revenue, fee schedules, and possible assessments should be reviewed against governing documents and shareholder tolerance.'],
+    ['Cost Levers', 'Insurance rebidding, deductible strategy, vendor pricing, preventive maintenance, and superintendent coverage are the controllable cost areas to test first.'],
+  ];
+  return `<div class="slide slide-cream"><div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div><div class="pad"><div class="section-title">Budget, Refinancing &amp; Savings Workstream</div><div style="display:grid;grid-template-columns:.92fr 1.08fr;gap:18px"><div>${propertyImageCard(d, '37-40 85th Street exterior / front entrance', 410)}</div><div style="display:grid;gap:10px">${items.map(([title, copy]) => `<div class="gold-card" style="padding:14px 16px"><div style="font-size:16px;font-weight:800;color:#1a2744;margin-bottom:4px">${title}</div><div style="font-size:12px;color:#4a5568;line-height:1.45">${copy}</div></div>`).join('')}</div></div><div class="source-note">Pricing should be finalized only after reviewing latest budget, audit, prior management report, mortgage statements, tax information, arrears, insurance, vendor contracts, and requested staffing cadence.</div></div></div>`;
+}
+
+function jackson85thThirtyDaySlide(): string {
+  return `<div class="slide slide-cream"><div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div><div class="pad"><div class="section-title">30-Day Transition Plan</div><p class="body-text" style="margin-bottom:14px">The first month should make the board feel the difference: organized files, visible money controls, clear vendor ownership, and a real plan for superintendent coverage and refinancing preparation.</p><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">${JACKSON_85TH_TRANSITION_STEPS.map(([title, bullets]) => `<div class="gold-card" style="min-height:375px;padding:15px 14px"><div class="sub-heading" style="font-size:17px">${title}</div>${(bullets as string[]).map(item => `<div class="check-item" style="font-size:12px;line-height:1.35;margin-bottom:9px"><div class="check-icon">✓</div>${item}</div>`).join('')}</div>`).join('')}</div><div class="source-note">Transition begins after board authorization, executed agreement, prior-manager records, bank setup, and board-approved resident/vendor communication.</div></div></div>`;
+}
+
+function jackson85thReferencesSlide(): string {
+  const refs = [
+    'Small co-op reference with similar board-service needs',
+    'Queens / outer-borough residential reference',
+    'Accounting and monthly reporting reference',
+    'Capital project / Local Law compliance reference',
+    'Responsive transition / communication reference',
+  ];
+  return `<div class="slide slide-cream"><div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div><div class="pad"><div class="section-title">References &amp; Follow-Up Package</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:18px"><div class="gold-card"><div class="sub-heading">Reference Contacts to Provide</div>${refs.map(item => `<div class="check-item"><div class="check-icon">✓</div>${item}</div>`).join('')}<p class="small" style="margin-top:12px">Camelot should provide names, buildings, emails / phone numbers, and permission-confirmed reference contacts under separate cover.</p></div><div class="gold-card"><div class="sub-heading">Materials Samantha Requested</div>${['AI-generated meeting notes', 'Standard management agreement', 'Schedule B1 / fee menu: included vs separately billed', 'Local Law 11 and related compliance forms', 'Refinancing preparation guidance from accounting team', 'Written proposal that can be shared with the board'].map(item => `<div class="check-item"><div class="check-icon">✓</div>${item}</div>`).join('')}</div></div><div class="source-note">Source: May 2026 call action items and board follow-up request.</div></div></div>`;
 }
 
 function intelligenceSourceCards(): string {
@@ -572,7 +637,10 @@ ${onboardingChecklistSlide()}
 export function generateBoardMeetingDeck(d: MasterReportData): string {
   if (isHoaExecutiveOpportunity(d)) return generateHoaBoardMeetingDeck(d);
   const base = generatePitchReport(d);
-  const insert = executiveTeamSlide();
+  const jacksonInsert = isJacksonHeights85th(d)
+    ? `${jackson85thScopeSlide(d)}\n${jackson85thFinancialContextSlide(d)}\n${jackson85thThirtyDaySlide()}\n${jackson85thReferencesSlide()}`
+    : '';
+  const insert = `${jacksonInsert}\n${executiveTeamSlide()}`;
   return base.replace('<!-- SLIDE 13: Next Steps (Dark) -->', `${insert}\n<!-- SLIDE 13: Next Steps (Dark) -->`)
     .replace('Property Intelligence Report', 'Board Meeting Deck')
     .replace('<!-- SLIDE 14: Thank You (Dark) -->', '<!-- SLIDE 15: Thank You (Dark) -->');

@@ -1552,7 +1552,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       canonicalAddress: '37-40 85th Street, Jackson Heights, NY 11372',
       buildingName: '37-40 85th Street',
       borough: 'Queens',
-      units: 18,
+      units: 16,
       stories: 4,
       yearBuilt: 1921,
       propertyType: 'Co-operative',
@@ -1565,7 +1565,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
         '/images/37-40-85th/red-brick-garages.jpg',
         '/images/37-40-85th/street-view-context.png',
       ],
-      description: '37-40 85th Street is a small pre-war Jackson Heights co-operative / residential community with garden-style operating considerations, common exterior areas, and a scope that requires hands-on accounting, board support, vendor oversight, and maintenance coordination.',
+      description: '37-40 85th Street is a small pre-war Jackson Heights co-operative / residential community with garden-style operating considerations, common exterior areas, and a scope that requires hands-on accounting, board support, vendor oversight, superintendent coverage review, refinancing preparation, and maintenance coordination.',
       amenities: [
         'Pre-war brick residential setting',
         'Shared rear garden / courtyard context',
@@ -1579,9 +1579,12 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
         'Small co-op governance, accounting controls, maintenance collection, and superintendent payroll support are the primary operating signals.',
       ],
       revenueOpportunities: [
-        'Laundry, storage, garage or parking policy and recoverable-fee schedule review.',
+        'Parking fee review and garage / parking policy update where permitted by governing documents.',
+        'Washer / dryer or laundry revenue review, including vendor economics and shareholder convenience.',
         'Move-in/move-out, sales package, alteration, sublet, refinancing, closing, and document fee schedule review.',
-        'Vendor rebidding for insurance, repairs, supplies, extermination, landscaping, snow and seasonal work.',
+        'Insurance rebid, deductible review, and vendor pricing comparison to reduce controllable operating costs.',
+        'Vendor rebidding for repairs, supplies, extermination, landscaping, snow and seasonal work.',
+        'Mortgage refinancing preparation and lender package coordination with Camelot accounting support.',
         'Preventive maintenance calendar, arrears workflow, attorney coordination, and accountant/tax package process.',
       ],
       landmarks: [
@@ -1594,9 +1597,9 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       locationTitle: 'Jackson Heights Garden Co-op Positioning',
       locationCopy: 'The property sits in the Jackson Heights residential market, where garden-style co-op character, transit access, and local vendor responsiveness are central to resident experience and long-term value.',
       lifestyleTitle: 'Small Co-op Governance, Accounting & Service Discipline',
-      lifestyleCopy: 'An 18-unit co-op needs clean monthly financials, maintenance collection discipline, superintendent/payroll coordination, vendor oversight, attorney/accountant cooperation, and practical repairs management without large-firm overhead.',
+      lifestyleCopy: 'A 16-unit co-op needs clean monthly financials, maintenance collection discipline, superintendent/payroll coordination, vendor oversight, attorney/accountant cooperation, and practical repairs management without large-firm overhead.',
       brandingTitle: '37-40 85th Street Jackson Heights Co-op Profile',
-      brandingDescription: 'Known-property guard: Jackie treats 37-40 / 37-34 85th Street as an approximately 18-unit Jackson Heights co-op / residential building and uses uploaded building photos before Google fallback.',
+      brandingDescription: 'Known-property guard: Jackie treats 37-40 / 37-34 85th Street as a small approximately 16-unit Jackson Heights co-op / residential building and uses uploaded building photos before Google fallback.',
       researchSources: [
         'User-uploaded property photographs for 37-40 / 37-34 85th Street',
         'PropertyShark report supplied by Camelot for 37-34 85th St, Jackson Heights, NY 11372',
@@ -1624,6 +1627,11 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       professionalNotes: [
         'Formal proposal should be priced after reviewing prior management report, audited financials or latest budget, staffing, arrears, attorney/accountant needs, and requested service cadence.',
         'Primary scope includes billing and collecting maintenance, bill payment, vendor invoice review, bookkeeping, monthly and annual financial reports, lawyer/accountant cooperation, superintendent payroll/workers comp support, and arranging repairs.',
+        'May 2026 board discussion notes: Samantha is evaluating management options for a small Jackson Heights co-op after a period of heavy capital projects and board fatigue; final decisions rest with the board.',
+        'The board asked for a detailed fee menu / Schedule B1-style summary, at least five references, Local Law 11 / compliance information, and guidance around refinancing preparation.',
+        'Known budget pressures to review include two mortgages totaling approximately $2M at roughly 4%-5%, a future refinance window, and a tax abatement scheduled to expire at year-end.',
+        'Operating opportunities discussed include parking fee increases, washer/dryer or laundry revenue, insurance bidding / deductible review, vendor pricing, and possible assessment planning.',
+        'Staffing issue to evaluate: the building has not had a consistent on-site superintendent for a long time; Camelot should assess whether porter, handyman, or superintendent support is the right fit.',
       ],
     };
   }
