@@ -270,6 +270,8 @@ const requiredTokens = [
   ['Intelligence recommended investment row', 'Recommended Package'],
   ['Intelligence package is default recommendation', 'Recommended starting point: <strong>Camelot Intelligence</strong>'],
   ['Technology priced inside Intelligence', 'Priced inside the recommended Intelligence package'],
+  ['Portfolio street view embeds', 'portfolioStreetViewEmbed'],
+  ['Portfolio visual helper', 'portfolioVisual'],
   ['Sentinel 15 percent pricing rule', '15% below comparable large-firm pricing'],
   ['Scout integrations status endpoint', '/api/integrations/status'],
   ['Scout integrations push endpoint', '/api/integrations/push-building'],

@@ -1259,6 +1259,17 @@ function findNearbyPortfolioBuildings(lat: number | null, lng: number | null, bo
     .slice(0, limit);
 }
 
+function portfolioStreetViewEmbed(b: PortfolioBuilding): string {
+  return `https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_REPORT_KEY}&location=${b.lat},${b.lng}&heading=0&pitch=5&fov=78`;
+}
+
+function portfolioVisual(b: PortfolioBuilding, height: number): string {
+  if (b.image) {
+    return `<img src="${b.image}" alt="${b.address} portfolio property image" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<iframe src=&quot;${portfolioStreetViewEmbed(b)}&quot; width=&quot;100%&quot; height=&quot;${height}&quot; style=&quot;border:0;display:block&quot; loading=&quot;lazy&quot; referrerpolicy=&quot;no-referrer-when-downgrade&quot;></iframe>')">`;
+  }
+  return `<iframe src="${portfolioStreetViewEmbed(b)}" title="${b.address} Google Street View" width="100%" height="${height}" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+}
+
 function buildPortfolioSection(d: MasterReportData): string {
   const nearby = findNearbyPortfolioBuildings(d.latitude, d.longitude, d.borough, 5);
   const hasNearby = nearby.length > 0 && nearby[0].distance !== -1 && nearby[0].distance < 10;
@@ -1269,12 +1280,10 @@ function buildPortfolioSection(d: MasterReportData): string {
     const distSpan = distLabel ? ` <span style="color:#A89035;font-size:10px;font-weight:600">(${distLabel})</span>` : '';
     const streetViewLocation = `${b.address}, ${b.borough}, NY`;
     const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(streetViewLocation)}`;
-    const image = b.image || `https://maps.googleapis.com/maps/api/streetview?size=220x140&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
-    const fallbackImage = `https://maps.googleapis.com/maps/api/streetview?size=220x140&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
     return `<tr>
 <td style="width:92px;padding:6px">
   <a href="${streetViewUrl}" target="_blank" rel="noopener" style="display:block;width:84px;height:54px;border:1px solid #D5D0C6;background:#EDE9DF;overflow:hidden;text-decoration:none">
-    <img src="${image}" alt="${b.address} portfolio property image" style="width:100%;height:100%;object-fit:cover;display:block" onerror="if(this.src!=='${fallbackImage}'){this.src='${fallbackImage}'}else{this.parentElement.innerHTML='<div style=&quot;height:54px;display:flex;align-items:center;justify-content:center;background:#3A4B5B;color:#A89035;font-size:8px;font-weight:800;text-align:center;padding:6px&quot;>Street View</div>'}">
+    ${portfolioVisual(b, 54)}
   </a>
 </td>
 <td style="font-weight:700"><a href="${streetViewUrl}" target="_blank" rel="noopener" style="color:#0D2E63;text-decoration:none">${b.address}</a><br><span style="color:#A89035;font-size:9px;font-weight:600">${b.image ? 'Verified Camelot image' : 'Google Street View reference'}</span></td>
@@ -1288,10 +1297,8 @@ function buildPortfolioSection(d: MasterReportData): string {
   const portfolioImageStrip = nearby.map(b => {
     const streetViewLocation = `${b.address}, ${b.borough}, NY`;
     const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(streetViewLocation)}`;
-    const image = b.image || `https://maps.googleapis.com/maps/api/streetview?size=360x220&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
-    const fallbackImage = `https://maps.googleapis.com/maps/api/streetview?size=360x220&location=${encodeURIComponent(streetViewLocation)}&key=${GOOGLE_MAPS_REPORT_KEY}`;
     return `<a href="${streetViewUrl}" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:1px solid #D5D0C6;box-shadow:0 5px 12px rgba(44,50,64,0.07);overflow:hidden;display:block;min-height:112px">
-<div style="height:78px;background:#EDE9DF;overflow:hidden"><img src="${image}" alt="${b.address} building reference image" style="width:100%;height:100%;object-fit:cover;display:block" onerror="if(this.src!=='${fallbackImage}'){this.src='${fallbackImage}'}else{this.parentElement.innerHTML='<div style=&quot;height:78px;display:flex;align-items:center;justify-content:center;background:#3A4B5B;color:#A89035;font-size:9px;font-weight:800;text-align:center;padding:8px&quot;>${b.address}</div>'}"></div>
+<div style="height:78px;background:#EDE9DF;overflow:hidden">${portfolioVisual(b, 78)}</div>
 <div style="padding:7px 8px;font-size:8.5px;line-height:1.3;color:#3A4B5B;font-weight:700">${b.address}<br><span style="color:#A89035;font-weight:600">${b.image ? 'Verified Camelot image' : 'Google Street View reference'}</span></div>
 </a>`;
   }).join('\n');
