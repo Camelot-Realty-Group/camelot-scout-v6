@@ -369,9 +369,12 @@ function cleanBuildingName(value: string, address: string, managementCompany?: s
 // ============================================================
 
 function hasExact22East22Subject(...values: Array<string | null | undefined>): boolean {
-  const key = values.map(value => String(value || '')).join(' ').toLowerCase();
-  if (/(^|[^0-9])220\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key)) return false;
-  return /(^|[^0-9])22\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key);
+  return values.some(value => {
+    const key = String(value || '').toLowerCase();
+    if (!key) return false;
+    if (/(^|[^0-9])220\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key)) return false;
+    return /(^|[^0-9])22\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key);
+  });
 }
 
 function dedupeText(items: Array<string | null | undefined>): string[] {
@@ -1608,7 +1611,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       yearBuilt: 1900,
       propertyType: 'Co-operative / Tenancy-in-Common',
       neighborhoodName: 'Flatiron / Madison Square',
-      imageUrls: ['./images/22-east-22nd/22East22ndStreet_NYC.jpg'],
+      imageUrls: ['https://camelot-scout-v6.onrender.com/images/22-east-22nd/22East22ndStreet_NYC.jpg'],
       description: '22 East 22nd Street is a small pre-war residential building in the Flatiron / Madison Square market. Camelot treats the property as a 19-unit co-op or tenancy-in-common candidate unless board, offering-plan, land-record, or ownership records confirm a different legal structure.',
       amenities: [
         'Pre-war walk-up operating profile',
