@@ -13,6 +13,7 @@ import { getNeighborhoodIntel, generateNeighborhoodIntelHTML } from '@/lib/neigh
 import { fetchStreetEasyBuilding, type StreetEasyBuilding } from '@/lib/streeteasy';
 import { searchViolations, type ViolationSummary } from '@/lib/nyc-violations';
 import { fetch311Complaints } from '@/lib/nyc-311';
+import { NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
 
 // ============================================================
 // Types
@@ -3505,6 +3506,16 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       ? `Signals: ${[...d.commercialIntel.commercialSignals, ...d.commercialIntel.amenities].slice(0, 5).join(', ') || 'Verified research completed'}`
       : 'No confirmed commercial/amenity/official website signals yet; verify with site visit, offering plan, or board materials',
   });
+  const nyPeopleEntityCompMissing = NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES.filter(source => !html.includes(source));
+  checks.push({
+    name: 'NY People / Entity / Comp Web Source Stack',
+    status: isHoaRecovery || isFloridaReceivership || nyPeopleEntityCompMissing.length === 0 ? 'pass' : 'fail',
+    detail: isHoaRecovery || isFloridaReceivership
+      ? 'Non-NY report mode uses state/county/town and local-market equivalents instead of the NYC-specific web enrichment stack'
+      : nyPeopleEntityCompMissing.length
+        ? `Missing NY web enrichment source(s): ${nyPeopleEntityCompMissing.join(', ')}`
+        : `NY scans include ${nyPeopleEntityCompSourceSummary()}`,
+  });
   const requiredCommercialSources = isHoaRecovery
     ? [
         'Connecticut Secretary of the State business/entity search path',
@@ -4920,11 +4931,20 @@ ${commercialIntel.brandingDescription ? `<p style="margin-top:10px">${safe(comme
 <div style="background:#fff;border:1px solid #D8C894;border-radius:8px;padding:10px 12px;margin-top:14px;font-size:10px;color:#555;line-height:1.55">
 <strong style="color:#A89035">Commercial / amenity source stack:</strong>
 NYC vacant storefront data · CoStar/LoopNet-style commercial listings · Walker &amp; Dunlop Suite / commercial data · Local Logic neighborhood enrichment · PropertyShark · DOT/DOB parking and garage records · public signage and official building website review. Tenant names, garage operators, storage inventory, and amenity revenue must be verified before publication.
+<br><strong style="color:#A89035">NY people / entity / comp web stack:</strong> ${safe(nyPeopleEntityCompSourceSummary())}. Use this stack for New York ownership, lender/note, litigation, management-review, broker, comparable-sale/rental, commercial occupant, and entity cross-checks.
 <div style="margin-top:5px">
 <a href="https://data.cityofnewyork.us/City-Government/Storefronts-Reported-Vacant-or-Not/92iy-9c3n/about_data" target="_blank">NYC storefront data</a> ·
 <a href="https://suite.walkerdunlop.com/" target="_blank">Walker &amp; Dunlop Suite</a> ·
 <a href="https://locallogic.co/data-enrichment/" target="_blank">Local Logic</a> ·
 <a href="https://www.propertyshark.com/mason/ny/New-York-City/Property-Search" target="_blank">PropertyShark</a>
+Â· <a href="https://www.pincusco.com/" target="_blank">PincusCo</a>
+Â· <a href="https://www.compass.com/" target="_blank">Compass</a>
+Â· <a href="https://www.cityrealty.com/nyc" target="_blank">CityRealty</a>
+Â· <a href="https://www.openigloo.com/" target="_blank">Openigloo</a>
+Â· <a href="https://www.casemine.com/" target="_blank">CaseMine</a>
+Â· <a href="https://www.corcoran.com/" target="_blank">Corcoran</a>
+Â· <a href="https://www.realtor.com/" target="_blank">Realtor.com</a>
+Â· <a href="https://www.zillow.com/" target="_blank">Zillow</a>
 </div>
 </div>
 ${commercialIntel.brandingImages.length > 0 ? `<div style="display:grid;grid-template-columns:repeat(${Math.min(commercialIntel.brandingImages.length, 4)},1fr);gap:10px;margin-top:18px">${commercialIntel.brandingImages.slice(0, 4).map(src => `<div style="height:100px;border:1px solid #D5D0C6;background:#fff;overflow:hidden"><img src="${src}" alt="${safe(d.buildingName)} branding image" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}</div>` : ''}

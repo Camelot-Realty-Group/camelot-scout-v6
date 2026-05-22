@@ -1,4 +1,5 @@
 import { slugify } from '@/lib/utils';
+import { NY_PEOPLE_ENTITY_COMP_SOURCE_STACK, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
 
 export type ArthurDealType =
   | 'commercial'
@@ -202,6 +203,13 @@ const SOURCE_SEARCH_BASES = {
   zillow: 'https://www.zillow.com/homes/',
   loopnet: 'https://www.loopnet.com/search/',
   propertyShark: 'https://www.propertyshark.com/mason/ny/New-York-City/Property-Search',
+  pincusCo: 'https://www.pincusco.com/?s=',
+  compass: 'https://www.compass.com/search/',
+  cityRealty: 'https://www.cityrealty.com/nyc/search',
+  openigloo: 'https://www.openigloo.com/building-search',
+  caseMine: 'https://www.casemine.com/search/us/',
+  corcoran: 'https://www.corcoran.com/search/for-sale/location/new-york-ny',
+  realtor: 'https://www.realtor.com/realestateandhomes-search/',
 };
 
 type ArthurSeed = Omit<
@@ -823,6 +831,7 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
   .pill { display:inline-block; border:1px solid #d8c99c; padding:6px 9px; margin:4px 5px 4px 0; background:#f8f5ec; }
   .footer { position:absolute; bottom:18px; right:30px; color:#8a8f99; font-size:10px; }
   .note { color:#6b7280; font-size:12px; line-height:1.45; }
+  .source-stack { border:1px solid #d8c99c; background:#fff; padding:14px; margin-top:16px; font-size:11px; line-height:1.45; color:#334963; }
 </style>
 </head>
 <body>
@@ -874,6 +883,10 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
       ${(property.selectedCriteriaNotes || buildSelectedCriteriaNotes(normalizedCriteria)).map((item) => `<span class="pill">${item}</span>`).join('')}
     </div>
   </div>
+  <div class="source-stack">
+    <strong>NY people / entity / comp source stack:</strong> ${nyPeopleEntityCompSourceSummary()}.
+    <br />Arthur must use this stack for New York ownership, lender, note, broker, litigation, commercial occupant, entity, and comparable-sale/rental enrichment before a candidate is treated as investment-ready.
+  </div>
   <div class="footer">2</div>
 </section>
 <section class="page">
@@ -914,6 +927,7 @@ export function buildArthurExcelHtml(property: ArthurProperty, criteria: ArthurC
     ['Unit Range', `${criteria.minUnits}-${criteria.maxUnits}`],
     ['Broker Notes', property.brokerNotes],
     ['Arthur Thesis', property.arthurThesis],
+    ['NY People / Entity / Comp Sources', NY_PEOPLE_ENTITY_COMP_SOURCE_STACK.join(' | ')],
   ];
   const sensitivity = model.sensitivity.map((row) =>
     `<tr><td>${row.caseName}</td><td>${row.exitCap}</td><td>${row.rentGrowth}</td><td>${row.irr}</td><td>${row.equityMultiple}</td></tr>`

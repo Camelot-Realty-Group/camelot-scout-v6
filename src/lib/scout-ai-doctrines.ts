@@ -1,3 +1,5 @@
+import { NY_PEOPLE_ENTITY_COMP_SOURCE_STACK, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+
 export type ScoutAgentId =
   | 'jackie'
   | 'merlin'
@@ -24,6 +26,7 @@ Scout competitive operating standard:
 - Scout must position Camelot as a boutique institutional operator: senior attention, local judgment, in-house accounting, legal/engineering advisory, automation, field operations, and source-checked reporting.
 - Every bot must separate confirmed facts from assumptions, name missing documents, and create the next useful action instead of pretending the record is complete.
 - Client-facing exports must support print, PDF, HTML, and email workflows with clean filenames, concise cover notes, page numbers where applicable, and no broken images or placeholder data.
+- New York people, comps, contacts, litigation, commercial occupants, ownership, lender, note, and entity scans must include the NY people/entity/comp stack: ${nyPeopleEntityCompSourceSummary()}.
 `;
 
 export const LEAD_GENERATOR_DEPLOYMENT_PROMPT = `
@@ -134,6 +137,7 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
       'Scout property record and public records',
       'Rent roll, financials, listing photos, permits, violations and compliance data when available',
       'Management, staffing, vendor, super and transition records',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
     ],
     deliverables: ['Acquisition Fit Brief', '90-Day transition plan', 'Capex estimate', 'Operational red flags', 'Proceed / Caveat / Kill recommendation'],
     releaseGates: ['No Arthur handoff before Jackie acquisition-fit score', 'Capex includes contingency', 'Red flags explicitly listed'],
@@ -154,6 +158,7 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
       'NYC / state / municipal property records',
       'HPD, DOB, ECB/OATH, DOF, ACRIS, court and lien sources when applicable',
       'StreetEasy, Zillow, PropertyShark, local MLS and official property websites for images and market context',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
     ],
     deliverables: ['Pipeline brief', 'Board talking points', 'Outreach draft', 'Savings plan', 'Verification checklist'],
     releaseGates: ['No guessed identity data', 'No self-managed claim without source', 'No zero-value conclusion without missing-data explanation'],
@@ -177,6 +182,7 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
       'ACRIS / county land records',
       'StreetEasy / Zillow / MLS-style listings',
       'Official building websites and management websites',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
     ],
     deliverables: ['Lead score', 'Owner / manager intel', 'Source gap list', 'Pipeline next action', 'Neighborhood opportunity brief', 'Lead generator deployment prompt'],
     releaseGates: ['Address and unit-count sanity check', 'Owner/manager confidence label', 'Commercial and amenity scan when applicable', 'Hybrid batch/webhook workflow has environment variables and webhook secret configured'],
@@ -217,6 +223,7 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
     requiredSources: [
       'Miller Samuel and REBNY-style market reports',
       'StreetEasy, Zillow, MLS and PropertyShark-style comps',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
       'Niche, NeighborhoodScout, NYC Open Data or local equivalents',
       'Camelot portfolio history and case studies',
     ],
@@ -239,6 +246,7 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
       'Jackie report focus notes',
       'Get-a-Quote inquiry notes',
       'Camelot roster, services and case studies',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
     ],
     deliverables: ['First email', 'Follow-up email', 'Call script', 'Meeting agenda', 'Board packet cover note'],
     releaseGates: ['Draft-only behavior', 'No duplicate emails', 'Correct Camelot address and phone', 'Property name/address in subject'],
@@ -280,6 +288,7 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
       'Sentinel Memo',
       'Rent roll, T12, budget, debt terms, taxes, insurance, capex schedule and market comps',
       'Perplexity/market research, PropertyShark/Reonomy/CoStar/MLS-style comps where licensed or available',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
     ],
     deliverables: ['Acquisition model', 'Sensitivity table', 'Investor deck', 'Lender deck', 'Sponsor summary', 'LOI'],
     releaseGates: ['Jackie approved or caveated the deal', 'Assumptions trace to source', 'Downside case and debt survivability shown'],

@@ -22,6 +22,7 @@ const botsPageFile = resolve(root, 'src/pages/Bots.tsx');
 const acquisitionPipelineFile = resolve(root, 'src/lib/acquisition-pipeline.ts');
 const arthurPageFile = resolve(root, 'src/pages/Arthur.tsx');
 const arthurUnderwritingFile = resolve(root, 'src/lib/arthur-underwriting.ts');
+const nyResearchSourcesFile = resolve(root, 'src/lib/ny-research-sources.ts');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
 const nycApiSource = readFileSync(nycApiFile, 'utf8');
@@ -37,11 +38,12 @@ const botsPageSource = readFileSync(botsPageFile, 'utf8');
 const acquisitionPipelineSource = readFileSync(acquisitionPipelineFile, 'utf8');
 const arthurPageSource = readFileSync(arthurPageFile, 'utf8');
 const arthurUnderwritingSource = readFileSync(arthurUnderwritingFile, 'utf8');
+const nyResearchSourcesSource = readFileSync(nyResearchSourcesFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -211,6 +213,17 @@ const requiredTokens = [
   ['Sentinel StreetEasy market source', 'StreetEasy Data Dashboard'],
   ['Sentinel PLUTO land context source', 'NYC DCP PLUTO/MapPLUTO'],
   ['Sentinel ACRIS foreclosure source', 'lis pendens'],
+  ['NY web enrichment source stack module', 'NY_PEOPLE_ENTITY_COMP_SOURCE_STACK'],
+  ['NY web enrichment source PincusCo', 'PincusCo: lender, note-sale, acquisition, foreclosure, financing, and sponsor/entity intelligence'],
+  ['NY web enrichment source Compass', 'Compass building pages: unit count, story count, building size'],
+  ['NY web enrichment source CityRealty', 'CityRealty building profiles'],
+  ['NY web enrichment source Openigloo', 'Openigloo: management-company reviews'],
+  ['NY web enrichment source CaseMine', 'CaseMine / court-opinion search'],
+  ['NY web enrichment source Corcoran', 'Corcoran building pages'],
+  ['NY web enrichment visible report stack', 'NY people / entity / comp web stack'],
+  ['NY web enrichment release gate', 'NY People / Entity / Comp Web Source Stack'],
+  ['NY web enrichment bot cards', 'NY_WEB_SOURCE_CARDS'],
+  ['Arthur NY enrichment stack', 'NY People / Entity / Comp Sources'],
   ['Sentinel 15 percent pricing rule', '15% below comparable large-firm pricing'],
   ['Scout integrations status endpoint', '/api/integrations/status'],
   ['Scout integrations push endpoint', '/api/integrations/push-building'],

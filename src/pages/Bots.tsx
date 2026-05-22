@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { BotStatus } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
 import { SCOUT_AGENT_DOCTRINES } from '@/lib/scout-ai-doctrines';
+import { NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES } from '@/lib/ny-research-sources';
 import { CAMELOT_ACQUISITION_PIPELINE, JACKIE_ACQUISITION_FIT_SECTIONS, SENTINEL_HANDOFF_RULES } from '@/lib/acquisition-pipeline';
 import {
   AlertCircle,
@@ -62,6 +63,11 @@ type BotRun = {
 const DRIVE_FOLDER = 'Google Drive folder 1T6WD8q-2h9Cq1kxCwFmIcdb4lo-A3EAF';
 
 const doctrineById = Object.fromEntries(SCOUT_AGENT_DOCTRINES.map((agent) => [agent.id, agent]));
+const NY_WEB_SOURCE_CARDS: BotSource[] = NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES.map((name) => ({
+  name: `NY web source: ${name}`,
+  kind: 'Generated',
+  status: 'reference',
+}));
 
 const DEMO_BOTS: DashboardBot[] = [
   {
@@ -97,6 +103,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'build_tur_proposal.py', kind: 'Drive', status: 'reference' },
       { name: 'build_tur_agreement.py', kind: 'Drive', status: 'reference' },
       { name: 'reference/jackie-skill.md', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Instant Proposal', href: '/instant-proposal', icon: Zap },
@@ -126,6 +133,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'src/lib/acquisition-pipeline.ts', kind: 'Repo', status: 'synced' },
       { name: 'Jackie Acquisition Fit Brief', kind: 'Generated', status: 'reference' },
       { name: 'Sentinel Memo', kind: 'Generated', status: 'reference' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Arthur Underwriting', href: '/arthur', icon: Landmark },
@@ -156,6 +164,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'src/lib/ai-client.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/lib/scout-ai-doctrines.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/components/ChatInterface.tsx', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Chat', href: '/chat', icon: Sparkles },
@@ -217,6 +226,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'src/lib/scoring.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/lib/nyc-api.ts', kind: 'Repo', status: 'synced' },
       { name: 'Scout_Unit_Intelligence.html', kind: 'Drive', status: 'pending' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Search', href: '/', icon: Database },
@@ -245,6 +255,7 @@ const DEMO_BOTS: DashboardBot[] = [
     sources: [
       { name: 'reference/sentinel_generate_report.py', kind: 'Repo', status: 'synced' },
       { name: 'reference/sentinel_parse_realtymx.py', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Sentinel', href: '/sentinel', icon: Sparkles },
@@ -305,6 +316,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'src/lib/nyc-api.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/lib/ll97-calculator.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/lib/gut-check.ts', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Shield', href: '/compliance', icon: ShieldCheck },
@@ -334,6 +346,7 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'Management agreement rate sheet', kind: 'Drive', status: 'reference' },
       { name: 'src/lib/pitch-report.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/pages/InstantProposal.tsx', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Instant Proposal', href: '/instant-proposal', icon: Zap },
@@ -363,6 +376,7 @@ const DEMO_BOTS: DashboardBot[] = [
     sources: [
       { name: 'src/lib/email-templates.ts', kind: 'Repo', status: 'synced' },
       { name: 'src/pages/Outreach.tsx', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
     ],
     actions: [
       { label: 'Outreach', href: '/outreach', icon: Mail },
