@@ -1129,12 +1129,12 @@ export function generatePitchReport(d: MasterReportData): string {
   <div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div>
   <div class="pad">
     <div class="section-title">The Proposed Investment</div>
-    <div class="body-text" style="margin-bottom:20px">Flat-rate, all-inclusive — no percentage fees, no hidden surcharges, no surprises.</div>
+    <div class="body-text" style="margin-bottom:20px">Recommended starting point: <strong>Camelot Intelligence</strong>. Classic and Premier remain available if the board wants a leaner, expanded, or hybrid scope.</div>
     <table class="fee-table">
       <tr><th>Management Service Component</th><th>Camelot Inclusion</th></tr>
-      <tr><td><strong>Estimated Management Fee</strong><br><span style="font-size:12px;color:#6b7280">Subject to review of prior management report, latest budget, audited financials, staffing, arrears, and requested scope.</span></td><td class="gold">${scopedFeeLabel(d)}</td></tr>
+      <tr><td><strong>Recommended Package</strong><br><span style="font-size:12px;color:#6b7280">Subject to review of prior management report, latest budget, audited financials, staffing, arrears, and requested scope.</span></td><td class="gold">Camelot Intelligence — ${d.tieredPricing?.intelligence?.monthly ? `$${d.tieredPricing.intelligence.monthly.toLocaleString()}/mo ($${d.tieredPricing.intelligence.annual.toLocaleString()}/yr)` : scopedFeeLabel(d)}</td></tr>
       <tr><td><strong>Online Banking Services</strong></td><td class="gold">BankUnited preferred banking workflow with zero bank fees</td></tr>
-      <tr><td><strong>Technology Platform</strong></td><td>Camelot Intelligence package — Camelot OS + ConciergePlus + Merlin AI</td></tr>
+      <tr><td><strong>Technology Platform</strong></td><td>Priced inside the recommended Intelligence package — Camelot OS + ConciergePlus + Merlin AI</td></tr>
       <tr><td><strong>Initial Building Inspection</strong></td><td class="gold">$500 introductory inspection ($2,500 value)</td></tr>
       <tr><td><strong>In-House CPA / Accounting</strong></td><td>Advisory and reporting coordination; tax returns and deeper accounting work separately scoped</td></tr>
       <tr><td><strong>Capital Project Management</strong></td><td>Initial coordination only; active project management separately scoped</td></tr>

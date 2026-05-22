@@ -4571,10 +4571,13 @@ ${complianceGutCheckRows.map(row => `<tr><td style="font-weight:800;color:#2C324
 </table>
 <div style="font-size:11px;color:#2C3240;margin-top:10px"><strong>Current quantified exposure:</strong> ${complianceGutCheckTotalExposure > 0 ? fmtMoney(complianceGutCheckTotalExposure) : 'No quantified penalty balance returned yet'}${complianceGutCheckTotalExposure > 0 ? ' before separate remediation, filing, professional, legal, or project-management fees.' : '; confirm open penalties, filing fees, and remediation costs through source records and professional review.'}</div>
 </div>`;
+  const intelligenceMonthly = d.tieredPricing?.intelligence?.monthly || d.monthlyFee;
+  const intelligenceAnnual = d.tieredPricing?.intelligence?.annual || d.annualFee;
+  const intelligencePerUnit = d.tieredPricing?.intelligence?.perUnit || d.pricePerUnit;
   const proposedRows = [
-    ['Annual Management Fee', d.monthlyFee > 0 ? `${fmtMoney(d.monthlyFee)}/mo (${fmtMoney(d.annualFee)}/yr) based on Jackie preliminary pricing` : '$TBD: custom flat rate after building scope review'],
+    ['Recommended Package', intelligenceMonthly > 0 ? `Camelot Intelligence — ${fmtMoney(intelligenceMonthly)}/mo (${fmtMoney(intelligenceAnnual)}/yr; approx. ${fmtMoney(intelligencePerUnit)}/unit/mo) based on Jackie preliminary pricing` : 'Camelot Intelligence — custom flat rate after building scope review'],
     ['Online Banking Services', 'BankUnited preferred banking workflow with zero bank fees for residents, owners, and the management company'],
-    ['Technology Platform', 'Camelot Intelligence package: Camelot Central + ConciergePlus + Merlin AI'],
+    ['Technology Platform', 'Priced inside the recommended Intelligence package: Camelot Central + ConciergePlus + Merlin AI'],
     ['Initial Building Inspection', '$500 one-time introductory inspection ($2,500 value)'],
     ['In-House CPA / Accounting', 'Advisory and monthly reporting coordination; tax returns and deeper accounting work separately scoped'],
     ['LL97 / Local Law Summary', d.ll97 ? `Initial summary: carbon cap modeling + ${fmtMoney(d.ll97.totalExposure11yr)} 11-year exposure roadmap; filings, remediation, and project work separately scoped` : 'Initial summary when applicable; filings, remediation, budgets, and project work separately scoped'],
@@ -6062,7 +6065,7 @@ ${proposedRows.slice(1).map(r => `<tr><td><strong>${r[0]}</strong></td><td>${saf
 <div class="deck-slide">
 <div class="brand-logo"><img src="./images/camelot-logo.png" alt="Camelot Realty Group" onerror="this.style.display='none'"></div>
 <h2 class="deck-title">The Proposed Investment</h2>
-<p class="deck-kicker" style="margin:0 0 28px 32px">Flat-rate, all-inclusive: no percentage fees, no hidden surcharges, no surprises.</p>
+<p class="deck-kicker" style="margin:0 0 28px 32px">Recommended starting point: <strong>Camelot Intelligence</strong>. Classic and Premier remain available if the board wants a leaner, expanded, or hybrid scope.</p>
 <table class="deck-table">
 <thead><tr><th>Management Service Component</th><th>Camelot Inclusion</th></tr></thead>
 <tbody>
