@@ -771,8 +771,8 @@ export function generatePitchReport(d: MasterReportData): string {
   if (d.permitsCount > 3) hookLines.push(`${d.permitsCount} active capital projects requiring oversight`);
   
   const hookText = hookLines.length > 0
-    ? `${d.buildingName || d.address} deserves a partner that brings renewed energy, proactive capital planning, and the hands-on attention your community needs — with in-house legal counsel, engineering advisory, and CPAs included at no extra cost.`
-    : `${d.buildingName || d.address} deserves a management partner that combines boutique attention with institutional-grade financial and compliance services — with in-house legal counsel, engineering advisory, and CPAs included at no extra cost.`;
+    ? `${d.buildingName || d.address} deserves a partner that brings renewed energy, proactive capital planning, and the hands-on attention your community needs — with accounting oversight, legal issue-spotting, and engineering advisory available through the right scope.`
+    : `${d.buildingName || d.address} deserves a management partner that combines boutique attention with institutional-grade financial and compliance services — with accounting oversight, legal issue-spotting, and engineering advisory available through the right scope.`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1054,7 +1054,7 @@ export function generatePitchReport(d: MasterReportData): string {
       <div class="gold-card" style="padding:24px">
         <div class="sub-heading">For Residents</div>
         <div class="check-item"><div class="check-icon">✓</div> ConciergePlus portal + mobile app</div>
-        <div class="check-item"><div class="check-icon">✓</div> Pay maintenance online — zero bank fees</div>
+        <div class="check-item"><div class="check-icon">✓</div> BankUnited online banking services — zero bank fees</div>
         <div class="check-item"><div class="check-icon">✓</div> Work orders, amenity requests, and administrative tickets</div>
         <div class="check-item"><div class="check-icon">✓</div> AI chatbot support layered over Camelot OS</div>
         <div class="check-item"><div class="check-icon">✓</div> Traditional paper statements still supported</div>
@@ -1079,7 +1079,7 @@ export function generatePitchReport(d: MasterReportData): string {
   <div class="pad">
     <div class="section-title">The 90-Day Transition</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:16px">
-      <div class="phase-card"><div class="phase-title">Month 1: Assessment</div><div class="phase-sub">Full file audit, FREE systems inspection, and staff performance review.</div><div class="phase-items">• Full file & data transfer<br>• FREE inspection ($2,500 value)<br>• Staff audit<br>• Vendor contract analysis<br>• Compliance review (HPD, boiler, fire)</div></div>
+      <div class="phase-card"><div class="phase-title">Month 1: Assessment</div><div class="phase-sub">Full file audit, $500 introductory inspection, and staff performance review.</div><div class="phase-items">• Full file & data transfer<br>• $500 introductory inspection ($2,500 value)<br>• Staff audit<br>• Vendor contract analysis<br>• Compliance summary review (HPD, boiler, fire where applicable)</div></div>
       <div class="phase-card"><div class="phase-title">Month 2: Stabilization</div><div class="phase-sub">Implement SOPs, begin twice-monthly visits, and launch board portal.</div><div class="phase-items">• Staff SOPs implemented<br>• Work orders configured<br>• Vendor re-bidding begins<br>• Board portal setup & training<br>• Capital project scoping begins</div></div>
       <div class="phase-card"><div class="phase-title">Month 3: Optimization</div><div class="phase-sub">Capital improvement roadmap and first quarterly board review.</div><div class="phase-items">• Capital plan + financing options<br>• Resident portal launched<br>• Monthly reporting cadence set<br>• Mortgage pre-qualification if needed<br>• First quarterly board review</div></div>
     </div>
@@ -1095,13 +1095,14 @@ export function generatePitchReport(d: MasterReportData): string {
     <table class="fee-table">
       <tr><th>Management Service Component</th><th>Camelot Inclusion</th></tr>
       <tr><td><strong>Estimated Management Fee</strong><br><span style="font-size:12px;color:#6b7280">Subject to review of prior management report, latest budget, audited financials, staffing, arrears, and requested scope.</span></td><td class="gold">${scopedFeeLabel(d)}</td></tr>
-      <tr><td><strong>Online Maintenance Payments</strong></td><td class="gold">ZERO Bank Fees (paper still supported)</td></tr>
-      <tr><td><strong>Technology Platform</strong></td><td>Included — Camelot OS + ConciergePlus + Merlin AI</td></tr>
-      <tr><td><strong>Initial Building Inspection</strong></td><td class="gold">FREE ($2,500 value)</td></tr>
-      <tr><td><strong>In-House CPA / Accounting</strong></td><td>Included — no outsourcing, full transparency</td></tr>
-      <tr><td><strong>Capital Project Management</strong></td><td>Included — full oversight</td></tr>
+      <tr><td><strong>Online Banking Services</strong></td><td class="gold">BankUnited preferred banking workflow with zero bank fees</td></tr>
+      <tr><td><strong>Technology Platform</strong></td><td>Camelot Intelligence package — Camelot OS + ConciergePlus + Merlin AI</td></tr>
+      <tr><td><strong>Initial Building Inspection</strong></td><td class="gold">$500 introductory inspection ($2,500 value)</td></tr>
+      <tr><td><strong>In-House CPA / Accounting</strong></td><td>Advisory and reporting coordination; tax returns and deeper accounting work separately scoped</td></tr>
+      <tr><td><strong>Capital Project Management</strong></td><td>Initial coordination only; active project management separately scoped</td></tr>
       <tr><td><strong>AI Board Meeting Minutes</strong></td><td>Included — annual meeting, AI-enhanced</td></tr>
-      <tr><td><strong>In-House Attorney & Engineer</strong></td><td>Free Advisory — legal & engineering consultation</td></tr>
+      <tr><td><strong>In-House Attorney & Engineer</strong></td><td>Advisory only; formal legal or engineering engagement separately scoped</td></tr>
+      <tr><td><strong>Schedule A / Ancillary Fees</strong></td><td>Property-type-specific menu issued with final agreement and scope</td></tr>
     </table>
     <div class="body-italic" style="margin-top:16px">Our efficiencies effectively pay for our management through long-term savings on vendors, compliance, and capital.</div>
   </div>

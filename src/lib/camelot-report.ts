@@ -774,38 +774,40 @@ function calculateMarketFeeComparison(
     tier,
     tierLabel,
     ancillaryFeesIncluded: [
-      'In-house CPA / accounting advisory services',
-      'LL97 compliance monitoring & reporting',
-      'Technology platform (ConciergePlus + Merlin AI)',
+      'In-house CPA advisory and monthly reporting coordination',
+      'Compliance summary review and LL97 / local-law monitoring where applicable',
+      'Camelot Intelligence technology package (ConciergePlus + Merlin AI)',
       'Board meeting minutes provided by Camelot AI',
-      'Online payment processing (ZERO bank fees)',
-      'Initial building inspection ($2,500 value)',
-      'Legal advisory services',
-      'Licensed engineer advisory',
+      'BankUnited online banking services with zero bank fees',
+      'Initial building inspection at a one-time $500 introductory fee ($2,500 value)',
+      'Attorney advisory only; formal legal engagement is separately scoped',
+      'Licensed engineer advisory only; engineering engagement is separately scoped',
       'Weekly on-site inspections',
       '24/7 emergency response line',
+      'Schedule A ancillary-fee menu tailored by property type and final scope',
     ],
     ancillaryComparison: [
       { service: 'Onboarding / Setup', marketRate: '$250-$500', camelotRate: 'Included' },
       { service: 'Lease Renewals', marketRate: '$250-$500/lease', camelotRate: '$350 per lease' },
-      { service: 'Building Inspection', marketRate: '$1,500-$3,500', camelotRate: 'FREE ($2,500 value)' },
-      { service: 'In-House CPA / Accounting Advisory Services', marketRate: '$5,000-$15,000/yr', camelotRate: 'Included' },
+      { service: 'Building Inspection', marketRate: '$1,500-$3,500', camelotRate: '$500 one-time introductory inspection ($2,500 value)' },
+      { service: 'In-House CPA / Accounting Advisory Services', marketRate: '$5,000-$15,000/yr', camelotRate: 'Advisory and reporting coordination included; tax returns and deeper accounting work separately scoped' },
       { service: 'Tax Returns for Client Entity', marketRate: 'Industry standard by property size/location', camelotRate: '20% less than industry standard' },
-      { service: 'LL97 Compliance Report', marketRate: '$3,000-$8,000', camelotRate: 'Included' },
-      { service: 'Technology Platform', marketRate: '$3-$8/unit/month', camelotRate: 'Included' },
-      { service: 'Online Payment Processing', marketRate: '2.5-3.5% per transaction', camelotRate: 'ZERO fees' },
+      { service: 'LL97 / Local Law Summary', marketRate: '$3,000-$8,000', camelotRate: 'Initial summary and modeling included when applicable; filings, remediation, budgets, and project work separately scoped' },
+      { service: 'Technology Platform', marketRate: '$3-$8/unit/month', camelotRate: 'Priced as part of the Camelot Intelligence package, not treated as a separate line-item discount' },
+      { service: 'Online Banking Services', marketRate: 'Monthly treasury, lockbox, and transaction fees vary by bank', camelotRate: 'BankUnited preferred banking workflow with zero bank fees for residents, owners, and management company' },
       { service: 'Board Meeting Minutes (Provided by Camelot AI)', marketRate: '$150-$500/meeting', camelotRate: 'Included; after 8 PM, $150 flat fee may apply' },
-      { service: 'Project Management Fee (under $25K / 30+ unit buildings)', marketRate: '5%-15% of project cost', camelotRate: 'Included' },
+      { service: 'Project Management Fee (under $25K / 30+ unit buildings)', marketRate: '5%-15% of project cost', camelotRate: 'Limited coordination may be included; active project management is separately scoped' },
       { service: 'Project Management Fee (major projects)', marketRate: '7%-10% of project cost', camelotRate: '7%-10%, flat fee, or $150/hr by separate agreement' },
       { service: 'Annual Board Meetings, Emergency Meetings, Town Halls', marketRate: '$150-$500/meeting plus admin', camelotRate: 'Billed by rate and hours incurred for setup, notices, proxies, sign-in sheets, Zoom, and board-directed administration' },
       { service: 'Sales Package Review', marketRate: '$300-$750', camelotRate: '$250-$500' },
       { service: 'Closings', marketRate: '$1,500-$2,500', camelotRate: '$1,500' },
       { service: 'Review of Alteration Agreements', marketRate: '$750-$1,500', camelotRate: '$500-$1,000' },
-      { service: 'Legal Advisory Services', marketRate: '$350-$750/hr', camelotRate: 'Included' },
+      { service: 'Legal Advisory Services', marketRate: '$350-$750/hr', camelotRate: 'Advisory only; attorney engagement separately scoped and approved' },
       { service: 'Sale/Transfer Processing', marketRate: '~$500 (buyer pays)', camelotRate: '$250-$500 sales package review; closing fees separate' },
       { service: 'Move-In/Move-Out Fee', marketRate: '~$500 each', camelotRate: '~$500 each' },
       { service: 'Sublet Application', marketRate: '$100-$250', camelotRate: '$100-$250' },
       { service: 'Late Payment Enforcement', marketRate: 'Up to $50 or 5%', camelotRate: 'Per building policy' },
+      { service: 'Schedule A Ancillary Fees', marketRate: 'Varies by property type and scope', camelotRate: 'Issued with final agreement for co-op, condo, rental, HOA, or receiver-managed property' },
     ],
   };
 }
@@ -2852,7 +2854,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     buildingClass: effectiveBuildingClass,
     isRentStabilized: raw.rentStabilization?.isStabilized || false,
     ll97Status: ll97Data?.complianceStatus || 'unknown',
-    pricePerUnit: tier.classic.perUnit,
+    pricePerUnit: tier.intelligence.perUnit,
   });
   // Jackie prices Camelot at 15% below the applicable market midpoint.
   let pricePerUnit = feeComparison.camelotMonthlyPerUnit;
@@ -3787,22 +3789,22 @@ OPENING:
 "Hi, this is [Your Name] calling from Camelot Property Management. We're a boutique management firm based in Manhattan at 57 West 57th Street, Suite 410. I'm reaching out because we specialize in managing buildings like ${d.buildingName} in your area, and I wanted to introduce our services to the decision makers."
 
 KEY HOOKS:
-${d.violationsOpen > 0 ? `• ${d.violationsOpen} OPEN HPD VIOLATIONS — "We noticed your building has ${d.violationsOpen} open HPD violations. We have a proven track record clearing these efficiently."\n` : ''}${d.ecbPenaltyBalance > 0 ? `• $${d.ecbPenaltyBalance.toLocaleString()} ECB PENALTY BALANCE — "Your building has outstanding ECB fines that we can help resolve."\n` : ''}${d.ll97 && d.ll97.period1Penalty > 0 ? `• LL97 PENALTY EXPOSURE: $${d.ll97.period1Penalty.toLocaleString()}/yr — "Under Local Law 97, your building faces estimated annual penalties. We include LL97 compliance at no extra charge."\n` : ''}${d.hasActiveLitigation ? `• ⚖️ ACTIVE HOUSING LITIGATION — "We see your building has active housing court cases. Camelot has experience stabilizing buildings in exactly this situation."\n` : ''}${d.isRentStabilized ? `• RENT STABILIZED — "We specialize in rent-stabilized buildings and understand the regulatory complexity."\n` : ''}${d.distressLevel === 'distressed' || d.distressLevel === 'critical' ? `• FINANCIAL DISTRESS DETECTED (${d.distressLevel.toUpperCase()}) — approach with sensitivity, but this building needs help.\n` : ''}
+${d.violationsOpen > 0 ? `• ${d.violationsOpen} OPEN HPD VIOLATIONS — "We noticed your building has ${d.violationsOpen} open HPD violations. We have a proven track record clearing these efficiently."\n` : ''}${d.ecbPenaltyBalance > 0 ? `• $${d.ecbPenaltyBalance.toLocaleString()} ECB PENALTY BALANCE — "Your building has outstanding ECB fines that we can help resolve."\n` : ''}${d.ll97 && d.ll97.period1Penalty > 0 ? `• LL97 PENALTY EXPOSURE: $${d.ll97.period1Penalty.toLocaleString()}/yr — "Under Local Law 97, your building faces estimated annual penalties. Camelot includes an initial LL97 summary and roadmap where applicable; filings, remediation, budgeting, and project work are separately scoped."\n` : ''}${d.hasActiveLitigation ? `• ⚖️ ACTIVE HOUSING LITIGATION — "We see your building has active housing court cases. Camelot has experience stabilizing buildings in exactly this situation."\n` : ''}${d.isRentStabilized ? `• RENT STABILIZED — "We specialize in rent-stabilized buildings and understand the regulatory complexity."\n` : ''}${d.distressLevel === 'distressed' || d.distressLevel === 'critical' ? `• FINANCIAL DISTRESS DETECTED (${d.distressLevel.toUpperCase()}) — approach with sensitivity, but this building needs help.\n` : ''}
 PRICING (USE THIS IN THE CALL):
 "We have three service levels designed for buildings like yours:"
-• CAMELOT CLASSIC: $${d.tieredPricing.classic.perUnit}/unit/month — full management, in-house CPA, weekly inspections, compliance
-• CAMELOT INTELLIGENCE ⭐: $${d.tieredPricing.intelligence.perUnit}/unit/month — everything in Classic PLUS AI portal, zero bank fees, quarterly market reports, LL97 compliance, free building inspection ($2,500 value)
+• CAMELOT INTELLIGENCE ⭐ (recommended): $${d.tieredPricing.intelligence.perUnit}/unit/month — full management PLUS ConciergePlus, Merlin AI, BankUnited online banking services with zero bank fees, quarterly market reports, local-law summaries, AI board minutes, and a one-time $500 introductory building inspection ($2,500 value)
+• CAMELOT CLASSIC: $${d.tieredPricing.classic.perUnit}/unit/month — leaner base management for boards that want less technology and more Schedule A billing
 • CAMELOT PREMIER: $${d.tieredPricing.premier.perUnit}/unit/month — everything in Intelligence PLUS dedicated senior PM, insurance rebid, vendor guarantee, annual strategy session with David
 
-"Most of our buildings are on Intelligence — it includes AI-powered technology that no other management company offers. No Schedule A surprises."
+"Most of our buildings are on Intelligence because the technology, automation, and reporting are now part of responsible building management. If the board wants Classic, Premier, or a hybrid scope, we can shape the Schedule A menu around the property type and final services."
 
 For ${d.units} units: Classic = $${d.tieredPricing.classic.monthly.toLocaleString()}/mo | Intelligence = $${d.tieredPricing.intelligence.monthly.toLocaleString()}/mo | Premier = $${d.tieredPricing.premier.monthly.toLocaleString()}/mo
 
 VALUE PROPS:
 • Weekly on-site inspections by senior management
-• AI-powered resident portal (ConciergePlus) — zero bank fees
+• ConciergePlus resident portal and BankUnited online banking workflow — zero bank fees
 • Monthly virtual accounting, full financial transparency
-• LL97 compliance tracking included at no charge
+• Local-law and LL97 summary tracking where applicable; active remediation is separately scoped
 • 24/7 emergency response with direct management access
 • Three flexible pricing tiers — no long-term contracts required
 ${isSelfManaged ? '• "We understand you\'re self-managed — our 90-day onboarding makes the transition seamless"\n' : '• "We would love to show you how Camelot compares after we verify the current management structure."\n'}
@@ -3840,10 +3842,10 @@ What makes Camelot different:
 
 • Personal Attention — I personally oversee every property in our portfolio.
 • Weekly Inspections — Our team visits each building weekly for thorough on-site inspections.
-• Technology-Forward — AI-powered resident portal with zero bank fees for maintenance payments.
+• Technology-Forward — ConciergePlus resident portal with BankUnited online banking services and zero bank fees.
 • Transparent Financials — Monthly virtual accounting and real-time performance dashboards.
 • Compliance Expertise — We actively track LL97, HPD, DOB, and provide full compliance reporting.
-${d.violationsOpen > 0 ? `\nI noticed that ${d.buildingName} currently has ${d.violationsOpen} open HPD violations on record. Our compliance team has extensive experience resolving these efficiently.\n` : ''}${d.ll97 && d.ll97.period1Penalty > 0 ? `\nAdditionally, under Local Law 97, your building faces an estimated annual penalty of $${d.ll97.period1Penalty.toLocaleString()}. We include LL97 compliance services at no additional charge.\n` : ''}
+${d.violationsOpen > 0 ? `\nI noticed that ${d.buildingName} currently has ${d.violationsOpen} open HPD violations on record. Our compliance team has extensive experience resolving these efficiently.\n` : ''}${d.ll97 && d.ll97.period1Penalty > 0 ? `\nAdditionally, under Local Law 97, your building faces an estimated annual penalty of $${d.ll97.period1Penalty.toLocaleString()}. Camelot includes an initial LL97 summary and roadmap where applicable; filings, remediation, budgeting, and project work are separately scoped.\n` : ''}
 I'd welcome the opportunity to introduce Camelot to your board. Would you have 15 minutes for a brief call this week?
 
 Warm regards,${sig}`,
@@ -3861,7 +3863,7 @@ Since my last message, I wanted to highlight a few things:
 ${d.violationsOpen > 0 ? `\n• Compliance: ${d.violationsOpen} open HPD violations on record. Our team resolves these efficiently.` : ''}
 • Technology: Our ConciergePlus portal gives board members and residents a complete digital experience.
 • Transparency: Monthly virtual accounting, quarterly market reports, and real-time dashboards.
-${d.ll97 && d.ll97.period1Penalty > 0 ? `• LL97: Your building's estimated annual penalty is $${d.ll97.period1Penalty.toLocaleString()}. We include compliance services at no extra charge.\n` : ''}
+${d.ll97 && d.ll97.period1Penalty > 0 ? `• LL97: Your building's estimated annual penalty is $${d.ll97.period1Penalty.toLocaleString()}. Camelot includes an initial LL97 summary and roadmap where applicable; filings, remediation, budgeting, and project work are separately scoped.\n` : ''}
 I've prepared a customized management proposal for ${d.buildingName}. Would you have 15 minutes this week for a brief call?
 
 Warm regards,${sig}`,
@@ -3876,7 +3878,7 @@ Warm regards,${sig}`,
 Thank you for your interest in Camelot Property Management. I'm pleased to present our approach for managing ${d.buildingName}, your ${d.units}-unit property.
 
 OUR 90-DAY ONBOARDING:
-• Month 1: Full building audit, FREE inspection ($2,500 value), vendor review
+• Month 1: Full building audit, one-time $500 introductory inspection ($2,500 value), vendor review
 • Month 2: SOPs, portal launch, financial migration, vendor optimization
 • Month 3: Full technology stack live, reporting cadence, 5-year capital roadmap
 
@@ -3884,16 +3886,16 @@ ONGOING SERVICES:
 • Weekly on-site inspections
 • 24/7 emergency response
 • In-house CPA and monthly financial reporting
-• LL97 compliance tracking and penalty modeling
-• ConciergePlus resident portal with zero bank fees
+• LL97 summary tracking and penalty modeling where applicable
+• ConciergePlus resident portal and BankUnited online banking services with zero bank fees
 
 PROPOSED INVESTMENT:
 • Management Fee: $${d.monthlyFee.toLocaleString()}/month ($${d.pricePerUnit}/unit)
-• Online Payments: ZERO bank fees
-• Technology Platform: Included
-• Building Inspection: FREE
-• LL97 Compliance Report: Included
-• In-House Legal Advisory: Free consultation
+• Online Banking Services: BankUnited preferred banking workflow with zero bank fees
+• Technology Platform: Camelot Intelligence package
+• Building Inspection: $500 introductory inspection ($2,500 value)
+• LL97 / Local Law Summary: initial summary included when applicable; filings and remediation separately scoped
+• In-House Legal / Engineering Advisory: advisory only; formal engagement separately scoped
 
 I'd welcome the opportunity to present this to your board.
 
@@ -3932,14 +3934,14 @@ ${d.energyStarScore ? `• Current Energy Star Score: ${d.energyStarScore}` : ''
 
 These penalties are real and enforceable starting NOW. Many building boards are unaware of their exposure until they receive their first penalty notice.
 
-Camelot Property Management includes comprehensive LL97 compliance services at NO additional charge:
+Camelot Property Management includes an initial LL97 summary and roadmap where applicable:
 • Annual energy benchmarking and filing
 • Carbon penalty modeling and forecasting
 • Capital upgrade planning (HVAC, boiler, insulation)
 • Rebate and incentive capture for energy improvements
 • Ongoing monitoring and compliance reporting
 
-We'd like to offer a complimentary LL97 compliance assessment for ${d.buildingName}. Would you have 15 minutes this week to discuss?
+We'd like to review the building's LL97 and local-law position with the board and outline what can be handled through management versus what would require a separately approved scope. Would you have 15 minutes this week to discuss?
 
 Regards,${sig}`,
   };
@@ -4442,13 +4444,14 @@ export function generateBrochureHTML(d: MasterReportData): string {
   };
   const proposedRows = [
     ['Annual Management Fee', d.monthlyFee > 0 ? `${fmtMoney(d.monthlyFee)}/mo (${fmtMoney(d.annualFee)}/yr) based on Jackie preliminary pricing` : '$TBD: custom flat rate after building scope review'],
-    ['Online Common Charge Payments', 'ZERO bank fees for residents and owners'],
-    ['Technology Platform', 'Included: Camelot Central + ConciergePlus + Merlin AI'],
-    ['Initial Building Inspection', 'FREE ($2,500 value)'],
-    ['In-House CPA / Accounting', 'Included: no outsourcing, full transparency'],
-    ['LL97 Liability Report', d.ll97 ? `Included: carbon cap modeling + ${fmtMoney(d.ll97.totalExposure11yr)} 11-year exposure roadmap` : 'Included when applicable: carbon cap modeling + compliance roadmap'],
-    ['AI Board Meeting Minutes', 'Included: every meeting, AI-enhanced and distributed'],
-    ['In-House Attorney & Engineer', 'Free advisory: legal and engineering consultation'],
+    ['Online Banking Services', 'BankUnited preferred banking workflow with zero bank fees for residents, owners, and the management company'],
+    ['Technology Platform', 'Camelot Intelligence package: Camelot Central + ConciergePlus + Merlin AI'],
+    ['Initial Building Inspection', '$500 one-time introductory inspection ($2,500 value)'],
+    ['In-House CPA / Accounting', 'Advisory and monthly reporting coordination; tax returns and deeper accounting work separately scoped'],
+    ['LL97 / Local Law Summary', d.ll97 ? `Initial summary: carbon cap modeling + ${fmtMoney(d.ll97.totalExposure11yr)} 11-year exposure roadmap; filings, remediation, and project work separately scoped` : 'Initial summary when applicable; filings, remediation, budgets, and project work separately scoped'],
+    ['AI Board Meeting Minutes', 'Included in Intelligence: every meeting, AI-enhanced and distributed'],
+    ['In-House Attorney & Engineer', 'Advisory only; formal legal or engineering engagement separately scoped and approved'],
+    ['Schedule A / Ancillary Fees', 'Property-type-specific menu issued with final agreement for co-op, condo, rental, HOA, or receiver-managed scope'],
   ];
   const parseOpexRange = (range?: string) => {
     const nums = String(range || '').match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
@@ -5630,7 +5633,7 @@ ${d.isRentStabilized ? '<tr><td style="font-weight:700">Rent Stabilization</td><
 </table>
 
 <div style="background:#3A4B5B;border-radius:8px;padding:14px 18px;margin-top:14px;color:#fff;font-size:12px;line-height:1.7">
-<strong style="color:#A89035">Camelot Compliance Guarantee:</strong> We proactively track ALL local law deadlines, filing requirements, and inspection cycles for every building we manage. Our zero-penalty track record across 42 properties speaks for itself. Compliance monitoring is included at no additional charge.
+<strong style="color:#A89035">Camelot Compliance Discipline:</strong> We proactively track local law deadlines, filing requirements, and inspection cycles for every building we manage. Summary monitoring is part of the management cadence; filings, remediation, professional applications, and project work are separately scoped when action is required.
 </div>
 </div>
 
@@ -5652,7 +5655,7 @@ ${ll97LikelyApplicable ? `
 <div><div class="label">Building GFA</div><div class="value">${(d.buildingArea || ll97ModeledArea).toLocaleString()} sqft${!d.buildingArea && ll97ModeledArea ? ' est.' : ''}</div></div>
 </div>
 <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:16px;margin-top:16px">
-<p style="font-size:12px;color:#991b1b;font-weight:600">Camelot includes LL97 compliance services at NO additional charge: annual benchmarking, penalty modeling, capital upgrade planning, and rebate/incentive capture.</p>
+<p style="font-size:12px;color:#991b1b;font-weight:600">Camelot includes an initial LL97 summary and roadmap where applicable. Annual benchmarking, filings, remediation budgeting, capital upgrade planning, and rebate / incentive work are separately scoped when action is required.</p>
 <p style="font-size:11px;color:#555;line-height:1.6;margin-top:8px">${safe(ll97Display.sourceNote)}</p>
 <p style="font-size:11px;color:#555;line-height:1.6;margin-top:8px"><strong>Jackie release rule:</strong> if LL84/LL97 data is missing for a likely covered building, the report must flag the missing data and provide the compliance workplan rather than silently removing the LL97 page.</p>
 </div>
@@ -5805,7 +5808,7 @@ ${isSelfManaged ? `
 <div>
 ${[
   { icon: '\uD83C\uDFE2', title: 'Property & Asset Management', desc: 'Weekly site visits by senior management. Vendor coordination, proactive inspections, and cost reduction. 24/7 emergency response with direct access to decision-makers. Buildings treated like owner-managed assets.', color: '#3A4B5B' },
-  { icon: '\uD83D\uDCB0', title: 'In-House CPA & Financials', desc: 'Dedicated CPAs \u2014 never outsourced. Monthly board-ready financial reports, 5-year capital planning, real-time arrears tracking, vendor benchmarking, and zero-fee payment processing.', color: '#A89035' },
+  { icon: '\uD83D\uDCB0', title: 'In-House CPA & Financials', desc: 'Dedicated accounting oversight \u2014 never outsourced. Monthly board-ready financial reports, 5-year capital planning, real-time arrears tracking, vendor benchmarking, and advisory support; tax returns and deeper CPA engagements are separately scoped.', color: '#A89035' },
   { icon: '\uD83D\uDEE1\uFE0F', title: 'Compliance & Risk Management', desc: 'LL11/97, FISP Cycle 10, LL152, HPD, RPIE, boiler and elevator compliance. Zero-penalty track record.' + (d.violationsOpen > 0 ? ' We\u2019ve identified <strong>' + d.violationsOpen + ' compliance items</strong> that our team can address.' : ''), color: '#16a34a' },
 ].map(s => `<div style="display:flex;gap:16px;align-items:flex-start;background:#FDFAF3;border:1px solid #D5D0C6;border-left:4px solid ${s.color};border-radius:0 10px 10px 0;padding:20px;margin-bottom:14px">
 <div style="font-size:32px;flex-shrink:0;width:48px;height:48px;background:${s.color}10;border-radius:10px;display:flex;align-items:center;justify-content:center">${s.icon}</div>
@@ -5825,7 +5828,7 @@ ${[
   { icon: '\uD83D\uDD11', title: 'Brokerage & Sublet Processing', desc: 'Licensed brokers, background checks, flip tax, subletting compliance' },
   { icon: '\uD83C\uDFD7\uFE0F', title: 'Project Management', desc: 'Full construction oversight, contractor coordination, capital projects' },
   { icon: '\uD83D\uDCDC', title: 'Offering Plans & House Rules', desc: 'Drafted, modified, and updated in-house by our legal team' },
-  { icon: '\u2696\uFE0F', title: 'In-House Attorney Advisory', desc: 'Free legal consultation, lease reviews, dispute resolution' },
+  { icon: '\u2696\uFE0F', title: 'In-House Attorney Advisory', desc: 'Advisory guidance and issue-spotting; legal engagement, lease review, disputes, and formal opinions are separately scoped' },
   { icon: '\uD83D\uDC64', title: 'Fractional Senior PM / GM', desc: 'Senior-level leadership at a fraction of full-time cost' },
   { icon: '\uD83C\uDFE6', title: 'Licensed Mortgage Broker', desc: 'Shareholder refinancing, board financing, rate analysis' },
   { icon: '\uD83D\uDCCA', title: 'Audits, Analytics & Reports', desc: 'Vendor analysis, market reports, AI-powered meeting minutes' },
@@ -5861,7 +5864,7 @@ ${complianceDates.map(c => `<div class="compliance-card"><div class="month">${c.
 <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:14px;color:#A89035;text-align:center;margin-bottom:20px;font-weight:600">Merlin AI &nbsp;+&nbsp; Camelot Central &nbsp;+&nbsp; ConciergePlus</div>
 <div class="tech-cols">
 <div class="tech-col"><h4>For Board &amp; Management</h4><ul><li>Group and individual messaging</li><li>Utility usage tracking</li><li>Building files &amp; documents</li><li>Compliance status updates</li><li>AI-powered meeting minutes</li><li>Real-time financial dashboards</li></ul></div>
-<div class="tech-col"><h4>For Residents</h4><ul><li>ConciergePlus portal + mobile app</li><li>Pay maintenance \u2014 zero bank fees</li><li>AI chatbot support 24/7</li><li>Book amenities &amp; download docs</li><li>Direct staff contact</li><li>Work order tracking &amp; updates</li></ul></div>
+<div class="tech-col"><h4>For Residents</h4><ul><li>ConciergePlus portal + mobile app</li><li>BankUnited online banking services with zero bank fees</li><li>AI chatbot support 24/7</li><li>Book amenities &amp; download docs</li><li>Direct staff contact</li><li>Work order tracking &amp; updates</li></ul></div>
 </div>
 </div>
 
@@ -5870,7 +5873,7 @@ ${complianceDates.map(c => `<div class="compliance-card"><div class="month">${c.
 <div class="section-title">The 90-Day Transition</div>
 <div class="section-sub">A proven onboarding process that minimizes disruption</div>
 <div class="transition-grid">
-<div class="trans-card"><h4>Month 1: Assessment</h4><div class="sub">Full audit, FREE inspection, staff review</div><ul><li>Full file &amp; data transfer</li><li>FREE building inspection ($2,500 value)</li><li>Staff audit &amp; performance review</li><li>Vendor contract analysis &amp; re-bidding</li><li>Compliance review (LL11, LL97, HPD, FISP)</li></ul></div>
+<div class="trans-card"><h4>Month 1: Assessment</h4><div class="sub">Full audit, $500 introductory inspection, staff review</div><ul><li>Full file &amp; data transfer</li><li>$500 introductory building inspection ($2,500 value)</li><li>Staff audit &amp; performance review</li><li>Vendor contract analysis &amp; re-bidding</li><li>Compliance summary review (LL11, LL97, HPD, FISP where applicable)</li></ul></div>
 <div class="trans-card"><h4>Month 2: Stabilization</h4><div class="sub">SOPs, vendor re-bid, portal launch</div><ul><li>Written SOPs for all positions</li><li>Work order system configured</li><li>Vendor re-bidding &amp; optimization</li><li>Board portal setup &amp; training</li><li>Financial system migration</li></ul></div>
 <div class="trans-card"><h4>Month 3: Optimization</h4><div class="sub">Tech live, reporting, capital roadmap</div><ul><li>Full technology stack operational</li><li>Resident portal &amp; mobile app</li><li>Monthly reporting cadence</li><li>5-Year capital roadmap delivered</li><li>Merlin AI fully operational</li></ul></div>
 </div>
@@ -5918,7 +5921,7 @@ ${proposedRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${safe(r[1])}<
 <!-- PAGE 15: THREE-TIER PRICING -->
 <div class="section section-cream">
 <div class="section-title">Service Packages — ${d.buildingName}</div>
-<div class="section-sub">Three tiers designed for ${d.units} units \u2014 choose the level of service that fits your building</div>
+<div class="section-sub">Camelot recommends Intelligence first; Classic and Premier remain available if the board wants a leaner or expanded scope</div>
 
 <!-- Three Tier Cards -->
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
@@ -5938,9 +5941,9 @@ ${proposedRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${safe(r[1])}<
 \u2714 Board meetings<br>
 <span style="color:#ccc">\u2716 ConciergePlus Portal</span><br>
 <span style="color:#ccc">\u2716 Merlin AI</span><br>
-<span style="color:#ccc">\u2716 Zero bank fees</span><br>
+<span style="color:#ccc">\u2716 BankUnited zero-fee banking workflow</span><br>
 <span style="color:#ccc">\u2716 Market reports</span><br>
-<span style="color:#ccc">\u2716 Free inspection</span>
+<span style="color:#ccc">\u2716 $500 introductory inspection</span>
 </div>
 <div style="margin-top:14px;padding-top:12px;border-top:1px solid #E5E3DE">
 <div style="font-size:11px;color:#888">$${d.tieredPricing.classic.monthly.toLocaleString()}/mo \u00B7 $${d.tieredPricing.classic.annual.toLocaleString()}/yr</div>
@@ -5957,11 +5960,11 @@ ${proposedRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${safe(r[1])}<
 \u2714 Everything in Classic<br>
 \u2714 <strong style="color:#A89035">ConciergePlus Portal (26 modules)</strong><br>
 \u2714 <strong style="color:#A89035">Merlin AI \u2014 24/7 support</strong><br>
-\u2714 <strong style="color:#A89035">ZERO bank fees</strong><br>
+\u2714 <strong style="color:#A89035">BankUnited zero-fee banking workflow</strong><br>
 \u2714 <strong style="color:#A89035">Quarterly SCOUT reports</strong><br>
-\u2714 <strong style="color:#A89035">LL97 penalty modeling</strong><br>
+\u2714 <strong style="color:#A89035">LL97 / local-law summary modeling</strong><br>
 \u2714 <strong style="color:#A89035">AI board minutes</strong><br>
-\u2714 <strong style="color:#A89035">FREE building inspection</strong><br>
+\u2714 <strong style="color:#A89035">$500 introductory inspection ($2,500 value)</strong><br>
 <span style="color:rgba(255,255,255,0.3)">\u2716 Dedicated senior PM</span><br>
 <span style="color:rgba(255,255,255,0.3)">\u2716 Insurance rebid</span><br>
 <span style="color:rgba(255,255,255,0.3)">\u2716 Session w/ David</span>
@@ -5980,7 +5983,7 @@ ${proposedRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${safe(r[1])}<
 \u2714 Everything in Intelligence<br>
 \u2714 <strong>Dedicated Senior PM</strong><br>
 \u2714 <strong>Monthly market reports</strong><br>
-\u2714 <strong>Capital projects included</strong> (up to $50K)<br>
+\u2714 <strong>Capital project coordination allowance</strong> (up to $50K, final scope approved)<br>
 \u2714 <strong>Annual insurance rebid</strong><br>
 \u2714 <strong>Vendor rebid guarantee</strong><br>
 \u2714 <strong>30-min emergency guarantee</strong><br>
@@ -6001,10 +6004,10 @@ ${proposedRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${safe(r[1])}<
 <div><div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px">vs. AKAM</div><div style="font-size:13px;font-weight:700;color:#16a34a">25\u201340% less</div></div>
 <div><div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px">vs. Orsid</div><div style="font-size:13px;font-weight:700;color:#16a34a">15\u201330% less</div></div>
 </div>
-<div style="font-size:10px;color:#555;text-align:center;margin-top:8px">With MORE services included. No hidden Schedule A surprises.</div>
+<div style="font-size:10px;color:#555;text-align:center;margin-top:8px">With deeper advisory, reporting, and technology value. Schedule A items are disclosed by property type before signing.</div>
 </div>
 
-<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-style:italic;color:#A89035;font-size:13px;text-align:center">80% of Camelot clients choose Intelligence. Our AI technology pays for the difference.</div>
+<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-style:italic;color:#A89035;font-size:13px;text-align:center">Camelot recommends Intelligence as the starting point because automation, reporting, and banking visibility are now central to responsible building management.</div>
 </div>
 
 <!-- PAGE 15B: FEE COMPARISON — MARKET RATE ANALYSIS -->
@@ -6013,7 +6016,7 @@ ${d.feeComparison ? `
 <div class="section-title">Fee Comparison — Market Rate Analysis</div>
 <div class="section-sub">${d.feeComparison.tierLabel} — How Camelot compares to industry standard pricing</div>
 <div style="background:#EDE9DF;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px">
-<p style="font-size:11px;color:#3A4B5B;line-height:1.6"><strong style="color:#A89035">Pricing formula:</strong> Camelot's base management fee is modeled at <strong>15% below the applicable market midpoint</strong> for this building class and location, while keeping core advisory, accounting, technology, and compliance services included. <strong>Camelot minimum:</strong> ${d.feeComparison.minimumFeeLabel}${d.feeComparison.floorApplied ? ' (minimum floor applied to this preliminary quote).' : '.'}</p>
+<p style="font-size:11px;color:#3A4B5B;line-height:1.6"><strong style="color:#A89035">Pricing formula:</strong> Camelot's recommended fee is modeled from the <strong>Intelligence package</strong> for this building class and location, with technology, reporting automation, BankUnited online banking services, and advisory summaries priced into the package value. Formal legal, engineering, tax-return, brokerage, mortgage-brokerage, compliance remediation, and project-management engagements are separately scoped through Schedule A. <strong>Camelot minimum:</strong> ${d.feeComparison.minimumFeeLabel}${d.feeComparison.floorApplied ? ' (minimum floor applied to this preliminary quote).' : '.'}</p>
 </div>
 
 <!-- Market vs Camelot Visual -->
@@ -6074,14 +6077,14 @@ ${d.feeComparison.ancillaryComparison.map((row, i) => `<tr${i % 2 === 0 ? '' : '
 
 <!-- Services included callout -->
 <div style="background:#3A4B5B;border-radius:8px;padding:16px 20px;margin-top:16px;color:#fff">
-<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#A89035;font-weight:700;margin-bottom:10px">✅ Services Included at No Extra Charge</div>
+<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#A89035;font-weight:700;margin-bottom:10px">✅ Intelligence Package Value and Advisory Scope</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
 ${d.feeComparison.ancillaryFeesIncluded.map(svc => `<div style="font-size:11px;color:rgba(255,255,255,0.8);padding:3px 0">• ${svc}</div>`).join('\n')}
 </div>
 </div>
 
 <div style="background:#EDE9DF;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:12px 16px;margin-top:16px">
-<p style="font-size:10px;color:#555;line-height:1.6"><strong style="color:#A89035">Source:</strong> Industry fee ranges compiled from Brick Underground, CooperatorNews, FirstService Residential, PropertyClub NYC, Hudson Property Services, Habitat Magazine, Hauseit, and Yoreevo (2023–2025). Actual rates vary by company and building. Camelot's all-inclusive pricing often provides better total value than lower base fees with extensive à la carte charges.</p>
+<p style="font-size:10px;color:#555;line-height:1.6"><strong style="color:#A89035">Source:</strong> Industry fee ranges compiled from Brick Underground, CooperatorNews, FirstService Residential, PropertyClub NYC, Hudson Property Services, Habitat Magazine, Hauseit, and Yoreevo (2023–2025). Actual rates vary by company and building. Camelot's Intelligence pricing is intended to show full operating value while clearly separating Schedule A professional engagements and special-project work.</p>
 </div>
 </div>
 ` : ''}
@@ -6418,7 +6421,7 @@ ${[
 <div style="background:#fff;border:1px solid #E5E3DE;border-top:3px solid #dc2626;border-radius:0 0 8px 8px;padding:18px">
 <h4 style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:6px">\u26A0 Local Law Compliance (LL97, LL11, FISP, HPD)</h4>
 <p style="font-size:11px;color:#555;line-height:1.6;margin-bottom:8px">${d.buildingArea > 25000 ? `At ${d.buildingArea.toLocaleString()} SF, this building is above the LL97 carbon cap threshold. Non-compliance penalties start at $268/ton CO\u2082.` : 'Compliance with HPD, DOB, and local laws requires proactive tracking and resolution.'}</p>
-<p style="font-size:11px;color:#16a34a;font-weight:600">\u2714 Camelot delivers a FREE LL97 liability model + compliance roadmap within 30 days</p>
+<p style="font-size:11px;color:#16a34a;font-weight:600">\u2714 Camelot delivers an initial LL97 liability summary and compliance roadmap within 30 days where applicable</p>
 </div>
 
 <div style="background:#fff;border:1px solid #E5E3DE;border-top:3px solid #A89035;border-radius:0 0 8px 8px;padding:18px">
@@ -6495,7 +6498,7 @@ ${[
 </div>
 </div>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px">
-${['Amenity Booking', 'Service Requests', 'Online Payments', 'Admin Ticket Orders', 'Package Delivery', 'Cloud File Depository', 'AI Chatbot Layer', 'Zoom Board Meetings', 'Annual / Town Hall Meetings', 'Virtual Lockbox', 'Shared Bank Visibility', 'Vendor / Staff Workflow', 'Announcements', 'Key Tracking', 'Parking Mgmt', 'Residents\u2019 Guide'].map(m => `<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,0.8);text-align:center">${m}</div>`).join('\n')}
+${['Amenity Booking', 'Service Requests', 'Online Banking Services', 'Admin Ticket Orders', 'Package Delivery', 'Cloud File Depository', 'AI Chatbot Layer', 'Zoom Board Meetings', 'Annual / Town Hall Meetings', 'Virtual Lockbox', 'Shared Bank Visibility', 'Vendor / Staff Workflow', 'Announcements', 'Key Tracking', 'Parking Mgmt', 'Residents\u2019 Guide'].map(m => `<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:5px 8px;font-size:9px;color:rgba(255,255,255,0.8);text-align:center">${m}</div>`).join('\n')}
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
 <div style="background:rgba(168,144,53,0.15);border:1px solid rgba(168,144,53,0.3);border-radius:6px;padding:10px;text-align:center">
@@ -6573,7 +6576,7 @@ ${['MDS Property Codes', 'Auto-Classification', 'Make.com Automation', 'Google D
 </div>
 
 <div style="background:#3A4B5B;border-radius:8px;padding:16px;color:#fff;text-align:center">
-<p style="font-size:12px;line-height:1.7;color:rgba(255,255,255,0.8)">Quarterly reports are <strong style="color:#A89035">included at no additional charge</strong> for all Camelot-managed properties. Board members receive a branded PDF and live dashboard access via Camelot Central.</p>
+<p style="font-size:12px;line-height:1.7;color:rgba(255,255,255,0.8)">Quarterly reports are part of the Camelot Intelligence operating cadence. Board members receive a branded PDF and live dashboard access via Camelot Central.</p>
 </div>
 
 <!-- Report Preview — embedded screenshot of actual Sentinel report -->
@@ -6636,7 +6639,7 @@ Tribeca: $2,100/sf · $5,200 1BR
 <tbody>
 <tr><td>Compliance Management (zero violations)</td><td>+3–8% sale premium on units</td><td style="color:#16a34a;font-weight:600">${d.units > 0 ? `${d.units} units \u00D7 avg value = significant portfolio uplift` : 'Premium positioning for all units'}</td></tr>
 <tr><td>Resident Retention (Merlin AI)</td><td>+$3,500–8,000 per unit/yr</td><td style="color:#16a34a;font-weight:600">${d.units} units \u00D7 $4,500 avg = ~$${Math.round(d.units * 4500).toLocaleString()}/yr saved</td></tr>
-<tr><td>Online Payments (Prisma)</td><td>90% NSF reduction</td><td style="color:#16a34a;font-weight:600">${d.units} units \u00D7 $750 avg = ~$${Math.round(d.units * 750).toLocaleString()}/yr</td></tr>
+<tr><td>Online Banking Services</td><td>Reduced payment friction and clearer bank visibility</td><td style="color:#16a34a;font-weight:600">BankUnited workflow supports zero bank fees and better balance visibility</td></tr>
 <tr><td>Technology Premium (ConciergePlus)</td><td>+2–5% building value premium</td><td style="color:#16a34a;font-weight:600">${d.buildingArea > 0 ? `${d.units} units — tech-enabled management increases building appeal and resale value` : 'Measurable value uplift'}</td></tr>
 <tr><td>Energy Optimization (Parity)</td><td>+$0.25–0.75/sqft/yr savings</td><td style="color:#16a34a;font-weight:600">${d.buildingArea > 0 ? `${d.buildingArea.toLocaleString()} SF \u00D7 $0.40 = ~$${Math.round(d.buildingArea * 0.4).toLocaleString()}/yr` : 'Utility cost reduction'}</td></tr>
 <tr><td>Technology-Enabled Leasing</td><td>20–30% faster absorption</td><td>Fewer vacant months; stronger maintenance fee sustainability</td></tr>
@@ -7044,8 +7047,8 @@ function generateProposal() {
   '<strong>Units Managed:</strong> ' + unitDesc + '<br>' +
   '<strong>Fee Basis:</strong> Flat fee based on building type, size, and service tier. Annual escalation of 3–5% as agreed upon by board and management.<br>' +
   '<strong>Ancillary Fees:</strong> As outlined in Schedule A of the management agreement<br>' +
-  '<strong>Accounting:</strong> WAIVED for the first 12 months<br>' +
-  '<strong>Technology:</strong> Included — Camelot OS + ConciergePlus portal + Merlin AI (no additional charge)' +
+  '<strong>Accounting:</strong> Monthly reporting coordination included; tax returns and deeper CPA work separately scoped<br>' +
+  '<strong>Technology:</strong> Camelot Intelligence package — Camelot OS + ConciergePlus portal + Merlin AI; priced as package value rather than a separate line-item discount' +
   '</div>' +
 
   '<div class="hr"></div>' +
@@ -7211,7 +7214,7 @@ function generateProposal() {
   '<p>The first 30 days are dedicated to deep discovery \u2014 understanding ' + buildingNameClean + ' from every angle.</p>' +
   '<ul>' +
   '<li><strong>Full file and data transfer</strong> from current management. Camelot sends our standard Transitional Documentation outlining all files and information required.</li>' +
-  '<li><strong>Free building inspection</strong> \u2014 Sr. Facilities Manager conducts on-site walkthrough covering property envelope, mechanical systems, deferred maintenance, and capital priorities. Written report delivered at no charge ($2,500 value).</li>' +
+  '<li><strong>Introductory building inspection</strong> \u2014 Sr. Facilities Manager conducts on-site walkthrough covering property envelope, mechanical systems, deferred maintenance, and capital priorities. Written report delivered for a one-time $500 introductory fee ($2,500 value).</li>' +
   '<li><strong>Financial &amp; budget review</strong> \u2014 Line-item analysis vs. comparable buildings we manage. AR/AP audit, reserve fund assessment, and revenue gap analysis.</li>' +
   '<li><strong>Vendor contract review</strong> \u2014 Priority targets for rebidding: elevator (10\u201318% savings), insurance (12\u201320%), cleaning (8\u201315%), HVAC/boiler (10\u201315%), extermination (10\u201320%), and legal (5\u201310%).</li>' +
   '<li><strong>Compliance checklist</strong> \u2014 HPD registrations, DOB filings, fire safety, LL11/FISP, LL97 carbon compliance' + (d.buildingArea > 25000 ? ' (critical at ' + d.buildingArea.toLocaleString() + ' SF)' : '') + ', and all open violations.</li>' +
