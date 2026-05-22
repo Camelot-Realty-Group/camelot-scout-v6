@@ -4477,6 +4477,64 @@ export function generateBrochureHTML(d: MasterReportData): string {
       ? 'Building appears likely to require LL97/LL84 review, but benchmarking emissions were not returned by the automated source. Jackie must still show the LL97 workplan instead of dropping the page.'
       : 'Building appears below the primary LL97 size threshold; confirm final applicability during scope review.',
   };
+  const ll97NeedsAction = ll97LikelyApplicable && (!d.ll97 || ll97Display.period1Penalty > 0 || ll97Display.period2Penalty > 0 || !/compliant/i.test(ll97Display.complianceStatus));
+  const complianceGutCheckRows = [
+    {
+      category: 'HPD Open Violations',
+      openItems: d.violationsOpen,
+      cost: 'Per HPD class / cure timing',
+      additionalFees: 'Certified correction, contractor labor, legal/admin follow-up if contested',
+      exposure: d.violationsOpen > 0 ? `${d.violationsOpen} open item(s); ${d.violationClassC} Class C, ${d.violationClassB} Class B, ${d.violationClassA} Class A` : 'No open HPD items returned by current scan',
+      why: d.violationsOpen > 0 ? 'Open HPD records indicate unresolved conditions that require cure, certification, dismissal, or source verification.' : 'No active HPD exposure surfaced; verify HPD Online manually before final board-facing use.',
+    },
+    {
+      category: 'DOB / Local Law Open Items',
+      openItems: d.dobViolationOpen + d.facadeIssueCount,
+      cost: 'DOB/OATH penalties + professional filings where applicable',
+      additionalFees: 'Architect/engineer, expediter, permit, filing, inspection, and contractor charges',
+      exposure: d.dobViolationOpen || d.facadeIssueCount ? `${d.dobViolationOpen} DOB open signal(s); ${d.facadeIssueCount} FISP/facade issue signal(s)` : 'No DOB/FISP open issue returned by current scan',
+      why: d.dobViolationOpen || d.facadeIssueCount ? 'DOB or facade signals require source review because local-law filings can trigger penalties, permits, and professional remediation.' : 'No DOB/FISP issue surfaced; applicability still depends on building height, systems, permits, and inspection cycle.',
+    },
+    {
+      category: 'ECB / OATH Penalties',
+      openItems: d.ecbCount,
+      cost: d.ecbPenaltyBalance ? fmtMoney(d.ecbPenaltyBalance) : 'No balance returned',
+      additionalFees: 'Hearing representation, stipulation/default review, correction proof, and filing work if needed',
+      exposure: d.ecbPenaltyBalance ? `${fmtMoney(d.ecbPenaltyBalance)} current balance signal` : `${d.ecbCount} ECB/OATH record signal(s)`,
+      why: d.ecbPenaltyBalance || d.ecbCount ? 'ECB/OATH records can create direct cash exposure and delay permit or financing work if defaults remain unresolved.' : 'No penalty balance returned; verify OATH/ECB directly for defaults and paid/unpaid status.',
+    },
+    {
+      category: 'LL97 / Carbon Cap',
+      openItems: ll97NeedsAction ? 1 : 0,
+      cost: ll97Display.period1Penalty || ll97Display.period2Penalty ? `${fmtMoney(ll97Display.period1Penalty)}/yr P1; ${fmtMoney(ll97Display.period2Penalty)}/yr P2` : 'Benchmarking / applicability review needed',
+      additionalFees: 'Benchmarking, engineering analysis, energy audit, filings, remediation budget, incentives/rebate work, and capital project management',
+      exposure: ll97Display.totalExposure11yr ? fmtMoney(ll97Display.totalExposure11yr) : (ll97LikelyApplicable ? 'Exposure cannot be finalized until LL84/LL97 data is verified' : 'Likely below primary LL97 threshold'),
+      why: ll97NeedsAction
+        ? (!d.ll97 ? 'The building appears likely covered by size/unit/floor signals, but benchmarking emissions were not returned; non-compliance cannot be ruled out.' : `Modeled emissions exceed or may exceed LL97 carbon caps under status: ${ll97Display.complianceStatus}.`)
+        : 'Current modeled or threshold review does not show penalty exposure, subject to benchmarking verification.',
+    },
+    {
+      category: 'DOF Tax / Lien Exposure',
+      openItems: d.taxLienRecordCount,
+      cost: d.hasTaxLien || d.taxLienRecordCount ? 'Lien amount to verify in DOF / PROS' : 'No lien row returned',
+      additionalFees: 'Interest, payment-plan charges, payoff administration, title/closing delays, and counsel if contested',
+      exposure: d.taxLienRecordCount ? `${d.taxLienRecordCount} DOF lien-sale/tax risk row(s)` : 'No DOF tax lien row returned by current scan',
+      why: d.hasTaxLien || d.taxLienRecordCount ? 'Tax liens can create direct financial exposure and financing friction until resolved.' : 'No tax lien surfaced; tax balances and exemptions should still be checked in DOF / PROS.',
+    },
+  ];
+  const complianceGutCheckTotalExposure = (d.ecbPenaltyBalance || 0) + (ll97Display.totalExposure11yr || 0);
+  const complianceGutCheckTable = `
+<div style="background:#fff;border:1px solid #D5D0C6;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:14px 16px;margin-top:16px">
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.7px;color:#A89035;font-weight:800;margin-bottom:6px">Compliance Gut Check</div>
+<div style="font-size:11px;color:#555;line-height:1.55;margin-bottom:10px">For LL97 and any other local-law issue, Jackie must identify open items, known penalty/cost signals, additional fees likely to be needed, total exposure, and why the subject property appears non-compliant or requires verification.</div>
+<table class="invest-table" style="font-size:10px">
+<thead><tr><th>Area</th><th>Open Items</th><th>Known Cost / Penalty</th><th>Additional Fees / Work</th><th>Total Exposure</th><th>Why It Matters</th></tr></thead>
+<tbody>
+${complianceGutCheckRows.map(row => `<tr><td style="font-weight:800;color:#2C3240">${safe(row.category)}</td><td>${safe(row.openItems)}</td><td>${safe(row.cost)}</td><td>${safe(row.additionalFees)}</td><td style="font-weight:800;color:#A89035">${safe(row.exposure)}</td><td>${safe(row.why)}</td></tr>`).join('')}
+</tbody>
+</table>
+<div style="font-size:11px;color:#2C3240;margin-top:10px"><strong>Current quantified exposure:</strong> ${complianceGutCheckTotalExposure > 0 ? fmtMoney(complianceGutCheckTotalExposure) : 'No quantified penalty balance returned yet'}${complianceGutCheckTotalExposure > 0 ? ' before separate remediation, filing, professional, legal, or project-management fees.' : '; confirm open penalties, filing fees, and remediation costs through source records and professional review.'}</div>
+</div>`;
   const proposedRows = [
     ['Annual Management Fee', d.monthlyFee > 0 ? `${fmtMoney(d.monthlyFee)}/mo (${fmtMoney(d.annualFee)}/yr) based on Jackie preliminary pricing` : '$TBD: custom flat rate after building scope review'],
     ['Online Banking Services', 'BankUnited preferred banking workflow with zero bank fees for residents, owners, and the management company'],
@@ -5687,6 +5745,8 @@ ${d.isRentStabilized ? '<tr><td style="font-weight:700">Rent Stabilization</td><
 </tbody>
 </table>
 
+${complianceGutCheckTable}
+
 <div style="background:#3A4B5B;border-radius:8px;padding:14px 18px;margin-top:14px;color:#fff;font-size:12px;line-height:1.7">
 <strong style="color:#A89035">Camelot Compliance Discipline:</strong> We proactively track local law deadlines, filing requirements, and inspection cycles for every building we manage. Summary monitoring is part of the management cadence; filings, remediation, professional applications, and project work are separately scoped when action is required.
 </div>
@@ -5714,6 +5774,7 @@ ${ll97LikelyApplicable ? `
 <p style="font-size:11px;color:#555;line-height:1.6;margin-top:8px">${safe(ll97Display.sourceNote)}</p>
 <p style="font-size:11px;color:#555;line-height:1.6;margin-top:8px"><strong>Jackie release rule:</strong> if LL84/LL97 data is missing for a likely covered building, the report must flag the missing data and provide the compliance workplan rather than silently removing the LL97 page.</p>
 </div>
+${complianceGutCheckTable}
 </div>` : ''}
 
 <!-- PAGE 7: COMPETITOR ANALYSIS -->

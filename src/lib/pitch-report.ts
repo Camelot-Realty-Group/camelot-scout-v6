@@ -1038,6 +1038,16 @@ export function generatePitchReport(d: MasterReportData): string {
       ${d.violationsOpen > 0 ? `<div class="gold-card"><strong>Violation Resolution</strong><br><span style="font-size:14px;color:#4a5568">${d.violationsOpen} open violations to resolve. Systematic remediation with certified contractors.</span></div>` : ''}
       ${d.permitsCount > 0 ? `<div class="gold-card"><strong>Capital Project Oversight</strong><br><span style="font-size:14px;color:#4a5568">${d.permitsCount} active DOB permits. Full project management, vendor bidding, timeline control.</span></div>` : ''}
       <div class="gold-card"><strong>Building-Specific Local Law Review</strong><br><span style="font-size:14px;color:#4a5568">HPD MDR, DOB BIS/NOW, OATH/ECB, LL152 gas piping, boiler/elevator applicability, fire safety, lead-paint rules for pre-war buildings, insurance inspections, and FISP/LL97 applicability are verified against the building size and use.</span></div>
+    </div>
+    <div class="gold-card" style="margin-top:14px;padding:16px">
+      <div class="sub-heading" style="font-size:17px;margin-bottom:8px">Compliance Gut Check</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div><div style="font-size:10px;color:#8a7a4d;text-transform:uppercase;font-weight:800">Open Violations</div><div style="font-size:18px;font-weight:900;color:${d.violationsOpen > 0 ? '#dc2626' : '#1a2744'}">${d.violationsOpen}</div><div style="font-size:11px;color:#6b7280">${d.violationClassC} Class C / ${d.violationClassB} Class B</div></div>
+        <div><div style="font-size:10px;color:#8a7a4d;text-transform:uppercase;font-weight:800">Known Penalty</div><div style="font-size:18px;font-weight:900;color:${d.ecbPenaltyBalance > 0 ? '#dc2626' : '#1a2744'}">${fmt$(d.ecbPenaltyBalance || 0)}</div><div style="font-size:11px;color:#6b7280">ECB/OATH balance signal</div></div>
+        <div><div style="font-size:10px;color:#8a7a4d;text-transform:uppercase;font-weight:800">LL97 Exposure</div><div style="font-size:18px;font-weight:900;color:${d.ll97?.totalExposure11yr ? '#dc2626' : '#1a2744'}">${d.ll97?.totalExposure11yr ? fmt$(d.ll97.totalExposure11yr) : 'Verify'}</div><div style="font-size:11px;color:#6b7280">Carbon cap / benchmarking review</div></div>
+        <div><div style="font-size:10px;color:#8a7a4d;text-transform:uppercase;font-weight:800">Why Non-Compliant</div><div style="font-size:12px;line-height:1.35;color:#4a5568">${d.violationsOpen > 0 || d.dobViolationOpen > 0 || d.ecbPenaltyBalance > 0 || hasLL97 ? 'Open records, penalty balances, or modeled LL97 exposure require source-backed remediation.' : 'No quantified issue surfaced; confirm source records before final release.'}</div></div>
+      </div>
+      <div style="font-size:11px;color:#6b7280;margin-top:8px">Additional fees may include filings, engineering, legal, expediting, contractor remediation, hearings, project management, and board-approved capital work.</div>
     </div>` : ''}
   </div>
 </div>

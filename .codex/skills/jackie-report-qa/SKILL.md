@@ -26,6 +26,16 @@ For New York reports, the Ownership & Financial History section must always incl
 - PropertyShark, broker pages, StreetEasy, board files, and media sources can support the narrative, but they do not replace ACRIS or DOF/PROS.
 - Outside New York, use the state/county/town clerk, assessor, tax collector, recorder, court, and official-record equivalents.
 
+## Local Law / LL97 Compliance Gut Check
+
+Every LL97 Carbon Cap or local-law compliance section must include a board-readable gut check:
+
+- Open violations or open source records, including HPD, DOB, FISP/facade, ECB/OATH, tax liens, and LL97/LL84 where applicable.
+- Known penalty, fine, tax lien, or modeled cost.
+- Additional fees likely to be needed, including filings, engineering, legal, expediting, contractor remediation, hearings, project management, and board-approved capital work.
+- Total quantified exposure, with unpriced work clearly labeled as `to be confirmed`.
+- Plain-English reason the subject property appears non-compliant, at risk, or still requires verification.
+
 ## NY Ownership Hunt Skill (Additive)
 
 When a New York building-data bot, report, acquisition screen, outreach sequence, or ownership/contact search needs people, comps, entities, principals, debt clues, lenders, brokers, signatories, guarantors, or decision-makers, add this source stack to the normal official-source workflow. This list supplements other sources; it never replaces ACRIS, DOF, HPD, DOB, OATH/ECB, court, tax, board, offering-plan, or property-specific records. Keep this skill source-driven: do not hard-code example property addresses, sample buildings, tenant names, or one-off search-result examples into the skill.
