@@ -4,10 +4,25 @@ import { REPORT_FOCUS_THEMES, buildJackieIntelReportFilename, buildMasterReport,
 import { JACKIE_REPORT_PACKAGES, buildJackiePackageFilename, generateBoardMeetingDeck, generateFirstEmailIntroReport, generateJackieReportPackage, generatePitchEmail, type JackieReportPackage } from '@/lib/pitch-report';
 import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
 import { openBrochureForPrint, downloadAsHTML, triggerCSVDownload, copyToClipboard } from '@/lib/pdf-generator';
+import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
 import toast from 'react-hot-toast';
 
 type EmailType = 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty';
 const REPORT_FOCUS_OPTIONS = Object.values(REPORT_FOCUS_THEMES);
+const REPORT_CENTER_INPUT_SCOPE = 'jackie-report-center';
+
+type ReportCenterSavedInputs = {
+  address: string;
+  borough: string;
+  selectedFocus: ReportFocusKey[];
+  inquiryContact: string;
+  inquiryEmail: string;
+  inquiryPhone: string;
+  inquiryOrganization: string;
+  inquiryRole: string;
+  inquiryNotes: string;
+  selectedPackage: JackieReportPackage;
+};
 
 function ReleaseWorkflowPanel({
   qa,
@@ -116,6 +131,8 @@ export default function ReportCenter() {
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [selectedFocus, setSelectedFocus] = useState<ReportFocusKey[]>(['property_management']);
   const [inquiryContact, setInquiryContact] = useState('');
+  const [inquiryEmail, setInquiryEmail] = useState('');
+  const [inquiryPhone, setInquiryPhone] = useState('');
   const [inquiryOrganization, setInquiryOrganization] = useState('');
   const [inquiryRole, setInquiryRole] = useState('');
   const [inquiryNotes, setInquiryNotes] = useState('');
@@ -125,10 +142,44 @@ export default function ReportCenter() {
   const buildReportFocus = useCallback((): ReportFocusInput => ({
     selectedFocus: selectedFocus.length ? selectedFocus : ['property_management'],
     inquiryContact: inquiryContact.trim() || undefined,
+    inquiryEmail: inquiryEmail.trim() || undefined,
+    inquiryPhone: inquiryPhone.trim() || undefined,
     inquiryOrganization: inquiryOrganization.trim() || undefined,
     inquiryRole: inquiryRole.trim() || undefined,
     inquiryNotes: inquiryNotes.trim() || undefined,
-  }), [selectedFocus, inquiryContact, inquiryOrganization, inquiryRole, inquiryNotes]);
+  }), [selectedFocus, inquiryContact, inquiryEmail, inquiryPhone, inquiryOrganization, inquiryRole, inquiryNotes]);
+
+  const buildSavedInputs = useCallback((): ReportCenterSavedInputs => ({
+    address,
+    borough,
+    selectedFocus,
+    inquiryContact,
+    inquiryEmail,
+    inquiryPhone,
+    inquiryOrganization,
+    inquiryRole,
+    inquiryNotes,
+    selectedPackage,
+  }), [address, borough, selectedFocus, inquiryContact, inquiryEmail, inquiryPhone, inquiryOrganization, inquiryRole, inquiryNotes, selectedPackage]);
+
+  const loadLastInputs = useCallback(() => {
+    const saved = loadReportInputs<ReportCenterSavedInputs>(REPORT_CENTER_INPUT_SCOPE);
+    if (!saved) {
+      toast.error('No saved Jackie report inputs found yet');
+      return;
+    }
+    setAddress(saved.address || '');
+    setBorough(saved.borough || '');
+    setSelectedFocus(saved.selectedFocus?.length ? saved.selectedFocus : ['property_management']);
+    setInquiryContact(saved.inquiryContact || '');
+    setInquiryEmail(saved.inquiryEmail || '');
+    setInquiryPhone(saved.inquiryPhone || '');
+    setInquiryOrganization(saved.inquiryOrganization || '');
+    setInquiryRole(saved.inquiryRole || '');
+    setInquiryNotes(saved.inquiryNotes || '');
+    setSelectedPackage(saved.selectedPackage || 'board_meeting_deck');
+    toast.success('Last Jackie report inputs restored');
+  }, []);
 
   const toggleFocus = (key: ReportFocusKey) => {
     setSelectedFocus(prev => {
@@ -140,6 +191,7 @@ export default function ReportCenter() {
 
   const generate = useCallback(async () => {
     if (!address.trim()) return;
+    saveReportInputs(REPORT_CENTER_INPUT_SCOPE, buildSavedInputs());
     setLoading(true);
     setData(null);
     try {
@@ -157,7 +209,7 @@ export default function ReportCenter() {
       setLoading(false);
       setLoadingMsg('');
     }
-  }, [address, borough, buildReportFocus]);
+  }, [address, borough, buildReportFocus, buildSavedInputs]);
 
   const handlePreviewBrochure = () => {
     const d = getDataWithPhotos();
@@ -424,6 +476,13 @@ export default function ReportCenter() {
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             Run Jackie
           </button>
+          <button
+            type="button"
+            onClick={loadLastInputs}
+            className="px-4 py-3 rounded-lg border border-gray-200 text-gray-600 hover:text-[#A89035] hover:border-[#A89035] text-sm font-medium"
+          >
+            Load Last Inputs
+          </button>
         </div>
 
         <div className="mt-5 border-t pt-5">
@@ -476,6 +535,22 @@ export default function ReportCenter() {
               value={inquiryOrganization}
               onChange={e => setInquiryOrganization(e.target.value)}
               placeholder="Organization / building group"
+              className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#A89035]/50"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <input
+              value={inquiryEmail}
+              onChange={e => setInquiryEmail(e.target.value)}
+              placeholder="Inquiry contact email"
+              type="email"
+              className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#A89035]/50"
+            />
+            <input
+              value={inquiryPhone}
+              onChange={e => setInquiryPhone(e.target.value)}
+              placeholder="Inquiry contact phone"
+              type="tel"
               className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#A89035]/50"
             />
           </div>

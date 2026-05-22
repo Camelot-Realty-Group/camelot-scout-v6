@@ -183,6 +183,8 @@ export type ReportFocusKey =
 export interface ReportFocusInput {
   selectedFocus: ReportFocusKey[];
   inquiryContact?: string;
+  inquiryEmail?: string;
+  inquiryPhone?: string;
   inquiryOrganization?: string;
   inquiryRole?: string;
   inquiryNotes?: string;
@@ -4334,6 +4336,8 @@ export function generateBrochureHTML(d: MasterReportData): string {
   const primaryFocus = selectedFocusThemes[0] || REPORT_FOCUS_THEMES.property_management;
   const inquiryMeta = [
     reportFocus.inquiryContact ? `Contact: ${reportFocus.inquiryContact}` : null,
+    reportFocus.inquiryEmail ? `Email: ${reportFocus.inquiryEmail}` : null,
+    reportFocus.inquiryPhone ? `Phone: ${reportFocus.inquiryPhone}` : null,
     reportFocus.inquiryRole ? `Role: ${reportFocus.inquiryRole}` : null,
     reportFocus.inquiryOrganization ? `Organization: ${reportFocus.inquiryOrganization}` : null,
   ].filter(Boolean).join(' | ');

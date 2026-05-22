@@ -14,6 +14,7 @@ import {
 import toast from 'react-hot-toast';
 import { cn, formatCurrency, formatNumber } from '@/lib/utils';
 import { downloadAsHTML, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
+import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
 import {
   ARTHUR_CRITERIA_FIELDS,
   DEFAULT_ARTHUR_CRITERIA,
@@ -43,6 +44,7 @@ const DEAL_TYPES: ArthurDealType[] = [
   'mixed_use',
   'hoa_condo_recovery',
 ];
+const ARTHUR_INPUT_SCOPE = 'arthur-underwriter';
 
 export default function Arthur() {
   const [criteria, setCriteria] = useState<ArthurCriteria>(DEFAULT_ARTHUR_CRITERIA);
@@ -64,6 +66,7 @@ export default function Arthur() {
   const reportHtml = useMemo(() => selected && model ? buildArthurReportHtml(selected, criteria, model) : '', [selected, criteria, model]);
 
   const runSearch = () => {
+    saveReportInputs(ARTHUR_INPUT_SCOPE, criteria);
     setIsSearching(true);
     window.setTimeout(() => {
       const next = searchArthurListings(criteria);
@@ -73,6 +76,19 @@ export default function Arthur() {
       const nearest = next.some((property) => property.matchStatus === 'nearest');
       toast.success(nearest ? `${next.length} nearest Arthur candidates shown` : `${next.length} Arthur candidate${next.length === 1 ? '' : 's'} found`);
     }, 300);
+  };
+
+  const loadLastInputs = () => {
+    const saved = loadReportInputs<ArthurCriteria>(ARTHUR_INPUT_SCOPE);
+    if (!saved) {
+      toast.error('No saved Arthur criteria found yet');
+      return;
+    }
+    setCriteria(saved);
+    const next = searchArthurListings(saved);
+    setResults(next);
+    setSelectedId(next[0]?.id || '');
+    toast.success('Last Arthur criteria restored');
   };
 
   const selectProperty = (id: string) => {
@@ -209,7 +225,7 @@ export default function Arthur() {
 
       <div className="p-6 md:p-8 space-y-6">
         <section className="grid grid-cols-1 xl:grid-cols-[390px_minmax(0,1fr)] gap-5">
-          <CriteriaPanel criteria={criteria} setCriteria={setCriteria} toggleDealType={toggleDealType} />
+          <CriteriaPanel criteria={criteria} setCriteria={setCriteria} toggleDealType={toggleDealType} onLoadLast={loadLastInputs} />
           <div className="space-y-5">
             <section className="bg-white border border-gray-200 rounded-lg p-5">
               <div className="flex items-center justify-between gap-3">
@@ -473,10 +489,12 @@ function CriteriaPanel({
   criteria,
   setCriteria,
   toggleDealType,
+  onLoadLast,
 }: {
   criteria: ArthurCriteria;
   setCriteria: React.Dispatch<React.SetStateAction<ArthurCriteria>>;
   toggleDealType: (type: ArthurDealType) => void;
+  onLoadLast: () => void;
 }) {
   return (
     <section className="bg-white border border-gray-200 rounded-lg p-5 h-fit">
@@ -485,12 +503,20 @@ function CriteriaPanel({
           <h2 className="font-bold flex items-center gap-2"><Search size={18} className="text-camelot-gold" /> Arthur Search Criteria</h2>
           <p className="text-xs text-gray-500 mt-1">Change assumptions here before or after report generation.</p>
         </div>
-        <button
-          onClick={() => setCriteria(DEFAULT_ARTHUR_CRITERIA)}
-          className="text-xs border border-gray-200 rounded-md px-2 py-1 hover:bg-gray-50"
-        >
-          Reset
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onLoadLast}
+            className="text-xs border border-gray-200 rounded-md px-2 py-1 hover:bg-gray-50"
+          >
+            Load Last
+          </button>
+          <button
+            onClick={() => setCriteria(DEFAULT_ARTHUR_CRITERIA)}
+            className="text-xs border border-gray-200 rounded-md px-2 py-1 hover:bg-gray-50"
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4 mt-5">

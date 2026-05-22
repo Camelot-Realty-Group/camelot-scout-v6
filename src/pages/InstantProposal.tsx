@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Search, CheckCircle, FileText, Edit3, Download, Printer, Mail, Loader2, ChevronRight, ArrowLeft, Zap, X, ExternalLink, Copy } from 'lucide-react';
 import { buildJackieIntelReportFilename, buildMasterReport, generateBrochureHTML, validateJackieReport, type MasterReportData, type QACheckResult } from '@/lib/camelot-report';
 import { generatePitchReport } from '@/lib/pitch-report';
+import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
 import toast from 'react-hot-toast';
 
 type Step = 'search' | 'verify' | 'jackie' | 'draft' | 'export';
@@ -46,6 +47,12 @@ function ReportModal({ html, title, onClose }: { html: string; title: string; on
 // Demo property constants
 const DEMO_ADDRESS = '201 East 79th Street';
 const DEMO_BOROUGH = 'Manhattan';
+const INSTANT_PROPOSAL_INPUT_SCOPE = 'instant-proposal';
+
+type InstantProposalSavedInputs = {
+  address: string;
+  borough: string;
+};
 
 export default function InstantProposal() {
   const location = useLocation();
@@ -66,9 +73,21 @@ export default function InstantProposal() {
 
   const stepIndex = STEPS.findIndex(s => s.key === step);
 
+  const loadLastInputs = useCallback(() => {
+    const saved = loadReportInputs<InstantProposalSavedInputs>(INSTANT_PROPOSAL_INPUT_SCOPE);
+    if (!saved) {
+      toast.error('No saved instant proposal inputs found yet');
+      return;
+    }
+    setAddress(saved.address || '');
+    setBorough(saved.borough || '');
+    toast.success('Last instant proposal inputs restored');
+  }, []);
+
   // Step 1: Search
   const handleSearch = async () => {
     if (!address.trim()) { toast.error('Enter a property address'); return; }
+    saveReportInputs(INSTANT_PROPOSAL_INPUT_SCOPE, { address, borough });
     setLoading(true);
     try {
       const data = await buildMasterReport(address.trim(), borough || undefined);
@@ -96,6 +115,7 @@ export default function InstantProposal() {
   const handleTryDemo = async () => {
     setAddress(DEMO_ADDRESS);
     setBorough(DEMO_BOROUGH);
+    saveReportInputs(INSTANT_PROPOSAL_INPUT_SCOPE, { address: DEMO_ADDRESS, borough: DEMO_BOROUGH });
     setLoading(true);
     try {
       const data = await buildMasterReport(DEMO_ADDRESS, DEMO_BOROUGH);
@@ -410,6 +430,13 @@ export default function InstantProposal() {
               className="px-5 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
               Try Demo
+            </button>
+            <button
+              onClick={loadLastInputs}
+              disabled={loading}
+              className="px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:border-camelot-gold hover:text-camelot-gold transition-colors disabled:opacity-50"
+            >
+              Load Last Inputs
             </button>
           </div>
           <p className="text-xs text-gray-400 mt-3">Demo loads 201 East 79th Street, Manhattan</p>
