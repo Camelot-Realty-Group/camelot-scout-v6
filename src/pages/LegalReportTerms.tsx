@@ -1,5 +1,5 @@
 import { FileText, Mail, Scale, ShieldCheck } from 'lucide-react';
-import { nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+import { nyOwnershipHuntSummary, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
 
 const terms = [
   {
@@ -12,7 +12,7 @@ const terms = [
   },
   {
     title: 'Data Sources and Limits',
-    body: `Jackie may reference NYC Open Data, HPD, DOB, DOF, ACRIS, OATH/ECB, property tax records, StreetEasy, RealtyMX, PropertyShark-style market intelligence, building websites, uploaded materials, and other third-party databases. For New York people, entity, litigation, lender/note, commercial occupant, and comp scans, Camelot also references: ${nyPeopleEntityCompSourceSummary()}. Public and third-party data can be incomplete, delayed, or revised after a report is generated.`,
+    body: `Jackie may reference NYC Open Data, HPD, DOB, DOF, ACRIS, OATH/ECB, property tax records, StreetEasy, RealtyMX, PropertyShark-style market intelligence, building websites, uploaded materials, and other third-party databases. For New York people, entity, litigation, lender/note, commercial occupant, and comp scans, Camelot also references: ${nyPeopleEntityCompSourceSummary()}. For New York decision-maker and ownership-clue hunts, Camelot additionally references: ${nyOwnershipHuntSummary()}. Public and third-party data can be incomplete, delayed, or revised after a report is generated.`,
   },
   {
     title: 'AI-Assisted Review',

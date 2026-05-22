@@ -1,5 +1,12 @@
 import { slugify } from '@/lib/utils';
-import { NY_PEOPLE_ENTITY_COMP_SOURCE_STACK, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+import {
+  NY_OWNERSHIP_HUNT_SEQUENCE,
+  NY_OWNERSHIP_HUNT_SIGNATORY_RULE,
+  NY_OWNERSHIP_HUNT_SOURCE_STACK,
+  NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
+  nyOwnershipHuntSummary,
+  nyPeopleEntityCompSourceSummary,
+} from '@/lib/ny-research-sources';
 
 export type ArthurDealType =
   | 'commercial'
@@ -886,6 +893,8 @@ export function buildArthurReportHtml(property: ArthurProperty, criteria: Arthur
   <div class="source-stack">
     <strong>NY people / entity / comp source stack:</strong> ${nyPeopleEntityCompSourceSummary()}.
     <br />Arthur must use this stack for New York ownership, lender, note, broker, litigation, commercial occupant, entity, and comparable-sale/rental enrichment before a candidate is treated as investment-ready.
+    <br /><strong>NY ownership hunt skill:</strong> ${nyOwnershipHuntSummary()}.
+    <br />Preferred hunt order: ${NY_OWNERSHIP_HUNT_SEQUENCE.join(' -> ')}. ${NY_OWNERSHIP_HUNT_SIGNATORY_RULE}
   </div>
   <div class="footer">2</div>
 </section>
@@ -928,6 +937,9 @@ export function buildArthurExcelHtml(property: ArthurProperty, criteria: ArthurC
     ['Broker Notes', property.brokerNotes],
     ['Arthur Thesis', property.arthurThesis],
     ['NY People / Entity / Comp Sources', NY_PEOPLE_ENTITY_COMP_SOURCE_STACK.join(' | ')],
+    ['NY Ownership Hunt Sources', NY_OWNERSHIP_HUNT_SOURCE_STACK.map(({ source, bestUseCase }) => `${source}: ${bestUseCase}`).join(' | ')],
+    ['NY Ownership Hunt Sequence', NY_OWNERSHIP_HUNT_SEQUENCE.join(' -> ')],
+    ['ACRIS Signatory Rule', NY_OWNERSHIP_HUNT_SIGNATORY_RULE],
   ];
   const sensitivity = model.sensitivity.map((row) =>
     `<tr><td>${row.caseName}</td><td>${row.exitCap}</td><td>${row.rentGrowth}</td><td>${row.irr}</td><td>${row.equityMultiple}</td></tr>`

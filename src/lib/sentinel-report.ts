@@ -12,7 +12,12 @@
  * - REBNY RLS: Requires member access credentials
  */
 
-import { NY_PEOPLE_ENTITY_COMP_SOURCE_STACK, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+import {
+  NY_OWNERSHIP_HUNT_SOURCE_STACK,
+  NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
+  nyOwnershipHuntSummary,
+  nyPeopleEntityCompSourceSummary,
+} from '@/lib/ny-research-sources';
 
 // ============================================================
 // Types
@@ -200,6 +205,7 @@ export const SENTINEL_EXPANSION_SOURCE_STACK = [
   'Miller Samuel, REBNY, OneKey/RLS, and market reports: quarterly narrative, absorption, luxury trends, and brokerage context',
   'PropertyShark-style sources: ownership, foreclosure, tax map, zoning, liens, and comparable sales cross-check',
   ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
+  ...NY_OWNERSHIP_HUNT_SOURCE_STACK.map(({ source, bestUseCase }) => `${source}: ${bestUseCase}`),
 ];
 
 function escapeHtml(value: unknown): string {
@@ -304,7 +310,7 @@ export function generateSubjectMarketReport(input: SentinelInput): string {
     <div class="card"><div class="metric">${hood.momentum}</div><div class="label">Momentum</div></div>
   </div>
   <p style="margin-top:34px;color:#d8dee7;font-size:14px">${realtyMxStatus}</p>
-  <div class="source">Generated ${generated}. Sources: RealtyMX API/CSV, StreetEasy, Zillow, ACRIS, DOF, PLUTO, DOB/HPD/OATH-ECB, Miller Samuel/REBNY-style market reports, PropertyShark-style foreclosure and ownership checks, plus NY people/entity/comp stack: ${nyPeopleEntityCompSourceSummary()}.</div>
+  <div class="source">Generated ${generated}. Sources: RealtyMX API/CSV, StreetEasy, Zillow, ACRIS, DOF, PLUTO, DOB/HPD/OATH-ECB, Miller Samuel/REBNY-style market reports, PropertyShark-style foreclosure and ownership checks, NY people/entity/comp stack: ${nyPeopleEntityCompSourceSummary()}, and additive NY ownership hunt skill: ${nyOwnershipHuntSummary()}.</div>
   <div class="num">1</div>
 </section>
 

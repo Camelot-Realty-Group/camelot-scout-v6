@@ -17,6 +17,42 @@ metadata:
 6. Do not release a report with `undefined`, `NaN`, broken image sources, duplicated conflicting unit counts, or missing legal/source links.
 7. Use real partner assets or official website/social assets. Do not invent fake logos.
 
+## NY Ownership Hunt Skill (Additive)
+
+When a New York building-data bot, report, acquisition screen, outreach sequence, or ownership/contact search needs people, comps, entities, principals, debt clues, lenders, brokers, signatories, guarantors, or decision-makers, add this source stack to the normal official-source workflow. This list supplements other sources; it never replaces ACRIS, DOF, HPD, DOB, OATH/ECB, court, tax, board, offering-plan, or property-specific records.
+
+| Source | Website | Importance | Best Use Case | Weakness |
+| --- | --- | --- | --- | --- |
+| ACRIS | NYC ACRIS | 10/10 | Deeds, mortgages, signatories, guarantors, mailing addresses, entity tracing | Manhattan, Bronx, Brooklyn, and Queens only; not Staten Island |
+| PropertyShark | PropertyShark | 10/10 | Fast ownership lookups, portfolio tracing, contact info, comps | Paid; some contact data stale |
+| HPD Online | HPD Online | 9.5/10 | Managing agent, officer names, emergency contacts, violations | Sometimes LLC-heavy |
+| NY DOS Entity Search | NY Department of State Business Search | 9/10 | LLC filings, service address, formation attorney | Often hides beneficial owner |
+| DOB BIS | NYC DOB BIS | 9/10 | Permit applicants, engineers, expediters, contractors, ownership clues | Old interface, messy |
+| DOB NOW | DOB NOW | 8.5/10 | Active filings, permits, filings tied to current activity | Harder to navigate |
+| OpenCorporates | OpenCorporates | 8.5/10 | Cross-entity ownership tracing across states | Not always current |
+| PincusCo | PincusCo NYC Real Estate News | 8.5/10 | Institutional ownership, debt, acquisitions, hidden players | Mostly larger deals |
+| The Real Deal | The Real Deal NYC | 8/10 | Buyers, sellers, sponsor intelligence, financing context | Media source, not hard records |
+| Reonomy | Reonomy | 8/10 | Owner contact info, LLC mapping, debt | Expensive |
+| Trellis Law / court records | Lexis / Trellis / Court Records | 7.5/10 | Litigation that reveals principals, partners, disputes, liens, claims | Time-consuming |
+| JustFix Who Owns What | JustFix / Who Owns What | 7.5/10 | Portfolio clustering and landlord mapping | Residential-focused |
+| OpenIgloo | OpenIgloo | 7/10 | Quick owner/entity snapshots and resident-facing management signals | Consumer-level |
+| StreetEasy | StreetEasy | 7/10 | Building branding, leasing agents, listing history, imagery, portfolio clues | Not ownership-grade |
+| CityRealty | CityRealty | 7/10 | Condo/co-op/sponsor background and building context | Limited legal ownership |
+| Google Maps / LinkedIn | Google Maps / LinkedIn | 8/10 | Asset managers, property managers, acquisitions people, operating contacts | Requires detective work |
+| SEC EDGAR / FINRA / fund filings | SEC EDGAR | 7/10 | Private equity, fund ownership, securities, principals, institutional sponsor context | Mostly institutional |
+
+Preferred Camelot ownership-hunt sequence:
+
+1. PropertyShark: quick owner and portfolio clue.
+2. ACRIS: mortgage/deed signatory review.
+3. HPD Online: managing agent and emergency contact review.
+4. NY DOS: LLC filing address and formation attorney review.
+5. DOB BIS + DOB NOW: active building-player review.
+6. LinkedIn: asset manager, director, acquisitions person, property manager, or principal search.
+7. PincusCo / The Real Deal: ownership, financing, acquisition, and pain-point scan.
+
+Hidden trick: ACRIS mortgage signatories are often more valuable than deed owners. The person signing a major refinance is often the real decision-maker or family-office principal.
+
 ## Jackie v2 Universal Orchestrator Doctrine
 
 When a task involves acquisitions, underwriting, capital markets, value-add strategy, distressed assets, HOA/condo turnarounds, capital stacks, investor materials, lender materials, or platform roll-ups, Jackie must operate as Camelot's master acquisition and strategy engine.

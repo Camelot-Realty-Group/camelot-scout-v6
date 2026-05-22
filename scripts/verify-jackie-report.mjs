@@ -23,6 +23,7 @@ const acquisitionPipelineFile = resolve(root, 'src/lib/acquisition-pipeline.ts')
 const arthurPageFile = resolve(root, 'src/pages/Arthur.tsx');
 const arthurUnderwritingFile = resolve(root, 'src/lib/arthur-underwriting.ts');
 const nyResearchSourcesFile = resolve(root, 'src/lib/ny-research-sources.ts');
+const jackieReportQaSkillFile = resolve(root, '.codex/skills/jackie-report-qa/SKILL.md');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
 const nycApiSource = readFileSync(nycApiFile, 'utf8');
@@ -39,11 +40,12 @@ const acquisitionPipelineSource = readFileSync(acquisitionPipelineFile, 'utf8');
 const arthurPageSource = readFileSync(arthurPageFile, 'utf8');
 const arthurUnderwritingSource = readFileSync(arthurUnderwritingFile, 'utf8');
 const nyResearchSourcesSource = readFileSync(nyResearchSourcesFile, 'utf8');
+const jackieReportQaSkillSource = readFileSync(jackieReportQaSkillFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${jackieReportQaSkillSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -224,6 +226,23 @@ const requiredTokens = [
   ['NY web enrichment release gate', 'NY People / Entity / Comp Web Source Stack'],
   ['NY web enrichment bot cards', 'NY_WEB_SOURCE_CARDS'],
   ['Arthur NY enrichment stack', 'NY People / Entity / Comp Sources'],
+  ['NY ownership hunt source stack module', 'NY_OWNERSHIP_HUNT_SOURCE_STACK'],
+  ['NY ownership hunt source ACRIS', 'ACRIS mortgage signatories are often more valuable than deed owners'],
+  ['NY ownership hunt source PropertyShark', 'PropertyShark quick owner and portfolio clue'],
+  ['NY ownership hunt source HPD Online', 'HPD Online managing agent and emergency contact review'],
+  ['NY ownership hunt source NY DOS', 'NY DOS LLC filing address and formation attorney review'],
+  ['NY ownership hunt source DOB BIS NOW', 'DOB BIS and DOB NOW active building-player review'],
+  ['NY ownership hunt source OpenCorporates', 'OpenCorporates'],
+  ['NY ownership hunt source The Real Deal', 'The Real Deal NYC'],
+  ['NY ownership hunt source Reonomy', 'Reonomy'],
+  ['NY ownership hunt source Trellis', 'Trellis Law / court records'],
+  ['NY ownership hunt source JustFix', 'JustFix Who Owns What'],
+  ['NY ownership hunt source SEC EDGAR', 'SEC EDGAR / FINRA / fund filings'],
+  ['NY ownership hunt visible report stack', 'NY ownership hunt skill'],
+  ['NY ownership hunt release gate', 'NY Ownership Hunt Source Stack'],
+  ['NY ownership hunt bot cards', 'NY_OWNERSHIP_HUNT_SOURCE_CARDS'],
+  ['NY ownership hunt Jackie QA skill', 'NY Ownership Hunt Skill (Additive)'],
+  ['Arthur NY ownership hunt stack', 'NY Ownership Hunt Sources'],
   ['Sentinel 15 percent pricing rule', '15% below comparable large-firm pricing'],
   ['Scout integrations status endpoint', '/api/integrations/status'],
   ['Scout integrations push endpoint', '/api/integrations/push-building'],

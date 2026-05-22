@@ -13,7 +13,14 @@ import { getNeighborhoodIntel, generateNeighborhoodIntelHTML } from '@/lib/neigh
 import { fetchStreetEasyBuilding, type StreetEasyBuilding } from '@/lib/streeteasy';
 import { searchViolations, type ViolationSummary } from '@/lib/nyc-violations';
 import { fetch311Complaints } from '@/lib/nyc-311';
-import { NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+import {
+  NY_OWNERSHIP_HUNT_SEQUENCE,
+  NY_OWNERSHIP_HUNT_SIGNATORY_RULE,
+  NY_OWNERSHIP_HUNT_SOURCE_NAMES,
+  NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES,
+  nyOwnershipHuntSummary,
+  nyPeopleEntityCompSourceSummary,
+} from '@/lib/ny-research-sources';
 
 // ============================================================
 // Types
@@ -3516,6 +3523,16 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
         ? `Missing NY web enrichment source(s): ${nyPeopleEntityCompMissing.join(', ')}`
         : `NY scans include ${nyPeopleEntityCompSourceSummary()}`,
   });
+  const nyOwnershipHuntMissing = NY_OWNERSHIP_HUNT_SOURCE_NAMES.filter(source => !html.includes(source));
+  checks.push({
+    name: 'NY Ownership Hunt Source Stack',
+    status: isHoaRecovery || isFloridaReceivership || nyOwnershipHuntMissing.length === 0 ? 'pass' : 'fail',
+    detail: isHoaRecovery || isFloridaReceivership
+      ? 'Non-NY report mode uses state/county/town and local-market equivalents instead of the NYC ownership-hunt stack'
+      : nyOwnershipHuntMissing.length
+        ? `Missing NY ownership-hunt source(s): ${nyOwnershipHuntMissing.join(', ')}`
+        : `NY ownership hunts include ${nyOwnershipHuntSummary()}`,
+  });
   const requiredCommercialSources = isHoaRecovery
     ? [
         'Connecticut Secretary of the State business/entity search path',
@@ -4932,6 +4949,7 @@ ${commercialIntel.brandingDescription ? `<p style="margin-top:10px">${safe(comme
 <strong style="color:#A89035">Commercial / amenity source stack:</strong>
 NYC vacant storefront data · CoStar/LoopNet-style commercial listings · Walker &amp; Dunlop Suite / commercial data · Local Logic neighborhood enrichment · PropertyShark · DOT/DOB parking and garage records · public signage and official building website review. Tenant names, garage operators, storage inventory, and amenity revenue must be verified before publication.
 <br><strong style="color:#A89035">NY people / entity / comp web stack:</strong> ${safe(nyPeopleEntityCompSourceSummary())}. Use this stack for New York ownership, lender/note, litigation, management-review, broker, comparable-sale/rental, commercial occupant, and entity cross-checks.
+<br><strong style="color:#A89035">NY ownership hunt skill:</strong> ${safe(nyOwnershipHuntSummary())}. This is an additive decision-maker and ownership-clue stack, not a replacement for official records. Preferred hunt order: ${safe(NY_OWNERSHIP_HUNT_SEQUENCE.join(' -> '))}. ${safe(NY_OWNERSHIP_HUNT_SIGNATORY_RULE)}
 <div style="margin-top:5px">
 <a href="https://data.cityofnewyork.us/City-Government/Storefronts-Reported-Vacant-or-Not/92iy-9c3n/about_data" target="_blank">NYC storefront data</a> ·
 <a href="https://suite.walkerdunlop.com/" target="_blank">Walker &amp; Dunlop Suite</a> ·

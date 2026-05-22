@@ -11,7 +11,7 @@ export interface AIChatMessage {
 
 import { JACKIE_V2_ORCHESTRATOR_PROMPT } from './jackie-v2-orchestrator';
 import { SCOUT_AGENT_DOCTRINE_PROMPT } from './scout-ai-doctrines';
-import { nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+import { nyOwnershipHuntSummary, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
 
 export interface AIConfig {
   apiUrl: string;
@@ -269,7 +269,7 @@ export function localQueryEngine(
     let resp = `## Sentinel Market Intelligence Brief\n\n`;
     resp += `Sentinel should turn market data into a board-facing value story: how the building stacks up in value, $/SF, leasing velocity, safety, amenities, cost pressure, sales activity, and neighborhood demand.\n\n`;
     resp += `**Current Scout footprint:** ${active.length} active buildings, ${totalUnits.toLocaleString()} total units.\n${regionLines || '- No region data yet'}\n\n`;
-    resp += `**Source stack to use:** Miller Samuel / REBNY-style market reports, StreetEasy, Zillow, PropertyShark, local MLS, Niche, NeighborhoodScout, NYC Open Data or state/local equivalents, plus Camelot portfolio case studies and nearby managed buildings. For New York people, comps, owners, lenders, notes, entities, commercial occupants, and litigation, also scan: ${nyPeopleEntityCompSourceSummary()}.\n\n`;
+    resp += `**Source stack to use:** Miller Samuel / REBNY-style market reports, StreetEasy, Zillow, PropertyShark, local MLS, Niche, NeighborhoodScout, NYC Open Data or state/local equivalents, plus Camelot portfolio case studies and nearby managed buildings. For New York people, comps, owners, lenders, notes, entities, commercial occupants, and litigation, also scan: ${nyPeopleEntityCompSourceSummary()}. For New York decision-maker and ownership hunts, add: ${nyOwnershipHuntSummary()}.\n\n`;
     resp += `**Deliverable:** quarterly market report with maps, charts, comp table, local Camelot presence, and a clear "what your unit/building may be worth" explanation.`;
     return resp;
   }
