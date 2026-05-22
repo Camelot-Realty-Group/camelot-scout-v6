@@ -1776,6 +1776,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       yearBuilt: 1900,
       propertyType: 'Co-operative / Tenancy-in-Common',
       neighborhoodName: 'Flatiron / Madison Square',
+      dofOwner: 'WO Realty LLC (reported owner; verify against NYC DOF and ACRIS before board-facing release)',
       imageUrls: ['https://camelot-scout-v6.onrender.com/images/22-east-22nd/22East22ndStreet_NYC.jpg'],
       description: '22 East 22nd Street is a small pre-war residential building in the Flatiron / Madison Square market. Camelot treats the property as a 19-unit co-op or tenancy-in-common candidate unless board, offering-plan, land-record, or ownership records confirm a different legal structure.',
       amenities: [
@@ -1808,12 +1809,14 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       brandingDescription: 'Known-property guard: Jackie must not treat 22 East 22nd Street as the larger neighboring East 22nd Street rental profile. Use 19 units and co-op / tenancy-in-common review language until source documents confirm otherwise.',
       researchSources: [
         'User-provided property identity correction: 19-unit co-op or tenancy-in-common candidate',
+        'User-provided ownership lead: WO Realty LLC; confirm via NYC DOF property tax records, ACRIS deed/mortgage filings, and PropertyShark before final release',
         'NYC DOF / ACRIS ownership and tax-lot records must be cross-checked for legal ownership structure',
         'HPD MDR / DOB / HPD Online / OATH-ECB / DOF / ACRIS / PropertyShark source stack should be reviewed before board-facing release',
         'Offering plan, proprietary lease, TIC agreement, board records, or bank questionnaire should be requested for final unit count and governance confirmation',
       ],
       currentManagement: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
       boardMembers: [
+        { name: 'WO Realty LLC', title: 'Reported owner / ownership lead to verify via NYC DOF and ACRIS' },
         { name: '22 East 22nd Street ownership / board authority', title: 'Co-op / TIC governance to verify' },
       ],
       buildingStaff: [
