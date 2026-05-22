@@ -6948,6 +6948,11 @@ function generateProposal() {
   var chargeLabel = isCoop ? 'maintenance' : isCondo ? 'common charges' : 'rent';
   var agreementType = isCoop ? 'Co-op' : isCondo ? 'Condo' : 'Property';
   var unitDesc = d.units + (d.propertyType.toLowerCase().indexOf('mixed') >= 0 ? ' residential and commercial' : ' residential') + ' units';
+  var bblRaw = (d.bbl || '').replace(/[^0-9]/g, '');
+  var blockCode = bblRaw.length >= 10 ? String(parseInt(bblRaw.substring(1, 6), 10)) : '';
+  var lotCode = bblRaw.length >= 10 ? String(parseInt(bblRaw.substring(6, 10), 10)) : '';
+  var blockLotLabel = blockCode && lotCode ? 'Block ' + blockCode + ' / Lot ' + lotCode : (d.bbl || 'To be confirmed');
+  var squareFeetLabel = d.buildingArea > 0 ? d.buildingArea.toLocaleString() + ' SF' : 'To be confirmed';
 
   // Dynamic pain points for Management Philosophy section
   var painPoints = [];
@@ -6963,25 +6968,38 @@ function generateProposal() {
   var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Services \u2014 ' + buildingNameClean + '</title>' +
   '<style>' +
   '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }' +
-  'body { font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.65; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1in; }' +
-  'h1 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 700; color: #3A4B5B; text-align: center; margin: 20px 0 4px 0; letter-spacing: 1px; }' +
-  'h2 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 11.5px; font-weight: 700; color: #A89035; margin: 16px 0 6px 0; padding-bottom: 3px; border-bottom: 1px solid #A89035; text-transform: uppercase; letter-spacing: 0.5px; }' +
-  'h3 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 700; color: #3A4B5B; margin: 12px 0 4px 0; }' +
+  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.65; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: .82in .72in .72in; }' +
+  'h1 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 800; color: #111; text-align: center; margin: 20px 0 4px 0; letter-spacing: 1.2px; }' +
+  'h2 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 800; color: #A89035; margin: 18px 0 7px 0; padding-bottom: 4px; border-bottom: 1.5px solid #A89035; text-transform: uppercase; letter-spacing: 0.7px; }' +
+  'h3 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 800; color: #111; margin: 13px 0 4px 0; }' +
   '.cover-title { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; color: #A89035; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }' +
   'p { margin-bottom: 8px; text-align: justify; }' +
+  '.section-intro { font-size: 11.2px; color:#3A4B5B; line-height:1.65; margin: 2px 0 9px; text-align:left; }' +
   'ul { margin: 6px 0 10px 18px; }' +
   'ul li { margin-bottom: 4px; }' +
   '.hr { border: none; border-top: 1.5px solid #A89035; margin: 16px 0; }' +
   '.fee-box { background: #F5F0E5; border-left: 3px solid #A89035; padding: 12px 16px; margin: 10px 0; }' +
   '.fee-box strong { color: #A89035; }' +
+  '.price { color:#111; font-weight:900; text-decoration: underline; text-decoration-color:#A89035; text-underline-offset: 2px; }' +
+  '.proposal-header { position: fixed; top: 0; left: 0; right: 0; height: .56in; padding: .13in .55in .08in; border-bottom: 1px solid #D5D0C6; background: #fff; display:flex; align-items:center; justify-content:space-between; z-index: 10; }' +
+  '.proposal-header img { width: 132px; height:auto; display:block; }' +
+  '.proposal-header .hdr-text { font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:8.6px; letter-spacing:1.2px; color:#A89035; text-transform:uppercase; text-align:right; }' +
+  '.proposal-footer { position: fixed; bottom: 0; left: 0; right: 0; height: .42in; padding: .08in .55in; border-top: 1px solid #D5D0C6; background:#fff; display:flex; align-items:center; justify-content:space-between; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:8.5px; color:#777; z-index:10; }' +
+  '.proposal-footer .page-num::after { content: counter(page); }' +
+  '.fact-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin: 10px 0 12px; padding:10px 12px; background:#F8F6EF; border:1px solid #D5D0C6; }' +
+  '.fact-grid div { font-size:10px; } .fact-grid strong { color:#111; }' +
   '.sig-row { display: flex; gap: 40px; margin-top: 14px; }' +
   '.sig-col { flex: 1; }' +
   '.sig-line { border-bottom: 1px solid #2C3240; height: 28px; margin-bottom: 2px; }' +
+  '.type-sign { border:1px solid #D5D0C6; background:#fff; padding:8px; min-height:34px; margin: 8px 0 2px; color:#999; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:10px; }' +
   '.phase { background: #F5F0E5; border-left: 3px solid #3A4B5B; padding: 10px 14px; margin: 8px 0; }' +
   '.phase-title { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700; color: #3A4B5B; font-size: 11px; margin-bottom: 4px; }' +
   '.page-break { page-break-before: always; }' +
-  '@media print { @page { size: letter; margin: 1in; } body { padding: 0; max-width: none; font-size: 11px; } }' +
+  '.signature-page { min-height: 8.2in; display:flex; flex-direction:column; justify-content:center; }' +
+  '@media print { @page { size: letter; margin: .58in .55in .5in; } body { padding: .28in 0 .28in; max-width: none; font-size: 11px; } .proposal-header,.proposal-footer{position:fixed} }' +
   '</style></head><body>' +
+  '<div class="proposal-header"><img src="./images/camelot-logo.png" alt="Camelot Property Management" onerror="this.style.display=&quot;none&quot;"><div class="hdr-text">Proposal of Property Management Services<br>' + buildingNameClean + '</div></div>' +
+  '<div class="proposal-footer"><span>Camelot Property Management Services Corp. &middot; ' + addressClean + '</span><span>Page <span class="page-num"></span></span></div>' +
 
   /* ══════════════════════════════════════════════════════════════ */
   /* COVER */
@@ -7000,6 +7018,14 @@ function generateProposal() {
   '<strong>To:</strong> ' + boardLabel + '<br>' +
   buildingNameClean + '<br>' +
   (contactName ? 'c/o ' + contactName + (boardNames.length > 0 && boardNames[0].indexOf(',') > 0 ? ', ' + boardNames[0].split(',').slice(1).join(',').trim() : '') : 'c/o ' + owner) + '</p>' +
+  '<div class="fact-grid">' +
+  '<div><strong>Property:</strong> ' + addressClean + '</div>' +
+  '<div><strong>BBL / Block-Lot:</strong> ' + (d.bbl || 'To be confirmed') + ' &middot; ' + blockLotLabel + '</div>' +
+  '<div><strong>Asset Type:</strong> ' + agreementType + ' / ' + titleCase(d.propertyType) + '</div>' +
+  '<div><strong>Units:</strong> ' + d.units + '</div>' +
+  '<div><strong>Square Footage:</strong> ' + squareFeetLabel + '</div>' +
+  '<div><strong>Year Built:</strong> ' + (d.yearBuilt || 'To be confirmed') + '</div>' +
+  '</div>' +
 
   '<p><strong>Re: Management Proposal &amp; Scope of Services</strong></p>' +
 
@@ -7014,6 +7040,7 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* OUR COMMITMENT */
   '<h2>Our Commitment</h2>' +
+  '<p class="section-intro">This section frames the management philosophy behind the proposal: senior accountability, practical communication, financial discipline, and a service model that fits the actual building rather than a generic package.</p>' +
   '<p>Camelot\u2019s mission is to provide a boutique, hands-on management approach tailored to the needs of your ' + (isCoop ? 'cooperative' : isCondo ? 'condominium' : 'property') + '. Our team brings a \u201Cwhite-glove\u201D service model \u2014 designed to strengthen on-site operations, enhance financial clarity, and create long-term value for all ' + ownerLabel + '.</p>' +
 
   '<div class="hr"></div>' +
@@ -7021,6 +7048,7 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* DEDICATED MANAGEMENT TEAM */
   '<h2>Dedicated Management Team</h2>' +
+  '<p class="section-intro">Camelot assigns a named team so the board understands who is accountable for management, accounting, compliance, facilities, and transition follow-through. The objective is simple: give residents and board members real people behind the email address.</p>' +
   '<ul>' +
   '<li><strong>On-Site Oversight</strong> \u2014 A Property Manager and Facilities Manager will visit the property regularly, with more frequent visits during the initial stabilization period to work closely with on-site staff, residents, and vendors.</li>' +
   '<li><strong>Board Support</strong> \u2014 Valerie Fiume, Director of Condos &amp; Co-ops, will lead ' + (isBoard ? 'monthly board meetings' : 'ownership meetings') + ', assisted by your Property Manager and Camelot\u2019s administrative team.</li>' +
@@ -7036,6 +7064,7 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* SCOPE OF SERVICES */
   '<h2>Scope of Services &amp; Value Proposition</h2>' +
+  '<p class="section-intro">The scope below reflects the core duties of professional property management: collect income, control expenses, manage vendors, support the board, protect compliance, and communicate clearly with residents or shareholders.</p>' +
   '<ul>' +
   '<li>Strengthen and supervise the on-site management office and staff.</li>' +
   '<li>Review and optimize vendor contracts (elevator, HVAC, boiler, security, waste, cleaning, etc.) using Camelot\u2019s preferred vendor network.</li>' +
@@ -7059,13 +7088,14 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* FINANCIAL TERMS */
   '<h2>Financial Terms</h2>' +
+  '<p class="section-intro">The proposed fee is based on the full property profile: address, asset type, unit count, square footage, current service burden, reporting expectations, technology needs, and transition complexity. Ancillary items are governed by Schedule A to the management agreement.</p>' +
   '<div class="fee-box">' +
-  '<strong>Base Management Fee:</strong> $' + d.monthlyFee.toLocaleString() + ' per month ($' + d.annualFee.toLocaleString() + ' annually)<br>' +
-  '<strong>Units Managed:</strong> ' + unitDesc + '<br>' +
-  '<strong>Fee Basis:</strong> Flat fee based on building type, size, and service tier. Annual escalation of 3–5% as agreed upon by board and management.<br>' +
+  '<strong>Base Management Fee:</strong> <span class="price">$' + d.monthlyFee.toLocaleString() + ' per month</span> (<span class="price">$' + d.annualFee.toLocaleString() + ' annually</span>)<br>' +
+  '<strong>Property Basis:</strong> ' + addressClean + ' &middot; ' + unitDesc + ' &middot; ' + titleCase(d.propertyType) + ' &middot; ' + squareFeetLabel + ' &middot; ' + blockLotLabel + '<br>' +
+  '<strong>Fee Basis:</strong> Flat fee based on building type, size, and service tier. Annual escalation of <span class="price">3%&ndash;5%</span> as agreed upon by board and management.<br>' +
   '<strong>Ancillary Fees:</strong> As outlined in Schedule A of the management agreement<br>' +
-  '<strong>Accounting:</strong> Monthly reporting coordination included; tax returns and deeper CPA work separately scoped<br>' +
-  '<strong>Technology:</strong> Camelot Intelligence package — Camelot OS + ConciergePlus portal + Merlin AI; priced as package value rather than a separate line-item discount' +
+  '<strong>Accounting:</strong> Monthly management reporting is part of the selected service package. Tax returns, audit work, deeper CPA consulting, or special accounting projects may be discounted after further discussion with the client and their needs, but are separately scoped when engaged.<br>' +
+  '<strong>Technology:</strong> Camelot recommends the Intelligence Package because Camelot OS, ConciergePlus, meeting summaries, reporting tools, and related technology are packaged into the service model rather than waived as a free add-on.' +
   '</div>' +
 
   '<div class="hr"></div>' +
@@ -7073,15 +7103,43 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* TRANSITION PLAN */
   '<h2>Transition Plan &amp; Start Date</h2>' +
+  '<p class="section-intro">Transition is where management changes either become orderly or become frustrating. Camelot uses a staged rollout so records, banking, vendors, residents, board reporting, and communication all move under control.</p>' +
   '<p>Camelot is prepared to begin immediately or on a mutually convenient date. Our first 90 days will focus on learning the building\u2019s systems, meeting your staff and vendors, and integrating our accounting and compliance systems for a seamless transition.</p>' +
+  '<p>Within the first 30 days, Camelot will schedule a meet-and-greet or town hall, either on-site or by Zoom, so residents and the board can meet the property manager, accounting, compliance, administrative, and senior management team. We believe it is important to put a face to the email before the first issue comes up.</p>' +
 
   '<div class="hr"></div>' +
 
   /* ══════════════════════════════════════════════════════════════ */
   /* CLOSING */
   '<h2>Closing</h2>' +
+  '<p class="section-intro">This proposal is intended to give the board a clear view of Camelot&rsquo;s service model, pricing basis, transition approach, and practical next steps before the formal management agreement and Schedule A are finalized.</p>' +
   '<p>We deeply appreciate the opportunity to partner with ' + buildingNameClean + ' and are confident that our experience, resources, and dedicated team will provide measurable improvements in operations, transparency, and service quality.</p>' +
   '<p>We look forward to meeting ' + (isBoard ? 'the full board' : 'you') + ' soon \u2014 either on-site or via Zoom \u2014 and beginning this next chapter together.</p>' +
+  '<p style="font-weight:700;text-align:center;color:#3A4B5B;margin-top:18px">Signatures to follow.</p>' +
+
+  /* ACCEPTANCE & SIGNATURES */
+  '<div class="page-break"></div>' +
+  '<div class="signature-page">' +
+  '<h2>Acceptance of Proposal</h2>' +
+  '<p>By signing below, both parties acknowledge receipt of this proposal and authorize Camelot Property Management Services Corp. to prepare the final management agreement, Schedule A, transition request, and start-date plan for ' + buildingNameClean + '.</p>' +
+  '<p><strong>Proposed Start Date:</strong> _________________________ (or mutually convenient date)</p>' +
+  '<div class="sig-row">' +
+  '<div class="sig-col">' +
+  '<div style="font-size:10px;font-weight:700;color:#3A4B5B;margin-bottom:6px">Authorized ' + (isBoard ? 'Board Member' : 'Representative') + '</div>' +
+  '<div class="type-sign">Type full legal name</div><div style="font-size:9px;color:#888">Name</div>' +
+  '<div class="type-sign">Type title / board role</div><div style="font-size:9px;color:#888">Title</div>' +
+  '<div class="sig-line" style="margin-top:10px"></div><div style="font-size:9px;color:#888">Signature</div>' +
+  '<div class="sig-line" style="margin-top:10px;width:180px"></div><div style="font-size:9px;color:#888">Date</div>' +
+  '</div>' +
+  '<div class="sig-col">' +
+  '<div style="font-size:10px;font-weight:700;color:#3A4B5B;margin-bottom:6px">Camelot Property Management Services Corp.</div>' +
+  '<div class="type-sign">David A. Goldoff, President</div><div style="font-size:9px;color:#888">Name / Title</div>' +
+  '<div class="sig-line" style="margin-top:10px"></div><div style="font-size:9px;color:#888">Signature</div>' +
+  '<div class="sig-line" style="margin-top:10px;width:180px"></div><div style="font-size:9px;color:#888">Date</div>' +
+  '</div>' +
+  '</div>' +
+  '<p style="font-size:9.5px;color:#777;text-align:left;margin-top:20px">Digital signature workflow note: this page is structured for PDF signature tools such as DocuSign, Adobe Sign, or typed-signature approval. Final engagement remains subject to the formal management agreement and Schedule A.</p>' +
+  '</div>' +
 
   /* ══════════════════════════════════════════════════════════════ */
   /* PAGE 2: TRANSITION ROLLOUT */
@@ -7135,6 +7193,7 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* CORE MANAGEMENT DUTIES */
   '<h2>Core Management Duties</h2>' +
+  '<p class="section-intro">Core management duties are the day-to-day controls that keep the building stable: staff supervision, board support, resident communication, financial controls, vendor accountability, and preventive attention before small issues become expensive ones.</p>' +
   '<ul>' +
   '<li>Supervise on-site staff' + (d.buildingStaff.length > 0 ? ' (' + d.buildingStaff.map(function(s){return s.role;}).join(', ') + ')' : '') + '.</li>' +
   '<li>Conduct weekly property inspections.</li>' +
@@ -7195,42 +7254,18 @@ function generateProposal() {
   '<div class="hr"></div>' +
 
   /* ══════════════════════════════════════════════════════════════ */
-  /* ACCEPTANCE & SIGNATURES */
-  '<h2>Acceptance of Proposal</h2>' +
-  '<p>By signing below, both parties agree to the terms and authorize Camelot Property Management Services Corp. to commence management services for ' + buildingNameClean + '.</p>' +
-  '<p><strong>Proposed Start Date:</strong> _________________________ (or mutually convenient date)</p>' +
-
-  '<div class="sig-row">' +
-  '<div class="sig-col">' +
-  '<div style="font-size:10px;font-weight:700;color:#3A4B5B;margin-bottom:6px">Authorized ' + (isBoard ? 'Board Member' : 'Representative') + '</div>' +
-  '<div class="sig-line"></div><div style="font-size:9px;color:#888">Name</div>' +
-  '<div class="sig-line" style="margin-top:8px"></div><div style="font-size:9px;color:#888">Title</div>' +
-  '<div class="sig-line" style="margin-top:8px;width:180px"></div><div style="font-size:9px;color:#888">Date</div>' +
-  '</div>' +
-  '<div class="sig-col">' +
-  '<div style="font-size:10px;font-weight:700;color:#3A4B5B;margin-bottom:6px">Camelot Property Management Services Corp.</div>' +
-  '<div class="sig-line"></div><div style="font-size:9px;color:#888">David A. Goldoff, President</div>' +
-  '<div class="sig-line" style="margin-top:8px"></div><div style="font-size:9px;color:#888">Signature</div>' +
-  '<div class="sig-line" style="margin-top:8px;width:180px"></div><div style="font-size:9px;color:#888">Date</div>' +
-  '</div>' +
-  '</div>' +
-
-  '<div class="hr"></div>' +
-
-  /* ══════════════════════════════════════════════════════════════ */
   /* POST-SIGNATURE: WORKING WITH CAMELOT */
   '<div class="page-break"></div>' +
 
-  '<div style="text-align:center;margin-bottom:16px"><div class="cover-title">C A M E L O T</div><div style="font-size:9px;color:#A89035;letter-spacing:1.5px">W O R K I N G &nbsp; W I T H &nbsp; U S</div></div>' +
-
   '<h2>Next Steps \u2014 Working with Camelot</h2>' +
-  '<p>Upon execution of this proposal, Camelot begins a structured onboarding process designed to ensure zero disruption to residents and staff. Below is our proven 90-day transition and optimization plan.</p>' +
+  '<p>Upon execution of this proposal, Camelot begins a structured onboarding process designed to minimize disruption to residents and staff. Below is our proven 90-day transition and optimization plan.</p>' +
 
   /* PHASE I */
   '<h2>Phase I \u2014 Discovery &amp; Assessment (Days 1\u201330)</h2>' +
   '<p>The first 30 days are dedicated to deep discovery \u2014 understanding ' + buildingNameClean + ' from every angle.</p>' +
   '<ul>' +
   '<li><strong>Full file and data transfer</strong> from current management. Camelot sends our standard Transitional Documentation outlining all files and information required.</li>' +
+  '<li><strong>Transition drive directory</strong> &mdash; Camelot will coordinate a Google Drive transition folder or equivalent secure directory for building documents, with Sam Lodge serving as the transition intake coordinator until full automation is deployed.</li>' +
   '<li><strong>Introductory building inspection</strong> \u2014 Sr. Facilities Manager conducts on-site walkthrough covering property envelope, mechanical systems, deferred maintenance, and capital priorities. Written report delivered for a one-time $500 introductory fee ($2,500 value).</li>' +
   '<li><strong>Financial &amp; budget review</strong> \u2014 Line-item analysis vs. comparable buildings we manage. AR/AP audit, reserve fund assessment, and revenue gap analysis.</li>' +
   '<li><strong>Vendor contract review</strong> \u2014 Priority targets for rebidding: elevator (10\u201318% savings), insurance (12\u201320%), cleaning (8\u201315%), HVAC/boiler (10\u201315%), extermination (10\u201320%), and legal (5\u201310%).</li>' +
@@ -7285,12 +7320,15 @@ function generateProposal() {
 
   /* TRANSITIONAL DOCUMENTS */
   '<h2>Transitional Documents</h2>' +
-  '<p>Upon being retained, Camelot will provide our standard Transitional Documentation outlining all files and information required from the outgoing management company. All building files and records should be sent to:</p>' +
+  '<p>Upon being retained, Camelot will provide our standard Transitional Documentation outlining all files and information required from the outgoing management company. Camelot can provide a Google Drive directory or other secure upload location so the prior management company, board, attorney, accountant, and vendors can deliver files in one organized place.</p>' +
+  '<p>Where appropriate, Camelot will prepare the outgoing-manager notice requesting records, bank information, resident/shareholder ledgers, vendor contracts, insurance, payroll, compliance files, open work orders, keys/access information, and all current building documents. Transition intake is currently directed to Sam Lodge, Camelot&rsquo;s office manager and transition coordinator.</p>' +
+  '<p>When the board provides supporting materials such as budgets, management reports, competing proposals, violation lists, engineering reports, or correspondence, those items may be included as appendix materials to support the final proposal package.</p>' +
+  '<p>All building files and records should be sent to:</p>' +
   '<div style="background:#F5F0E5;border-left:3px solid #A89035;padding:10px 14px;margin:8px 0;font-size:10.5px">' +
   '<strong>Camelot Property Management Services Corp.</strong><br>' +
   'Att: Sam Lodge, Office Manager<br>' +
   '57 West 57th Street, Suite 410, New York, NY 10019<br>' +
-  'Email: <a href="mailto:info@camelot.nyc" style="color:#A89035">info@camelot.nyc</a> &nbsp;|&nbsp; Tel: (212) 206-9939</p>' +
+  'Email: <a href="mailto:info@camelot.nyc" style="color:#A89035">info@camelot.nyc</a> &nbsp;|&nbsp; Tel: (212) 206-9939' +
   '</div>' +
 
   '<div class="hr"></div>' +
