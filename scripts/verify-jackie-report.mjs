@@ -58,6 +58,8 @@ const requiredTokens = [
   ['22 East 22nd verified image asset', 'https://camelot-scout-v6.onrender.com/images/22-east-22nd/22East22ndStreet_NYC.jpg'],
   ['22 East 22nd no 122-unit guard', 'Do not publish the property as 122 units'],
   ['22 East 22nd exact-address lock', 'hasExact22East22Subject'],
+  ['embedded upload image base64 validator', 'payload.length > 80 && /^[A-Za-z0-9+/=]+$/.test(payload)'],
+  ['embedded image NaN false-positive guard', 'Base64 text can naturally contain sequences like "NaN"'],
   ['22 East 22nd release guard', 'Known Property Guard: 22 East 22nd'],
   ['22 East 22nd rejects 220 mismatch', 'Rejected 220 East 22nd / 122-unit mismatch'],
   ['Known property guard check', 'Known Property Guard: 201 East 79th'],

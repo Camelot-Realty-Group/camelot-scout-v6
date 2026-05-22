@@ -3404,10 +3404,13 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const stripEmbeddedImagePayloads = (markup: string) =>
     markup.replace(/data:image\/[a-z0-9.+-]+;base64,[^"']*/gi, 'data:image/embedded;base64,[embedded-image]');
   const htmlWithoutEmbeddedImagePayloads = stripEmbeddedImagePayloads(html);
-  const isValidEmbeddedImageSrc = (src: string) =>
-    /^data:image\/(?:png|jpe?g|webp|gif|svg\+xml);base64,/i.test(src)
-    && src.split(',').slice(1).join(',').replace(/\s/g, '').length > 80
-    && !/undefined|null|NaN|\[object Object\]/i.test(src);
+  const isValidEmbeddedImageSrc = (src: string) => {
+    if (!/^data:image\/(?:png|jpe?g|webp|gif|svg\+xml);base64,/i.test(src)) return false;
+    const payload = src.split(',').slice(1).join(',').replace(/\s/g, '');
+    // Base64 text can naturally contain sequences like "NaN"; validate the
+    // payload shape instead of treating those characters as render tokens.
+    return payload.length > 80 && /^[A-Za-z0-9+/=]+$/.test(payload);
+  };
   const isBrokenImageSrc = (src: string) => {
     const cleanSrc = String(src || '').trim();
     if (!cleanSrc) return true;
