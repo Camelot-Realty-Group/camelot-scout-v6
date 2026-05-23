@@ -1260,15 +1260,26 @@ function findNearbyPortfolioBuildings(lat: number | null, lng: number | null, bo
     .slice(0, limit);
 }
 
-function portfolioStreetViewEmbed(b: PortfolioBuilding): string {
-  return `https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_REPORT_KEY}&location=${b.lat},${b.lng}&heading=0&pitch=5&fov=78`;
+function portfolioStaticStreetViewImage(b: PortfolioBuilding, size = '640x360'): string {
+  return `https://maps.googleapis.com/maps/api/streetview?size=${size}&location=${encodeURIComponent(`${b.lat},${b.lng}`)}&heading=0&pitch=5&fov=78&key=${GOOGLE_MAPS_REPORT_KEY}`;
 }
 
-function portfolioVisual(b: PortfolioBuilding, height: number): string {
+function portfolioFallbackTile(b: PortfolioBuilding): string {
+  return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2F4051,#1E2B38);color:#F4D26A;text-align:center;font-size:9px;line-height:1.25;font-weight:700;padding:8px;box-sizing:border-box">${b.address}<br><span style="color:#fff;font-weight:500">Portfolio image</span></div>`;
+}
+
+function portfolioVisual(b: PortfolioBuilding): string {
+  const src = b.image || portfolioStaticStreetViewImage(b);
+  const source = b.image ? 'Verified Camelot portfolio image' : 'Static Google Street View image';
+  const fallback = portfolioFallbackTile(b).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  return `<img src="${src}" alt="${b.address} - ${source}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" onerror="this.outerHTML='${fallback}'">`;
+}
+
+function portfolioSourceLabel(b: PortfolioBuilding): string {
   if (b.image) {
-    return `<img src="${b.image}" alt="${b.address} portfolio property image" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<iframe src=&quot;${portfolioStreetViewEmbed(b)}&quot; width=&quot;100%&quot; height=&quot;${height}&quot; style=&quot;border:0;display:block&quot; loading=&quot;lazy&quot; referrerpolicy=&quot;no-referrer-when-downgrade&quot;></iframe>')">`;
+    return 'Verified Camelot portfolio image';
   }
-  return `<iframe src="${portfolioStreetViewEmbed(b)}" title="${b.address} Google Street View" width="100%" height="${height}" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+  return 'Static Google Street View image';
 }
 
 function buildPortfolioSection(d: MasterReportData): string {
@@ -1284,10 +1295,10 @@ function buildPortfolioSection(d: MasterReportData): string {
     return `<tr>
 <td style="width:92px;padding:6px">
   <a href="${streetViewUrl}" target="_blank" rel="noopener" style="display:block;width:84px;height:54px;border:1px solid #D5D0C6;background:#EDE9DF;overflow:hidden;text-decoration:none">
-    ${portfolioVisual(b, 54)}
+    ${portfolioVisual(b)}
   </a>
 </td>
-<td style="font-weight:700"><a href="${streetViewUrl}" target="_blank" rel="noopener" style="color:#0D2E63;text-decoration:none">${b.address}</a><br><span style="color:#A89035;font-size:9px;font-weight:600">${b.image ? 'Verified Camelot image' : 'Google Street View reference'}</span></td>
+<td style="font-weight:700"><a href="${streetViewUrl}" target="_blank" rel="noopener" style="color:#0D2E63;text-decoration:none">${b.address}</a><br><span style="color:#A89035;font-size:9px;font-weight:600">${portfolioSourceLabel(b)}</span></td>
 <td>${b.type}</td>
 <td>${b.neighborhood}${distSpan}</td>
 <td style="color:#A89035;font-weight:600">Active</td>
@@ -1299,8 +1310,8 @@ function buildPortfolioSection(d: MasterReportData): string {
     const streetViewLocation = `${b.address}, ${b.borough}, NY`;
     const streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(streetViewLocation)}`;
     return `<a href="${streetViewUrl}" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:1px solid #D5D0C6;box-shadow:0 5px 12px rgba(44,50,64,0.07);overflow:hidden;display:block;min-height:112px">
-<div style="height:78px;background:#EDE9DF;overflow:hidden">${portfolioVisual(b, 78)}</div>
-<div style="padding:7px 8px;font-size:8.5px;line-height:1.3;color:#3A4B5B;font-weight:700">${b.address}<br><span style="color:#A89035;font-weight:600">${b.image ? 'Verified Camelot image' : 'Google Street View reference'}</span></div>
+<div style="height:78px;background:#EDE9DF;overflow:hidden">${portfolioVisual(b)}</div>
+<div style="padding:7px 8px;font-size:8.5px;line-height:1.3;color:#3A4B5B;font-weight:700">${b.address}<br><span style="color:#A89035;font-weight:600">${portfolioSourceLabel(b)}</span></div>
 </a>`;
   }).join('\n');
 
@@ -3798,8 +3809,8 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const portfolioBlock = (html.match(/Camelot Portfolio[\s\S]*?Case Study:/i) || [])[0] || '';
   checks.push({
     name: 'Portfolio Building Images',
-    status: portfolioBlock.includes('Google Street View reference') || portfolioBlock.includes('Verified Camelot image') ? 'pass' : 'fail',
-    detail: 'Nearby portfolio cards must render verified local images or keyed Google Street View image fallbacks',
+    status: portfolioBlock.includes('Static Google Street View image') || portfolioBlock.includes('Verified Camelot portfolio image') ? 'pass' : 'fail',
+    detail: 'Nearby portfolio cards must render verified local images or clean static Street View image fallbacks',
   });
   const valueCreationSources = ['Benchmark / assumption disclosure', 'Actual financials required', 'not a savings guarantee'];
   const missingValueCreationSources = valueCreationSources.filter(source => !html.includes(source));
