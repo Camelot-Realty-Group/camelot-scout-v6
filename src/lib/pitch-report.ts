@@ -378,6 +378,22 @@ function iframeCard(src: string, title: string, caption: string, height = 260): 
   return `<div class="visual-card"><div class="image-frame" style="height:${height}px"><iframe src="${src}" title="${safeTitle}" allowfullscreen loading="lazy"></iframe></div><div class="image-caption">${caption}</div></div>`;
 }
 
+function closestSubwayPanel(d: MasterReportData, exact22East22 = false): string {
+  const stops = exact22East22
+    ? [
+        ['23 Street Station', 'N / R / W', 'Broadway & East 23rd Street', 'approx. 0.2 mi'],
+        ['23 Street Station', '6', 'Park Avenue South & East 23rd Street', 'approx. 0.3 mi'],
+        ['23 Street Station', 'F / M', 'Sixth Avenue & West 23rd Street', 'approx. 0.5 mi'],
+      ]
+    : [
+        ['Nearest transit', 'Verify', 'Confirm against MTA / Google Maps during final review', 'nearby'],
+        ['Vendor routing', 'Street access', 'Useful for site visits, inspections, and emergency response', 'context'],
+        ['Resident access', 'Neighborhood mobility', 'Important for value and resident experience', 'context'],
+      ];
+  const query = exact22East22 ? '23 Street Station N R W Broadway East 23rd Street New York NY' : `${d.address} nearest subway`;
+  return `<div class="gold-card" style="padding:16px 18px;height:100%"><div class="sub-heading" style="font-size:18px;margin-bottom:8px">Closest Subway Access</div><p class="body-text" style="font-size:12px;line-height:1.45;margin-bottom:10px">Transit access helps frame resident convenience, vendor routing, and day-to-day operating practicality.</p><div style="height:150px;border:1px solid rgba(184,151,58,.32);border-radius:8px;overflow:hidden;background:#EDE9DF;margin-bottom:10px">${rawIframeFrame(`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(query)}&zoom=16`, 'Closest subway map')}</div>${stops.map(([name, train, location, distance]) => `<div style="display:grid;grid-template-columns:70px 1fr;gap:9px;align-items:start;border-top:1px solid rgba(184,151,58,.18);padding-top:8px;margin-top:8px"><div style="background:#34444f;color:#F4D26A;border-radius:999px;text-align:center;font-size:11px;font-weight:900;padding:5px 7px">${train}</div><div><div style="font-size:12px;font-weight:900;color:#1a2744">${name} <span style="color:#B8973A">(${distance})</span></div><div style="font-size:11px;line-height:1.35;color:#4a5568">${location}</div></div></div>`).join('')}</div>`;
+}
+
 function rawIframeFrame(src: string, title: string): string {
   return `<iframe src="${src}" title="${escapeHtml(title)}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:0;display:block"></iframe>`;
 }
@@ -1019,30 +1035,26 @@ export function generatePitchReport(d: MasterReportData): string {
   <div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div>
   <div class="pad">
     <div class="section-title">The Property</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px">
-      ${factCards.map(card => `<div class="stat-box" style="padding:14px;text-align:left"><div class="stat-label">${card.label}</div><div class="stat-val" style="font-size:30px">${card.value}</div></div>`).join('')}
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px">
+      ${factCards.map(card => `<div class="stat-box" style="padding:12px 14px;text-align:left;min-height:92px"><div class="stat-label" style="font-size:11px">${card.label}</div><div class="stat-val" style="font-size:24px;line-height:1.12;word-break:normal;overflow-wrap:anywhere">${card.value}</div></div>`).join('')}
     </div>
-    <div style="display:flex;gap:40px">
+    <div style="display:flex;gap:28px">
       <div style="flex:1">
         <div class="sub-heading">${displayName}</div>
-        <div class="body-text" style="margin-bottom:16px">
-          ${d.units ? `At ${d.units} units, ${d.buildingName || d.address} is the ideal scale for Camelot's high-touch management - small enough that every ${d.isRentStabilized ? 'tenant' : 'shareholder'} is known by name, large enough to benefit from institutional-grade financial and compliance services.` : `${d.buildingName || d.address} is well-suited for Camelot's hands-on management approach - combining personal attention with institutional-grade services.`}
+        <div class="body-text" style="font-size:13.5px;line-height:1.48;margin-bottom:10px">
+          ${d.units ? `At ${d.units} units, ${displayName} is a strong fit for Camelot's high-touch management: small enough for direct board attention and large enough to benefit from disciplined financial, vendor, and compliance systems.` : `${displayName} is well-suited for Camelot's hands-on management approach: personal attention supported by institutional-grade reporting and compliance controls.`}
         </div>
-        <div style="font-size:15px;color:#4a5568;line-height:2.2">
-          ${d.yearBuilt ? `Built c. ${d.yearBuilt}  |  ` : ''}${d.propertyType || 'Residential'}${d.stories ? `  |  ${d.stories} Stories` : ''}<br>
-          ${d.units ? `${d.units} Units  |  ${displayHood}` : displayHood}<br>
-          Current Management: ${mgmt}<br>
-          ${d.marketValue ? `Market Value: ${fmt$(d.marketValue)}` : ''}${d.assessedValue ? `  |  Assessed: ${fmt$(d.assessedValue)}` : ''}<br>
-          Owner: ${ownerLabel}
+        <div style="font-size:12.5px;color:#4a5568;line-height:1.75">
+          <div><strong>Built / Type:</strong> ${d.yearBuilt ? `c. ${d.yearBuilt}` : 'To verify'} | ${d.propertyType || 'Residential'}${d.stories ? ` | ${d.stories} stories` : ''}</div>
+          <div><strong>Scale / Area:</strong> ${d.units ? `${d.units} units` : 'Unit count to verify'} | ${displayHood}</div>
+          <div><strong>Current Management:</strong> ${mgmt}</div>
+          <div><strong>Value / Assessment:</strong> ${d.marketValue ? `Market value ${fmt$(d.marketValue)}` : 'Market value to verify'}${d.assessedValue ? ` | Assessed ${fmt$(d.assessedValue)}` : ''}</div>
+          <div><strong>Owner:</strong> ${ownerLabel}</div>
         </div>
         ${d.isRentStabilized ? `<div class="body-italic" style="margin-top:12px">Rent stabilized - Camelot has deep DHCR & RGB expertise</div>` : ''}
       </div>
       <div style="flex:0 0 420px">
-        <div style="display:grid;grid-template-columns:1fr;gap:12px">
-          <div class="photo-frame"><img src="${exteriorImage}" style="width:420px;height:180px;object-fit:cover;display:block" onerror="this.src='${svUrl}'" /></div>
-          <div class="photo-frame"><img src="${interiorImage}" style="width:420px;height:180px;object-fit:cover;display:block" onerror="this.src='${exteriorImage}'" /></div>
-          ${propertyPhotoGallery(d, 12)}
-        </div>
+        ${closestSubwayPanel(d, exact22East22)}
       </div>
     </div>
   </div>
