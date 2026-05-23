@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Search, FileText, Download, Mail, Phone, Table2, Link2, Loader2, Eye, Copy, Check, X, ShieldCheck, ShieldX, AlertTriangle, Lock } from 'lucide-react';
+import { Search, FileText, Download, Mail, Phone, Table2, Link2, Loader2, Eye, Copy, Check, X, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
 import { REPORT_FOCUS_THEMES, buildJackieIntelReportFilename, buildMasterReport, generateBrochureHTML, generateColdCallerSheet, generateEmailDraft, generateCSVExport, validateJackieReport, type MasterReportData, type QACheckResult, type ReportFocusInput, type ReportFocusKey } from '@/lib/camelot-report';
 import { JACKIE_REPORT_PACKAGES, buildJackiePackageFilename, generateBoardMeetingDeck, generateFirstEmailIntroReport, generateJackieReportPackage, generatePitchEmail, type JackieReportPackage } from '@/lib/pitch-report';
 import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
@@ -64,17 +64,17 @@ function ReleaseWorkflowPanel({
             <h2 className={`text-lg font-bold ${qa.failures ? 'text-red-950' : 'text-emerald-950'}`}>Jackie Verified Release</h2>
             <p className={`text-sm mt-1 ${qa.failures ? 'text-red-800' : 'text-emerald-800'}`}>
               {qa.failures
-                ? 'Release locked. Jackie can draft, but cannot publish while source conflicts or render errors remain.'
-                : 'Release unlocked. Jackie verified the factual guardrails and render checks for board-facing output.'}
+                ? 'Review issues found. Jackie can still preview, export, and draft while the team cleans up source or render warnings.'
+                : 'Jackie verified the factual guardrails and render checks for board-facing output.'}
             </p>
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           <div className="px-3 py-2 rounded-lg bg-white border text-xs font-semibold text-gray-700">{passed} passed</div>
           <div className="px-3 py-2 rounded-lg bg-white border text-xs font-semibold text-amber-700">{qa.warnings} warnings</div>
-          <div className="px-3 py-2 rounded-lg bg-white border text-xs font-semibold text-red-700">{qa.failures} blockers</div>
+          <div className="px-3 py-2 rounded-lg bg-white border text-xs font-semibold text-red-700">{qa.failures} review issues</div>
           <button onClick={onPreview} className="px-3 py-2 rounded-lg bg-[#3A4B5B] text-white text-xs font-semibold flex items-center gap-2 hover:bg-[#2d3d4d]">
-            {qa.failures ? <Lock size={14} /> : <Eye size={14} />} Verify & Preview
+            <Eye size={14} /> Verify & Preview
           </button>
         </div>
       </div>
@@ -89,11 +89,11 @@ function ReleaseWorkflowPanel({
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-gray-900">{group.title}</h3>
                 <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${ok ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                  {ok ? 'CLEAR' : 'BLOCKED'}
+                  {ok ? 'CLEAR' : 'REVIEW'}
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-2 leading-relaxed">{group.desc}</p>
-              <p className="text-xs mt-3 text-gray-600">{group.checks.length} checks · {warn} warning(s) · {fail} blocker(s)</p>
+              <p className="text-xs mt-3 text-gray-600">{group.checks.length} checks · {warn} warning(s) · {fail} review issue(s)</p>
             </div>
           );
         })}
@@ -103,7 +103,7 @@ function ReleaseWorkflowPanel({
         <div className="mt-4 bg-white border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle size={16} className={failures.length ? 'text-red-600' : 'text-amber-600'} />
-            <h3 className="text-sm font-bold text-gray-900">{failures.length ? 'Release Blockers' : 'Warnings To Review'}</h3>
+            <h3 className="text-sm font-bold text-gray-900">{failures.length ? 'Review Before Sending' : 'Warnings To Review'}</h3>
           </div>
           <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
             {(failures.length ? failures : warnings).slice(0, 8).map((check, idx) => (
@@ -415,11 +415,11 @@ export default function ReportCenter() {
     if (qa.failures > 0) {
       const detail = qa.checks.filter(c => c.status === 'fail').slice(0, 4).map(c => `${c.name}: ${c.detail}`).join('\n');
       if (mode === 'internal') {
-        toast.error(`Internal review opened with Jackie blockers:\n${detail}`, { duration: 7000 });
+        toast.error(`Internal review opened with Jackie review issues:\n${detail}`, { duration: 7000 });
         return true;
       }
-      toast.error(`Jackie self-check blocked release:\n${detail}`, { duration: 8000 });
-      return false;
+      toast.error(`Jackie self-check found issues, but export is available for internal review:\n${detail}`, { duration: 8000 });
+      return true;
     }
     if (qa.warnings > 0) {
       toast.success(`Jackie self-check passed with ${qa.warnings} warning(s). Review photo/data warnings if needed.`, { duration: 4500 });

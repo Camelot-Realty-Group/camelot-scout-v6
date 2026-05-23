@@ -1151,7 +1151,7 @@ export function generatePitchReport(d: MasterReportData): string {
       <div class="stat-box" style="padding:13px"><div style="font-weight:700;color:#1a2744;font-size:13px;margin-bottom:4px">DOB / OATH</div><div style="font-size:12px;color:#B8973A;font-weight:600">Permits, ECB, safety</div><div style="font-size:11px;color:#6b7280;margin-top:4px">Penalty and hearing gut check.</div></div>
       <div class="stat-box" style="padding:13px"><div style="font-weight:700;color:#1a2744;font-size:13px;margin-bottom:4px">ENERGY / LOCAL LAWS</div><div style="font-size:12px;color:#B8973A;font-weight:600">LL97, LL84, LL152, FISP</div><div style="font-size:11px;color:#6b7280;margin-top:4px">Applicability verified by size/use.</div></div>
     </div>
-    ${true ? `
+    <div>
     <div class="sub-heading" style="font-size:18px;margin-bottom:10px">Building-Specific Compliance Needs - ${displayName}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       ${hasLL97 ? `<div class="gold-card" style="padding:13px 15px"><strong>LL97 Energy Planning</strong><br><span style="font-size:12px;color:#4a5568">${ll97ExposureNote}</span></div>` : ''}
@@ -1168,7 +1168,7 @@ export function generatePitchReport(d: MasterReportData): string {
         <div><div style="font-size:10px;color:#8a7a4d;text-transform:uppercase;font-weight:800">Why Non-Compliant</div><div style="font-size:12px;line-height:1.35;color:#4a5568">${d.violationsOpen > 0 || d.dobViolationOpen > 0 || d.ecbPenaltyBalance > 0 || hasLL97 ? 'Open records, penalty balances, or modeled LL97 exposure require source-backed remediation.' : 'No quantified issue surfaced; confirm source records before final release.'}</div></div>
       </div>
       <div style="font-size:11px;color:#6b7280;margin-top:8px">Additional fees may include filings, engineering, legal, expediting, contractor remediation, hearings, project management, and board-approved capital work.</div>
-    </div>` : ''}
+    </div>
   </div>
 </div>
 

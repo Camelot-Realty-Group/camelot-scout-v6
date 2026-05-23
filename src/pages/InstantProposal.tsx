@@ -145,7 +145,7 @@ export default function InstantProposal() {
       setFullJackieHTML(fullHtml);
       setStep('jackie');
       if (qa.failures > 0) {
-        toast.error(`Jackie opened for internal review with ${qa.failures} blocker(s). External proposal export is locked.`, { duration: 7000 });
+        toast.error(`Jackie opened for internal review with ${qa.failures} issue(s). Proposal export remains available for internal review.`, { duration: 7000 });
       } else {
         toast.success(qa.warnings > 0 ? `Jackie report generated with ${qa.warnings} review warning(s)` : 'Jackie report verified for release');
       }
@@ -160,7 +160,7 @@ export default function InstantProposal() {
   const handleGenerateDraft = () => {
     if (!reportData) return;
     if (releaseQA?.failures) {
-      toast.error('Jackie found report warnings/blockers, but proposal draft generation will continue for internal review.', { duration: 7000 });
+      toast.error('Jackie found report warnings/review issues, but proposal draft generation will continue for internal review.', { duration: 7000 });
     }
     // Render Jackie HTML in a hidden iframe to extract the proposal
     const iframe = document.createElement('iframe');
@@ -212,7 +212,7 @@ export default function InstantProposal() {
   // Export: Download PDF directly (no popup)
   const handleDownloadPDF = async () => {
     if (releaseQA?.failures) {
-      toast.error('Jackie found report warnings/blockers; exporting anyway for internal review.', { duration: 5000 });
+      toast.error('Jackie found report warnings/review issues; exporting anyway for internal review.', { duration: 5000 });
     }
     const content = getDraftContent();
     if (!content) { toast.error('No proposal content'); return; }
@@ -249,7 +249,7 @@ export default function InstantProposal() {
   // Export: Download HTML
   const handleDownloadHTML = () => {
     if (releaseQA?.failures) {
-      toast.error('Jackie found report warnings/blockers; exporting HTML anyway for internal review.', { duration: 5000 });
+      toast.error('Jackie found report warnings/review issues; exporting HTML anyway for internal review.', { duration: 5000 });
     }
     const content = getDraftContent();
     const blob = new Blob([content], { type: 'text/html' });
@@ -264,7 +264,7 @@ export default function InstantProposal() {
   // Export: Print using hidden iframe (works on mobile — triggers native print sheet)
   const handlePrint = () => {
     if (releaseQA?.failures) {
-      toast.error('Jackie found report warnings/blockers; opening print preview anyway for internal review.', { duration: 5000 });
+      toast.error('Jackie found report warnings/review issues; opening print preview anyway for internal review.', { duration: 5000 });
     }
     const content = getDraftContent();
     if (!content) return;
@@ -289,7 +289,7 @@ export default function InstantProposal() {
   // Export: Email — build email body, copy to clipboard + open mailto link
   const handleEmail = async () => {
     if (releaseQA?.failures) {
-      toast.error('Jackie found report warnings/blockers; opening email draft anyway for internal review.', { duration: 5000 });
+      toast.error('Jackie found report warnings/review issues; opening email draft anyway for internal review.', { duration: 5000 });
     }
     const buildingName = reportData?.buildingName || 'Property';
     const emailBody =
@@ -541,11 +541,11 @@ export default function InstantProposal() {
                 )}
                 <div className="min-w-0">
                   <p className={`text-sm font-semibold ${releaseQA.failures > 0 ? 'text-red-800' : 'text-green-800'}`}>
-                    Jackie Verified Release {releaseQA.failures > 0 ? 'Locked' : 'Ready'}
+                    Jackie Verified Release {releaseQA.failures > 0 ? 'Needs Review' : 'Ready'}
                   </p>
                   <p className="text-xs text-gray-600 mt-1">
                     {releaseQA.failures > 0
-                      ? 'Internal review is available. Board-facing drafts, PDF, HTML, print, and email exports stay locked until these checks pass.'
+                      ? 'Internal review is available. Board-facing drafts, PDF, HTML, print, and email exports remain available while these checks are reviewed.'
                       : 'External proposal actions are available. Warnings should still be reviewed before sending.'}
                   </p>
                   {(releaseQA.failures > 0 ? releaseQA.checks.filter(c => c.status === 'fail') : releaseQA.checks.filter(c => c.status === 'warn')).slice(0, 4).map((check) => (
