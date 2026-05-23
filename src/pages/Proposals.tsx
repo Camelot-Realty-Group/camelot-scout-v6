@@ -9,13 +9,13 @@ import {
   generateProposalData,
   calculatePricing,
   DEFAULT_SECTIONS,
-  CAMELOT_INFO,
   type ProposalData,
   type ProposalSection,
   type ProposalOptions,
 } from '@/lib/proposal-generator';
 import ProposalPDF from '@/components/ProposalPDF';
 import { openEmailDraft } from '@/lib/pdf-generator';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { cn, formatDate, formatCurrency } from '@/lib/utils';
 import { pdf } from '@react-pdf/renderer';
 import type { Building } from '@/types';
@@ -405,9 +405,7 @@ export default function Proposals() {
           `The proposal PDF has been downloaded as ${filename} so it can be attached to this email before sending.\n\n` +
           `We would welcome a short board Zoom or on-site meet-and-greet to answer questions and refine the proposal around the building's financials, service needs, and transition timing.\n\n` +
           `Best regards,\n` +
-          `Camelot Property Management\n` +
-          `${CAMELOT_INFO.phone}\n` +
-          `${CAMELOT_INFO.website}`,
+          `${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
       });
 
       const sentAt = new Date().toISOString();

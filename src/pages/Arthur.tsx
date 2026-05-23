@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 import { cn, formatCurrency, formatNumber } from '@/lib/utils';
 import { downloadAsHTML, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import {
   ARTHUR_CRITERIA_FIELDS,
   DEFAULT_ARTHUR_CRITERIA,
@@ -182,7 +183,7 @@ export default function Arthur() {
     openEmailDraft({
       to: '',
       subject: `Arthur Investment Report - ${selected.address}`,
-      body: `To the investment review team,\n\nAttached/linked is the Arthur Investment Report for ${selected.address}. The opportunity includes ${selected.units} units, estimated base IRR of ${model ? (model.irr * 100).toFixed(1) : 'TBD'}%, and an underwriting package that should be reviewed alongside Jackie operator diligence.\n\nSincerely,\nCamelot`,
+      body: `To the investment review team,\n\nAttached/linked is the Arthur Investment Report for ${selected.address}. The opportunity includes ${selected.units} units, estimated base IRR of ${model ? (model.irr * 100).toFixed(1) : 'TBD'}%, and an underwriting package that should be reviewed alongside Jackie operator diligence.\n\nSincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
     });
   };
 
@@ -191,7 +192,7 @@ export default function Arthur() {
     openEmailDraft({
       to: selected.brokerEmail || '',
       subject: `Buyer inquiry from Camelot Brokerage Services Corp. - ${selected.address}`,
-      body: `Dear ${selected.listingAgent || 'Listing Broker'},\n\nI am reaching out on behalf of Camelot Brokerage Services Corp. regarding ${selected.address}. We are reviewing the opportunity for a potential acquisition candidate and would appreciate any available listing package, rent roll, operating statements, tax information, violation/compliance history, and seller timing guidance.\n\nPlease let us know whether the asset is still available and the best time to discuss pricing, terms, and diligence access.\n\nSincerely,\nDavid A. Goldoff\nCamelot Brokerage Services Corp.\n57 West 57th Street, Suite 410\nNew York, NY 10019\n(212) 206-9939 ext. 701\ndgoldoff@camelot.nyc`,
+      body: `Dear ${selected.listingAgent || 'Listing Broker'},\n\nI am reaching out on behalf of Camelot Brokerage Services Corp. regarding ${selected.address}. We are reviewing the opportunity for a potential acquisition candidate and would appreciate any available listing package, rent roll, operating statements, tax information, violation/compliance history, and seller timing guidance.\n\nPlease let us know whether the asset is still available and the best time to discuss pricing, terms, and diligence access.\n\nSincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
     });
   };
 

@@ -4,6 +4,7 @@ import { Search, CheckCircle, FileText, Edit3, Download, Printer, Mail, Loader2,
 import { buildJackieIntelReportFilename, buildMasterReport, generateBrochureHTML, validateJackieReport, type MasterReportData, type QACheckResult } from '@/lib/camelot-report';
 import { generatePitchReport } from '@/lib/pitch-report';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import toast from 'react-hot-toast';
 
 type Step = 'search' | 'verify' | 'jackie' | 'draft' | 'export';
@@ -301,7 +302,7 @@ export default function InstantProposal() {
       `Please find attached our Proposal of Property Management Services for ${buildingName}.\n\n` +
       `We have taken the time to research your building and are confident that Camelot can deliver measurable improvements in operations, transparency, and service quality.\n\n` +
       `We look forward to meeting with you — either in person or via Zoom — to discuss this proposal further.\n\n` +
-      `Warm regards,\nDavid A. Goldoff\nPresident\nCamelot Property Management Services Corp.\n(212) 206-9939 ext. 701\ninfo@camelot.nyc | www.camelot.nyc\n57 West 57th Street, Suite 410, New York, NY 10019`;
+      `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
 
     const subject = `Proposal of Services — ${buildingName} | Camelot Realty Group`;
 

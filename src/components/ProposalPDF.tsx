@@ -12,6 +12,7 @@ import {
   Font,
 } from '@react-pdf/renderer';
 import type { ProposalData } from '@/lib/proposal-generator';
+import { DAVID_GOLDOFF_SIGNATURE, DAVID_GOLDOFF_SIGNATURE_LINES } from '@/lib/camelot-signature';
 
 // ============================================================
 // Color Palette
@@ -327,6 +328,29 @@ const s = StyleSheet.create({
     fontFamily: 'Helvetica-Bold',
     color: GOLD,
   },
+  signatureBlock: {
+    marginTop: 18,
+    paddingTop: 12,
+    borderTopWidth: 0.75,
+    borderTopColor: GOLD,
+  },
+  signatureScript: {
+    fontSize: 24,
+    fontFamily: 'Times-Italic',
+    color: NAVY,
+    marginBottom: 6,
+  },
+  signatureLine: {
+    fontSize: 8.5,
+    color: DARK_TEXT,
+    lineHeight: 1.4,
+  },
+  signatureName: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    color: NAVY,
+    marginTop: 4,
+  },
 });
 
 // ============================================================
@@ -348,6 +372,24 @@ function fmtDate(iso?: string): string {
 
 function sectionEnabled(data: ProposalData, id: string): boolean {
   return data.sections.find((sec) => sec.id === id)?.enabled ?? true;
+}
+
+function DavidSignatureBlock() {
+  return (
+    <View style={s.signatureBlock}>
+      <Text style={s.signatureScript}>David Goldoff</Text>
+      <Text style={s.signatureName}>{DAVID_GOLDOFF_SIGNATURE.name}</Text>
+      {DAVID_GOLDOFF_SIGNATURE_LINES.slice(1).map((line, i) =>
+        line ? (
+          <Text style={s.signatureLine} key={`${line}-${i}`}>
+            {line}
+          </Text>
+        ) : (
+          <Text style={s.signatureLine} key={`space-${i}`}> </Text>
+        )
+      )}
+    </View>
+  );
 }
 
 // ============================================================
@@ -980,6 +1022,8 @@ function NextStepsPage({ data }: { data: ProposalData }) {
         subject to on-site assessment. Valid for 60 days from date of issue. Internal reference:
         {` ${data.proposalNumber}`} generated {fmtDate(data.generatedAt)} by {data.generatedBy}.
       </Text>
+
+      <DavidSignatureBlock />
 
       <PageFooter data={data} pageNum={7} />
     </Page>

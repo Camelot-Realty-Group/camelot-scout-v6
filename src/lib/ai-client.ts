@@ -12,6 +12,7 @@ export interface AIChatMessage {
 import { JACKIE_V2_ORCHESTRATOR_PROMPT } from './jackie-v2-orchestrator';
 import { SCOUT_AGENT_DOCTRINE_PROMPT } from './scout-ai-doctrines';
 import { nyOwnershipHuntSummary, nyPeopleEntityCompSourceSummary } from '@/lib/ny-research-sources';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from './camelot-signature';
 
 export interface AIConfig {
   apiUrl: string;
@@ -183,10 +184,7 @@ export function localQueryEngine(
     resp += `• **Transparent Financials** — Real-time budget tracking\n\n`;
     resp += `I'd love to schedule a 15-minute call to discuss how Camelot can serve ${target.name || target.address}. Would this week work?\n\n`;
     resp += `Best regards,\n`;
-    resp += `David Goldoff\n`;
-    resp += `Principal, Camelot Realty Group\n`;
-    resp += `57 West 57th Street, Suite 410, New York, NY 10019\n`;
-    resp += `info@camelot.nyc\n\n`;
+    resp += `${DAVID_GOLDOFF_SIGNATURE_TEXT}\n\n`;
     resp += `---\n*You can copy this email or go to **Outreach → Compose** to customize it further.*`;
     return resp;
   }

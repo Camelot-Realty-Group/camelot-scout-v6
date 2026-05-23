@@ -14,6 +14,7 @@ import { enrichBuildingContacts, isEnrichmentConfigured } from '@/lib/enrichment
 import { calculateScore } from '@/lib/scoring';
 import { detectBuildingOperations, getDoormanLabel, getFrontDeskLabel } from '@/lib/building-ops';
 import { searchNYDOSCorporation, generateExternalLinks, type NYDOSCorporation, type ExternalRecordLink } from '@/lib/gov-apis';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import toast from 'react-hot-toast';
 import {
   X, MapPin, Building2, AlertTriangle, DollarSign, Zap, FileText,
@@ -366,7 +367,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     const body = encodeURIComponent(
       `Dear Board,\n\nMy name is David Goldoff, and I'm the principal of Camelot Realty Group, a boutique property management firm headquartered at 57 West 57th Street, Suite 410 in New York City.\n\nI'm reaching out because we specialize in managing ${building.type || 'residential'} buildings like ${building.address}, and I believe we could bring meaningful value to your ${building.units || ''}-unit property.\n\n` +
       (building.enriched_data?.violations?.open ? `I noticed that ${building.address} currently has ${building.enriched_data.violations.open} open HPD violations on record. Our compliance team has extensive experience resolving these efficiently.\n\n` : '') +
-      `I'd welcome the opportunity to introduce Camelot to your board. Would you have 15 minutes for a brief call this week?\n\nWarm regards,\n\nDavid Goldoff\nPrincipal, Camelot Realty Group\n57 West 57th Street, Suite 410, New York, NY 10019\ninfo@camelot.nyc\n212-206-9939 ext. 701`
+      `I'd welcome the opportunity to introduce Camelot to your board. Would you have 15 minutes for a brief call this week?\n\nWarm regards,\n\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
     );
     const contacts = building.contacts || [];
     const emailTo = contacts.find((c: any) => c.email)?.email || '';

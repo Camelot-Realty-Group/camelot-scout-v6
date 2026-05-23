@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { searchViolations, type ViolationSummary, type ViolationResult } from '@/lib/nyc-violations';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import toast from 'react-hot-toast';
 import {
   AlertTriangle, Shield, Search, Loader2, RefreshCw,
@@ -185,11 +186,7 @@ export default function Violations() {
       + `\n\nPlease review the attached PDF for the complete violation-by-violation breakdown, including specific descriptions, unit locations, cure deadlines, and cost estimates.`
       + `\n\nWe are available to discuss a resolution strategy at your convenience.`
       + `\n\nBest regards,`
-      + `\n\nDavid A. Goldoff`
-      + `\nPresident`
-      + `\nCamelot Property Management Services Corp.`
-      + `\n57 West 57th Street, Suite 410 | New York, NY 10019`
-      + `\n(212) 206-9939 ext. 701 | info@camelot.nyc | www.camelot.nyc`
+      + `\n\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
     );
     window.open(`https://mail.google.com/mail/?view=cm&su=${subject}&body=${body}`, '_blank');
     toast.success('Gmail opened \u2014 attach the downloaded PDF report');

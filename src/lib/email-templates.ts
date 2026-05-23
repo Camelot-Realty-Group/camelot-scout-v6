@@ -4,6 +4,7 @@
  */
 
 import type { Building, Contact, OutreachTemplate } from '@/types';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from './camelot-signature';
 
 export interface TemplateVariables {
   building_name: string;
@@ -135,11 +136,7 @@ Would you be available for a brief call this week?
 
 Best regards,
 
-Camelot Realty Group
-57 West 57th Street, Suite 410
-New York, NY 10019
-Phone: (212) 206-9939
-Web: www.camelot.nyc`;
+${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
 
   return { subject, body };
 }

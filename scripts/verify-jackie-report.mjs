@@ -29,6 +29,7 @@ const excaliburFile = resolve(root, 'src/lib/excalibur.ts');
 const proposalsPageFile = resolve(root, 'src/pages/Proposals.tsx');
 const proposalGeneratorFile = resolve(root, 'src/lib/proposal-generator.ts');
 const proposalPdfFile = resolve(root, 'src/components/ProposalPDF.tsx');
+const camelotSignatureFile = resolve(root, 'src/lib/camelot-signature.ts');
 const jackieReportQaSkillFile = resolve(root, '.codex/skills/jackie-report-qa/SKILL.md');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
@@ -52,12 +53,13 @@ const excaliburSource = readFileSync(excaliburFile, 'utf8');
 const proposalsPageSource = readFileSync(proposalsPageFile, 'utf8');
 const proposalGeneratorSource = readFileSync(proposalGeneratorFile, 'utf8');
 const proposalPdfSource = readFileSync(proposalPdfFile, 'utf8');
+const camelotSignatureSource = readFileSync(camelotSignatureFile, 'utf8');
 const jackieReportQaSkillSource = readFileSync(jackieReportQaSkillFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${jackieReportQaSkillSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${camelotSignatureSource}\n${jackieReportQaSkillSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -74,6 +76,9 @@ const requiredTokens = [
   ['embedded upload image base64 validator', 'payload.length > 80 && /^[A-Za-z0-9+/=]+$/.test(payload)'],
   ['embedded image NaN false-positive guard', 'Base64 text can naturally contain sequences like "NaN"'],
   ['22 East 22nd release guard', 'Known Property Guard: 22 East 22nd'],
+  ['David Goldoff signature standard', 'DAVID_GOLDOFF_SIGNATURE_TEXT'],
+  ['David Goldoff signature image asset', '/images/signatures/david-goldoff-signature.svg'],
+  ['David Goldoff company signature office line', 'Office: (212) 206-9939 x701'],
   ['22 East 22nd rejects 220 mismatch', 'Rejected 220 East 22nd / 122-unit mismatch'],
   ['Known property guard check', 'Known Property Guard: 201 East 79th'],
   ['Source conflict release gate', 'Source Conflict Release Gate'],
@@ -157,7 +162,7 @@ const requiredTokens = [
   ['Jackie first intro landlord greeting', "return 'Landlord'"],
   ['Jackie first intro proptech', 'practical proptech'],
   ['Jackie first intro signature', 'David A. Goldoff'],
-  ['Jackie first intro title', 'President, Camelot Property Management'],
+  ['Jackie first intro title', 'President/Owner'],
   ['Jackie intelligent report note', 'JACKIE_INTELLIGENT_REPORT_NOTE'],
   ['Camelot OS generated note', 'developed through Camelot OS'],
   ['Jackie unique intro positioning', 'standard generic introduction'],

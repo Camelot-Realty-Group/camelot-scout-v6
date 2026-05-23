@@ -5,6 +5,7 @@ import { JACKIE_REPORT_PACKAGES, buildJackiePackageFilename, generateBoardMeetin
 import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
 import { openBrochureForPrint, downloadAsHTML, triggerCSVDownload, copyToClipboard } from '@/lib/pdf-generator';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import toast from 'react-hot-toast';
 
 type EmailType = 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty';
@@ -275,7 +276,7 @@ export default function ReportCenter() {
       `Thank you for taking the time to review Camelot Property Management. Attached is a brief property-specific introduction prepared by Camelot OS for ${d.buildingName || d.address}.\n\n` +
       `Camelot is a New York-based property management company serving co-ops, condos, and rental buildings with senior attention, in-house accounting, legal and compliance guidance, practical technology, and hands-on local management. We would welcome the opportunity to speak with you by phone, Zoom, Google Meet, or in person to discuss where Camelot may be useful to your building.\n\n` +
       `Please attach the downloaded HTML report file: ${filename}\n\n` +
-      `Sincerely,\nDavid A. Goldoff\nFounder & President\nCamelot Realty Group\n57 West 57th Street, Suite 410, New York, NY 10019\n(212) 206-9939 ext. 701\ninfo@camelot.nyc | dgoldoff@camelot.nyc`
+      `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
     );
     window.open(`https://mail.google.com/mail/?view=cm&fs=1&cc=info@camelot.nyc,dgoldoff@camelot.nyc&su=${subject}&body=${body}`, '_blank', 'noopener,noreferrer');
     copyToClipboard(email);

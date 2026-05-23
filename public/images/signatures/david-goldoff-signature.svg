@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 190" role="img" aria-label="David Goldoff signature">
+  <rect width="900" height="190" fill="none"/>
+  <text x="18" y="124"
+        font-family="Segoe Script, Brush Script MT, Lucida Handwriting, cursive"
+        font-size="96"
+        fill="#111111"
+        transform="skewX(-6)">
+    David Goldoff
+  </text>
+  <path d="M24 148 C118 165 258 154 380 145 C526 134 702 130 872 144"
+        fill="none"
+        stroke="#111111"
+        stroke-width="4"
+        stroke-linecap="round"
+        opacity=".72"/>
+</svg>

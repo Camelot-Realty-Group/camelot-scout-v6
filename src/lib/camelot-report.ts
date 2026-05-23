@@ -21,6 +21,7 @@ import {
   nyOwnershipHuntSummary,
   nyPeopleEntityCompSourceSummary,
 } from '@/lib/ny-research-sources';
+import { buildDavidGoldoffSignatureHtml, DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 
 // ============================================================
 // Types
@@ -3905,7 +3906,7 @@ CONTACT: ${CAMELOT.principal} | ${CAMELOT.phone} | ${CAMELOT.email}
 // ============================================================
 
 export function generateEmailDraft(d: MasterReportData, type: 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty'): { subject: string; body: string } {
-  const sig = `\n\n${CAMELOT.principal}\n${CAMELOT.title}, ${CAMELOT.shortName}\n${CAMELOT.address}\n${CAMELOT.email} | ${CAMELOT.phone}\n${CAMELOT.web}`;
+  const sig = `\n\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
 
   if (type === 'intro') {
     return {
@@ -3984,7 +3985,6 @@ Best regards,${sig}`,
 
   // loyalty — short intro email accompanying the downloaded report
   if (type === 'loyalty') {
-    const loyaltySig = `\n\nSincerely yours,\n\nDavid A. Goldoff\nFounder & President\nCamelot Property Management\n${CAMELOT.address}\n${CAMELOT.email} | ${CAMELOT.phone}\n${CAMELOT.web}`;
     return {
       subject: `${d.buildingName} at ${d.address} — Property Intelligence Report from Camelot Realty Group`,
       body: `Dear Board Member,
@@ -3993,7 +3993,9 @@ Camelot Realty Group is a boutique property management firm based at 57 West 57t
 
 We were pleased to prepare the attached Property Intelligence Report for ${d.buildingName} at ${d.address}. Our team took a close look at your ${d.units ? d.units + '-unit ' : ''}building and we believe there is a meaningful opportunity for Camelot to add value — from compliance and vendor optimization to financial reporting and resident services.
 
-We hope that we get the chance to meet soon.${loyaltySig}`,
+We hope that we get the chance to meet soon.
+
+Sincerely yours,${sig}`,
     };
   }
 
@@ -7187,7 +7189,7 @@ function generateProposal() {
 
   '<p>We want to thank you for the opportunity to present this management proposal and for your time in discussing the future of ' + buildingNameClean + '. Following our review of the property, Camelot Property Management Services Corp. is pleased to submit this summary outlining our scope of services, dedicated team, and transition plan for the property\u2019s continued success.</p>' +
 
-  '<p>Warm regards,<br><strong>David A. Goldoff</strong><br>President<br>Camelot Property Management Services Corp.</p>' +
+  '<p>Warm regards,</p>' + buildDavidGoldoffSignatureHtml({ includeImage: true }) +
 
   '<div class="hr"></div>' +
 

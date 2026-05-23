@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useBuildings } from '@/hooks/useBuildings';
 import { renderOutreachEmail, getAvailableVariables } from '@/lib/email-templates';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import type { OutreachTemplate, Building, Contact } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
 import {
@@ -29,10 +30,7 @@ With {violations_count} open HPD violations on record, I understand the challeng
 I'd love to schedule a 15-minute call to discuss how Camelot can serve {building_name}. Would this week work for you?
 
 Best regards,
-David Goldoff
-Principal, Camelot Realty Group
-57 West 57th Street, Suite 410
-New York, NY 10019`,
+${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
     category: 'cold', variables: ['building_name', 'address', 'unit_count', 'building_type', 'borough', 'violations_count', 'contact_name'], is_default: true, created_at: '', updated_at: '',
   },
   {
@@ -55,8 +53,7 @@ We're confident that once you see the Camelot difference, the decision will be e
 Shall I schedule a walkthrough this week?
 
 Best regards,
-David Goldoff
-Camelot Realty Group`,
+${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
     category: 'complimentary', variables: ['building_name', 'address', 'contact_name'], is_default: false, created_at: '', updated_at: '',
   },
   {
@@ -73,8 +70,7 @@ I understand these decisions take time, and I respect that. If it would be helpf
 Our door is always open. When the timing is right, we'd love to earn your business.
 
 Warm regards,
-David Goldoff
-Camelot Realty Group`,
+${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
     category: 'nurture', variables: ['building_name', 'contact_name'], is_default: false, created_at: '', updated_at: '',
   },
 ];
@@ -239,7 +235,7 @@ export default function Outreach() {
   const handleFollowUp = (entry: typeof DEMO_OUTREACH_LOG[0]) => {
     const subject = encodeURIComponent(`Re: ${entry.subject}`);
     const body = encodeURIComponent(
-      `Hi ${entry.contact_name.split(' ')[0]},\n\nI wanted to follow up on my recent email about ${entry.building_name}. I'd love to find 15 minutes to discuss how Camelot can help with your property management needs.\n\nWe offer a complimentary 30-day property evaluation at no cost and no obligation — it's our way of demonstrating value upfront.\n\nWould this week work for a quick call?\n\nBest regards,\nDavid Goldoff\nPrincipal, Camelot Realty Group\n57 West 57th Street, Suite 410\nNew York, NY 10019\ninfo@camelot.nyc\n212-206-9939 ext. 701`
+      `Hi ${entry.contact_name.split(' ')[0]},\n\nI wanted to follow up on my recent email about ${entry.building_name}. I'd love to find 15 minutes to discuss how Camelot can help with your property management needs.\n\nWe offer a complimentary 30-day property evaluation at no cost and no obligation — it's our way of demonstrating value upfront.\n\nWould this week work for a quick call?\n\nBest regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
     );
     window.open(`mailto:${entry.contact_email}?subject=${subject}&body=${body}`, '_self');
     toast.success(`Follow-up email opened for ${entry.contact_name}`);
@@ -616,7 +612,7 @@ export default function Outreach() {
                   value={newTemplateBody}
                   onChange={(e) => setNewTemplateBody(e.target.value)}
                   rows={12}
-                  placeholder={`Dear {contact_name},\n\nI'm reaching out about {building_name} at {address}...\n\nBest regards,\nDavid Goldoff\nCamelot Realty Group`}
+                  placeholder={`Dear {contact_name},\n\nI'm reaching out about {building_name} at {address}...\n\nBest regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`}
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50 resize-none"
                 />
               </div>
