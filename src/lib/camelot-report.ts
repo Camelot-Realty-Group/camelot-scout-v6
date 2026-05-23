@@ -3801,22 +3801,22 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
     status: portfolioBlock.includes('Google Street View reference') || portfolioBlock.includes('Verified Camelot image') ? 'pass' : 'fail',
     detail: 'Nearby portfolio cards must render verified local images or keyed Google Street View image fallbacks',
   });
-  const valueCreationSources = ['U.S. Census / ACS', 'NYC Open Data', 'Con Edison', 'REBNY', 'CHIP Data', 'SPONY Data', 'IREM', 'Habitat Magazine', 'The Cooperator'];
+  const valueCreationSources = ['Benchmark / assumption disclosure', 'Actual financials required', 'not a savings guarantee'];
   const missingValueCreationSources = valueCreationSources.filter(source => !html.includes(source));
   checks.push({
-    name: 'Value Creation Source Stack',
+    name: 'Value Creation Source Discipline',
     status: missingValueCreationSources.length === 0 ? 'pass' : 'fail',
     detail: missingValueCreationSources.length === 0
-      ? 'Value Creation page cites Census/ACS, NYC Open Data, Con Edison, REBNY, CHIP, SPONY, IREM, Habitat Magazine, and The Cooperator'
-      : `Missing value-creation source(s): ${missingValueCreationSources.join(', ')}`,
+      ? 'Value Creation page separates direct data, benchmarks, and assumptions without promising savings'
+      : `Missing value-creation disclosure(s): ${missingValueCreationSources.join(', ')}`,
   });
-  const proFormaBlock = (html.match(/5-Year Financial Pro Forma[\s\S]*?Typical Operating Expense Breakdown/i) || [])[0] || '';
+  const proFormaBlock = (html.match(/5-Year Planning View[\s\S]*?Typical Operating Expense Mix/i) || [])[0] || '';
   checks.push({
-    name: 'Positive Value-Creation Pro Forma',
-    status: /\$-|\b-\d+%/.test(proFormaBlock) ? 'fail' : 'pass',
-    detail: /\$-|\b-\d+%/.test(proFormaBlock)
-      ? 'Value Creation pro forma is showing negative net benefit or ROI; Jackie must model controllable savings, recovered value, risk avoidance, and time savings before release'
-      : '5-year pro forma presents positive controllable-value case after management fee',
+    name: 'Conservative Value-Creation Pro Forma',
+    status: /\bwill save\b|savings typically compound|guaranteed savings/i.test(proFormaBlock) ? 'fail' : 'pass',
+    detail: /\bwill save\b|savings typically compound|guaranteed savings/i.test(proFormaBlock)
+      ? 'Value Creation page must not imply guaranteed savings or force a positive ROI'
+      : '5-year view is framed as planning math pending actual budget, utility, insurance, vendor, and arrears data',
   });
   checks.push({
     name: 'DOF Tax Search Link',
@@ -4608,47 +4608,50 @@ ${complianceGutCheckRows.map(row => `<tr><td style="font-weight:800;color:#2C324
   const modeledBuildingArea = Math.max(d.buildingArea || 0, modelUnits * 850, 1);
   const modeledAnnualOpex = Math.round(modeledBuildingArea * opex.avg);
   const modeledAnnualFee = Math.max(d.annualFee || d.monthlyFee * 12, 1);
+  const hasUploadedFinancials = Boolean(
+    d.raw?.uploadedFinancials ||
+    d.raw?.boardFinancials ||
+    d.raw?.managementReports ||
+    d.raw?.latestBudget ||
+    d.raw?.auditedFinancials
+  );
   const expenseMix = [
-    { label: 'Real Estate Taxes', pct: 0.27, savingsRate: 0 },
-    { label: 'Insurance', pct: 0.20, savingsRate: 0.08 },
-    { label: 'Utilities', pct: 0.17, savingsRate: 0.07 },
-    { label: 'Maintenance & Repairs', pct: 0.14, savingsRate: 0.09 },
-    { label: 'Management & Admin', pct: 0.11, savingsRate: 0.08 },
-    { label: 'Other / Reserve', pct: 0.11, savingsRate: 0.03 },
+    { label: 'Real Estate Taxes', pct: 0.27, savingsRate: 0, confidence: 'Verify in DOF / tax bills' },
+    { label: 'Insurance', pct: 0.20, savingsRate: hasUploadedFinancials ? 0.03 : 0.015, confidence: hasUploadedFinancials ? 'Medium' : 'Low - policy needed' },
+    { label: 'Utilities', pct: 0.17, savingsRate: hasUploadedFinancials ? 0.025 : 0.01, confidence: hasUploadedFinancials ? 'Medium' : 'Low - bills needed' },
+    { label: 'Maintenance & Repairs', pct: 0.14, savingsRate: hasUploadedFinancials ? 0.04 : 0.02, confidence: hasUploadedFinancials ? 'Medium' : 'Low - contracts needed' },
+    { label: 'Management & Admin', pct: 0.11, savingsRate: hasUploadedFinancials ? 0.025 : 0.01, confidence: hasUploadedFinancials ? 'Medium' : 'Low - budget needed' },
+    { label: 'Other / Reserve', pct: 0.11, savingsRate: 0, confidence: 'Not modeled as savings' },
   ];
   const categorySavings = expenseMix.map(item => ({
     ...item,
     spend: Math.round(modeledAnnualOpex * item.pct),
     savings: Math.round(modeledAnnualOpex * item.pct * item.savingsRate),
   }));
-  const vendorBidSavings = Math.round(Math.max(modelUnits * 550, modeledAnnualOpex * 0.022));
-  const laborEfficiencySavings = Math.round(Math.max(modelUnits * 350, modeledAnnualOpex * 0.012));
-  const materialsSupplySavings = Math.round(Math.max(modelUnits * 180, modeledAnnualOpex * 0.006));
-  const consultantDiscountSavings = Math.round(Math.max(modelUnits * 150, modeledAnnualOpex * 0.004));
-  const revenueRecovery = Math.round(Math.max(modelUnits * 425, modeledAnnualOpex * 0.006));
-  const retentionSavings = Math.round(Math.max(modelUnits * 525, modeledAnnualOpex * 0.009));
-  const boardTimeSavings = Math.round(Math.max(modelUnits * 250, modeledAnnualOpex * 0.004));
-  const complianceAvoidance = Math.round(Math.max((d.ll97?.period1Penalty || 0) * 0.25, (d.violationsOpen + d.ecbCount) > 0 ? modelUnits * 225 : modelUnits * 125));
-  let opportunityLevers = [
-    { label: 'Vendor Rebidding & Scope Control', amount: vendorBidSavings, narrative: '3-bid process, scope normalization, preferred vendor pricing, and change-order discipline' },
-    { label: 'Insurance, Utility & Maintenance Efficiency', amount: categorySavings.filter(item => item.savingsRate > 0).reduce((sum, item) => sum + item.savings, 0), narrative: 'broker market checks, utility monitoring, preventive maintenance, and operating-expense review' },
-    { label: 'Labor, Materials & Supplies Discipline', amount: laborEfficiencySavings + materialsSupplySavings, narrative: 'staff schedule review, overtime control, buying standards, inventory discipline, and negotiated supply pricing' },
-    { label: 'Consultant / Professional Rate Advantage', amount: consultantDiscountSavings, narrative: 'trusted attorneys, engineers, expediters, insurance, energy, and project consultants willing to sharpen rates for Camelot-introduced clients' },
-    { label: 'Collections, Amenities & Revenue Recovery', amount: revenueRecovery, narrative: 'arrears cadence, payment friction reduction, storage/parking/laundry/license review, alteration/sublet/move fee controls' },
-    { label: 'Retention, Risk Avoidance & Board Time Saved', amount: retentionSavings + boardTimeSavings + complianceAvoidance, narrative: 'fewer emergencies, better documentation, compliance calendars, resident support, and less volunteer-board administrative burden' },
+  const vendorBidSavings = Math.round(Math.max(modelUnits * (hasUploadedFinancials ? 300 : 125), modeledAnnualOpex * (hasUploadedFinancials ? 0.018 : 0.0075)));
+  const laborEfficiencySavings = Math.round(Math.max(modelUnits * (hasUploadedFinancials ? 175 : 75), modeledAnnualOpex * (hasUploadedFinancials ? 0.0075 : 0.003)));
+  const materialsSupplySavings = Math.round(Math.max(modelUnits * (hasUploadedFinancials ? 90 : 40), modeledAnnualOpex * (hasUploadedFinancials ? 0.0035 : 0.0015)));
+  const consultantDiscountSavings = Math.round(Math.max(modelUnits * (hasUploadedFinancials ? 80 : 35), modeledAnnualOpex * (hasUploadedFinancials ? 0.0025 : 0.001)));
+  const revenueRecovery = Math.round(Math.max(modelUnits * (hasUploadedFinancials ? 175 : 65), modeledAnnualOpex * (hasUploadedFinancials ? 0.0035 : 0.0012)));
+  const complianceAvoidance = d.ll97?.period1Penalty
+    ? Math.round(d.ll97.period1Penalty * 0.1)
+    : ((d.violationsOpen + d.ecbCount) > 0 ? Math.round(modelUnits * 75) : 0);
+  const boardTimeSavings = 0;
+  const opportunityLevers = [
+    { label: 'Vendor Rebidding & Scope Control', amount: vendorBidSavings, confidence: hasUploadedFinancials ? 'Medium' : 'Low', narrative: 'Illustrative range only until recurring contracts, invoices, and current vendor scopes are reviewed' },
+    { label: 'Insurance, Utility & Maintenance Review', amount: categorySavings.filter(item => item.savingsRate > 0).reduce((sum, item) => sum + item.savings, 0), confidence: hasUploadedFinancials ? 'Medium' : 'Low', narrative: 'Requires insurance dec pages, utility bills, service contracts, and maintenance history before any savings can be quoted' },
+    { label: 'Labor, Materials & Supplies Discipline', amount: laborEfficiencySavings + materialsSupplySavings, confidence: hasUploadedFinancials ? 'Medium' : 'Low', narrative: 'Preliminary staffing and purchasing review; not a payroll reduction promise' },
+    { label: 'Consultant / Professional Rate Review', amount: consultantDiscountSavings, confidence: 'Low', narrative: 'Potential benefit depends on actual legal, engineering, expediting, insurance, and project needs' },
+    { label: 'Collections, Amenities & Revenue Recovery', amount: revenueRecovery, confidence: hasUploadedFinancials ? 'Medium' : 'Low', narrative: 'Excluded from firm savings until arrears, parking/storage/laundry schedules, and fee policies are reviewed' },
+    { label: 'Compliance Risk Avoidance', amount: complianceAvoidance, confidence: d.ll97 || d.violationsOpen || d.ecbCount ? 'Medium' : 'Low', narrative: 'Risk-reduction planning tied to verified LL97, HPD, DOB, ECB/OATH, DOF, insurance, and professional review' },
   ];
-  const baselineBusinessCase = Math.round(modeledAnnualFee * 1.35);
-  const rawYear1Value = opportunityLevers.reduce((sum, item) => sum + item.amount, 0);
-  if (rawYear1Value < baselineBusinessCase) {
-    const gap = baselineBusinessCase - rawYear1Value;
-    opportunityLevers = opportunityLevers.map((item, index) => index === opportunityLevers.length - 1 ? { ...item, amount: item.amount + gap } : item);
-  }
   const modeledYear1Value = opportunityLevers.reduce((sum, item) => sum + item.amount, 0);
   const financialModel = {
     modeledBuildingArea,
     opexRange: opex,
     annualOpex: modeledAnnualOpex,
     annualFee: modeledAnnualFee,
+    hasUploadedFinancials,
     categorySavings,
     opportunityLevers,
     vendorBidSavings,
@@ -4657,23 +4660,23 @@ ${complianceGutCheckRows.map(row => `<tr><td style="font-weight:800;color:#2C324
     consultantDiscountSavings,
     boardTimeSavings,
     revenueRecovery,
-    retentionSavings,
+    retentionSavings: 0,
     complianceAvoidance,
     year1Value: modeledYear1Value,
     feeEscalation: 0.03,
-    valueGrowth: 0.08,
+    valueGrowth: hasUploadedFinancials ? 0.03 : 0.01,
   };
   const valueCreationDataSources = [
-    { name: 'U.S. Census / ACS', use: 'resident, household, income, tenure, and neighborhood demand context' },
-    { name: 'NYC Open Data', use: 'DOB, HPD, ECB/OATH, 311, PLUTO, LL84/LL97, tax, lien, and compliance signals' },
-    { name: 'Con Edison / Utility Benchmarking', use: 'energy-cost, usage, demand, and conservation opportunity modeling' },
-    { name: 'REBNY Market Reports', use: 'sales, leasing, market velocity, price-per-square-foot, and Manhattan submarket trends' },
-    { name: 'CHIP Data', use: 'NYC operating-cost, rent-regulation, tax, insurance, and multifamily policy benchmarks' },
-    { name: 'SPONY Data', use: 'owner/operator peer practices, building operations, insurance, and service-cost context' },
-    { name: 'IREM Benchmarks', use: 'professional property-management expense ratios and operating standards' },
-    { name: 'Habitat Magazine', use: 'co-op/condo board governance, vendor, compliance, and capital-project intelligence' },
-    { name: 'The Cooperator', use: 'board-facing co-op/condo management, reserves, amenities, and legal/compliance context' },
-    { name: 'Camelot Portfolio Benchmarks', use: '42-property operating history, vendor rebids, retention, compliance, and transition results' },
+    { name: 'Direct property scan', status: 'Direct / pulled when available', use: 'HPD, DOB, ECB/OATH, DOF, ACRIS, 311, LL84/LL97, and neighborhood records actually returned by the current report run' },
+    { name: 'Board / manager financials', status: hasUploadedFinancials ? 'Uploaded / internal' : 'Required before underwriting', use: 'Latest budget, audited financials, prior manager report, AP aging, arrears, insurance, payroll, utilities, and vendor contracts' },
+    { name: 'U.S. Census / ACS', status: 'Reference benchmark', use: 'Neighborhood demand and demographic context only; not used to promise building savings' },
+    { name: 'NYC Open Data', status: 'Direct / public-record reference', use: 'Public building, compliance, 311, PLUTO, LL84/LL97, and municipal signals where returned' },
+    { name: 'Con Edison / Utility Benchmarking', status: 'Reference until bills are uploaded', use: 'Utility opportunity cannot be underwritten without actual bills, meters, and usage history' },
+    { name: 'REBNY / market reports', status: 'Reference benchmark', use: 'Market context, sales velocity, and broker/investor sentiment; not a property savings source' },
+    { name: 'CHIP / SPONY / IREM', status: 'Reference benchmark', use: 'Peer operating-cost, owner/operator, and property-management benchmark context' },
+    { name: 'Habitat Magazine / The Cooperator', status: 'Board-governance reference', use: 'Co-op/condo governance, reserves, insurance, compliance, and capital-project context' },
+    { name: 'Camelot portfolio benchmarks', status: 'Internal benchmark', use: 'Used as a directional comparison only until matched against this building’s actual financials' },
+    { name: 'RealtyMX / Google Drive reports', status: 'Available integration; not assumed', use: 'Can enrich comps and portfolio benchmarking once credentials or files are provided for the specific run' },
   ];
   const commercialIntel = d.commercialIntel || {
     commercialSignals: [],
@@ -6414,58 +6417,58 @@ ${[
 <!-- PAGE 17: FINANCIAL OPPORTUNITY ANALYSIS -->
 <div class="section section-cream">
 <div class="section-title">Financial Opportunity Analysis</div>
-<div class="section-sub">Projected annual value creation — based on Camelot portfolio benchmarks</div>
+<div class="section-sub">Conservative opportunity screen — benchmark / assumption disclosure, actual financials required before any savings claim</div>
 
 <div class="stats-row">
 <div class="stat-box"><div class="val gold">$${d.monthlyFee.toLocaleString()}/mo</div><div class="lbl">Recommended Intelligence Fee ($${d.pricePerUnit}/unit)</div></div>
-<div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.vendorBidSavings.toLocaleString()}/yr</div><div class="lbl">Vendor Bid Savings</div></div>
-<div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.revenueRecovery.toLocaleString()}/yr</div><div class="lbl">Collections / Revenue Recovery</div></div>
-<div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.year1Value.toLocaleString()}/yr</div><div class="lbl">Year 1 Value Target</div></div>
+<div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.vendorBidSavings.toLocaleString()}/yr</div><div class="lbl">Vendor Review Range</div></div>
+<div class="stat-box"><div class="val" style="color:#16a34a">$${financialModel.revenueRecovery.toLocaleString()}/yr</div><div class="lbl">Revenue Review Range</div></div>
+<div class="stat-box"><div class="val" style="color:${financialModel.hasUploadedFinancials ? '#16a34a' : '#A89035'}">${financialModel.hasUploadedFinancials ? 'MED' : 'LOW'}</div><div class="lbl">Financial Confidence</div></div>
 </div>
 
 <div style="background:#F8F5EC;border:1px solid #D8C894;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:13px 16px;margin:14px 0;color:#3A4B5B">
-<div style="font-size:12px;font-weight:800;color:#0D2E63;margin-bottom:5px">The business case for Camelot</div>
-<p style="font-size:11px;line-height:1.6;margin:0">A smaller, senior-led firm can win by doing the work large shops often push into layers: rebidding vendors, tightening labor and supplies, reducing avoidable emergencies, reviewing insurance and utilities, enforcing collections, negotiating consultant rates, and giving the board time back. Inflation cannot be avoided, but operating drift can be controlled. Jackie models Camelot's value as gross controllable savings and recovered value, then subtracts the management fee so the board can see the net benefit of a first-year trial and a five-year commitment.</p>
+<div style="font-size:12px;font-weight:800;color:#0D2E63;margin-bottom:5px">The business case for Camelot — without overpromising</div>
+<p style="font-size:11px;line-height:1.6;margin:0">This page is an initial operating-opportunity screen, not a guaranteed pro forma. Jackie can identify where savings may exist — vendor rebids, insurance review, utilities, collections, staffing design, compliance planning, and project controls — but final savings require the latest budget, audited financials, prior management report, utility bills, insurance policies, vendor contracts, arrears, payroll/staffing schedules, and mortgage/debt information. Actual financials required before any savings claim.</p>
 </div>
 
 <table class="invest-table" style="margin-top:16px">
-<thead><tr><th>Opportunity Area</th><th>Est. Annual Impact</th><th>Priority</th><th>Camelot Approach</th></tr></thead>
+<thead><tr><th>Opportunity Area</th><th>Illustrative Annual Range</th><th>Confidence</th><th>Camelot Approach</th></tr></thead>
 <tbody>
-${financialModel.opportunityLevers.map((lever: any, i: number) => `<tr${i % 2 ? ' style="background:#EDE9DF"' : ''}><td>${safe(lever.label)}</td><td style="color:#16a34a;font-weight:700">$${lever.amount.toLocaleString()}/yr</td><td>${i < 3 ? '★★★ High' : '★★ Medium'}</td><td>${safe(lever.narrative)}</td></tr>`).join('\n')}
+${financialModel.opportunityLevers.map((lever: any, i: number) => `<tr${i % 2 ? ' style="background:#EDE9DF"' : ''}><td>${safe(lever.label)}</td><td style="color:#16a34a;font-weight:700">$0 - $${lever.amount.toLocaleString()}/yr</td><td>${safe(lever.confidence || 'Low')}</td><td>${safe(lever.narrative)}</td></tr>`).join('\n')}
 </tbody>
 </table>
 
 <div style="background:#EDE9DF;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:14px 18px;margin-top:12px">
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-<div><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888">Resident Retention (Merlin AI)</span><br>
-<span style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:20px;font-weight:700;color:#16a34a">$${Math.round(d.units * 3500).toLocaleString()} – $${Math.round(d.units * 8000).toLocaleString()}/yr</span>
-<span style="display:block;font-size:10px;color:#555;margin-top:2px">${d.units} units × $3,500–$8,000 avg turnover cost avoided per unit</span></div>
-<div style="text-align:right"><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888">Priority</span><br><span style="font-size:14px;font-weight:700;color:#A89035">★★★ High</span></div>
+<div><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888">Non-cash board benefit</span><br>
+<span style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:20px;font-weight:700;color:#A89035">Time, control, and cleaner decisions</span>
+<span style="display:block;font-size:10px;color:#555;margin-top:2px">Board-time savings are shown as a governance benefit, not a dollar ROI line item, unless the board asks for a separate time-value model.</span></div>
+<div style="text-align:right"><span style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888">Use</span><br><span style="font-size:14px;font-weight:700;color:#A89035">Narrative only</span></div>
 </div>
 </div>
 
-<div style="background:#16a34a;color:#fff;border-radius:8px;padding:14px 20px;margin-top:16px;text-align:center">
-<span style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:16px;font-weight:700">Total Year 1 Opportunity: $${(98000 + Math.round(d.units * 3500)).toLocaleString()} – $${(223000 + Math.round(d.units * 8000)).toLocaleString()}+</span>
-<span style="display:block;font-size:11px;opacity:0.9;margin-top:4px">$98K–$223K operational savings + $${Math.round(d.units * 3500 / 1000)}K–$${Math.round(d.units * 8000 / 1000)}K resident retention value</span>
+<div style="background:#3A4B5B;color:#fff;border-radius:8px;padding:14px 20px;margin-top:16px;text-align:center">
+<span style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:16px;font-weight:700">Preliminary Review Range: $0 - $${financialModel.year1Value.toLocaleString()}/yr</span>
+<span style="display:block;font-size:11px;opacity:0.9;margin-top:4px">Benchmark / assumption disclosure only. Camelot should not quote a firm savings target until board financials, contracts, utilities, insurance, and arrears are reviewed.</span>
 </div>
 </div>
 
 <!-- PAGE 17B: CHARTS, GRAPHS & 5-YEAR PRO FORMA -->
 <div class="section section-white">
 <div class="section-title">Value Creation — Visual Analysis</div>
-<div class="section-sub">Source-informed charts and projections specific to ${d.buildingName} (${d.units} units${d.buildingArea > 0 ? ', ' + d.buildingArea.toLocaleString() + ' SF' : ''})</div>
+<div class="section-sub">Visual diligence map for ${d.buildingName} (${d.units} units${d.buildingArea > 0 ? ', ' + d.buildingArea.toLocaleString() + ' SF' : ''}); assumptions remain preliminary until tested against actual financials</div>
 
 <div style="background:#F8F5EC;border:1px solid #D8C894;border-radius:8px;padding:12px 14px;margin:12px 0 22px">
-<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#A89035;font-weight:700;margin-bottom:8px">Value-Creation Source Stack</div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#A89035;font-weight:700;margin-bottom:8px">Value-Creation Source Stack — Benchmark / assumption disclosure</div>
 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px">
-${valueCreationDataSources.map(src => `<div style="font-size:9.5px;line-height:1.45;color:#3A4B5B"><strong style="color:#14356A">${src.name}</strong><br><span style="color:#666">${src.use}</span></div>`).join('\n')}
+${valueCreationDataSources.map(src => `<div style="font-size:9.5px;line-height:1.45;color:#3A4B5B"><strong style="color:#14356A">${src.name}</strong> <span style="color:#A89035;font-weight:700">(${src.status})</span><br><span style="color:#666">${src.use}</span></div>`).join('\n')}
 </div>
-<div style="font-size:9px;color:#777;line-height:1.5;margin-top:10px;border-top:1px solid #E2D7B2;padding-top:8px">Camelot cites this source stack when modeling operating expense, utility, market-value, resale/leasing, compliance, governance, insurance, vendor, amenity, and resident-retention opportunity. Building-specific figures remain preliminary until matched against source records and board materials.</div>
+<div style="font-size:9px;color:#777;line-height:1.5;margin-top:10px;border-top:1px solid #E2D7B2;padding-top:8px">These names are not all direct data pulls in every run. Direct data is limited to records actually returned by the report. Industry publications and association data are reference benchmarks only. RealtyMX, Google Drive management reports, and Camelot internal reports can be used when credentials or source files are connected for the specific engagement.</div>
 </div>
 
 <!-- Savings Breakdown — Horizontal Bar Chart -->
 <div style="margin-bottom:28px">
-<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A89035;font-weight:600;margin-bottom:14px;padding-left:16px;border-left:4px solid #A89035">Projected Annual Savings by Category</div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A89035;font-weight:600;margin-bottom:14px;padding-left:16px;border-left:4px solid #A89035">Illustrative Review Range by Category</div>
 ${financialModel.opportunityLevers.map((item: any, index: number) => {
   const maxVal = Math.max(...financialModel.opportunityLevers.map((lever: any) => lever.amount), 1);
   const pct = Math.min(100, Math.max(10, Math.round((item.amount / maxVal) * 100)));
@@ -6475,7 +6478,7 @@ ${financialModel.opportunityLevers.map((item: any, index: number) => {
 <div style="width:170px;text-align:right;font-size:10.5px;color:#555;flex-shrink:0">${safe(item.label)}</div>
 <div style="flex:1;background:#E5E3DE;border-radius:4px;height:24px;position:relative">
 <div style="position:absolute;left:0;top:0;height:100%;background:${color};border-radius:4px;width:${pct}%"></div>
-<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:#2C3240">$${(item.amount/1000).toFixed(0)}K</span>
+<span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:#2C3240">$0-$${(item.amount/1000).toFixed(0)}K</span>
 </div>
 </div>`;
 }).join('\n')}
@@ -6483,10 +6486,9 @@ ${financialModel.opportunityLevers.map((item: any, index: number) => {
 
 <!-- 5-Year Pro Forma Projection -->
 <div style="margin-bottom:28px">
-<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A89035;font-weight:600;margin-bottom:14px;padding-left:16px;border-left:4px solid #A89035">5-Year Financial Pro Forma</div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A89035;font-weight:600;margin-bottom:14px;padding-left:16px;border-left:4px solid #A89035">5-Year Planning View (not a savings promise)</div>
 ${(() => {
   const mgmtFee = financialModel.annualFee;
-  // Dynamic savings: scale with units — insurance ($200-500/unit) + vendor ($300-650/unit) + energy ($120-300/unit) + revenue ($130-350/unit) + admin ($70-160/unit)
   const yr1Mid = financialModel.year1Value;
   const growth = 1 + financialModel.valueGrowth;
   const years = [1, 2, 3, 4, 5];
@@ -6499,14 +6501,14 @@ ${(() => {
   });
   const cumSavings = projections.reduce((acc, p) => { acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + p.net); return acc; }, [] as number[]);
   const totalSavings5yr = cumSavings[cumSavings.length - 1];
-  const maxCum = totalSavings5yr;
+  const maxCum = Math.max(...cumSavings.map(Math.abs), 1);
 
   return `<table class="invest-table" style="font-size:11px">
-<thead><tr><th>Year</th><th>Target Value Created</th><th>Management Fee</th><th>Net Benefit</th><th>ROI</th><th>Cumulative Net</th></tr></thead>
+<thead><tr><th>Year</th><th>Illustrative Review Range</th><th>Management Fee</th><th>Net Planning View</th><th>Ratio</th><th>Cumulative View</th></tr></thead>
 <tbody>
 ${projections.map((p, i) => `<tr${i % 2 ? ' style="background:#EDE9DF"' : ''}>
 <td style="font-weight:700">Year ${p.year}</td>
-<td style="color:#16a34a;font-weight:600">$${p.savings.toLocaleString()}</td>
+<td style="color:#16a34a;font-weight:600">$0 - $${p.savings.toLocaleString()}</td>
 <td>$${p.fee.toLocaleString()}</td>
 <td style="color:${p.net > 0 ? '#16a34a' : '#dc2626'};font-weight:700">$${p.net.toLocaleString()}</td>
 <td style="color:#A89035;font-weight:700">${p.roi}%</td>
@@ -6517,10 +6519,10 @@ ${projections.map((p, i) => `<tr${i % 2 ? ' style="background:#EDE9DF"' : ''}>
 
 <!-- Cumulative Net Benefit — Area Chart -->
 <div style="margin-top:16px;padding:16px 20px;background:#EDE9DF;border-radius:8px">
-<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px">Cumulative Net Benefit Over 5 Years</div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px">Cumulative Planning View Over 5 Years</div>
 <div style="display:flex;align-items:flex-end;gap:4px;height:120px">
 ${cumSavings.map((val, i) => {
-  const pct = Math.max(8, Math.round((val / maxCum) * 100));
+  const pct = Math.max(8, Math.round((Math.abs(val) / maxCum) * 100));
   return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
 <div style="font-size:9px;font-weight:700;color:#16a34a">$${(val/1000).toFixed(0)}K</div>
 <div style="width:100%;background:linear-gradient(to top,#16a34a,#4ade80);border-radius:4px 4px 0 0;height:${pct}%;min-height:10px"></div>
@@ -6534,15 +6536,15 @@ ${cumSavings.map((val, i) => {
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px">
 <div style="background:#3A4B5B;border-radius:8px;padding:16px;text-align:center;color:#fff">
 <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:28px;font-weight:700;color:#A89035">${projections[0].roi}%</div>
-<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;opacity:0.7">Year 1 ROI</div>
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;opacity:0.7">Year 1 Planning Ratio</div>
 </div>
 <div style="background:#3A4B5B;border-radius:8px;padding:16px;text-align:center;color:#fff">
-<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:28px;font-weight:700;color:#16a34a">$${(totalSavings5yr/1000).toFixed(0)}K</div>
-<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;opacity:0.7">5-Year Net Benefit</div>
+<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:28px;font-weight:700;color:${totalSavings5yr >= 0 ? '#16a34a' : '#dc2626'}">$${(totalSavings5yr/1000).toFixed(0)}K</div>
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;opacity:0.7">5-Year Planning View</div>
 </div>
 <div style="background:#3A4B5B;border-radius:8px;padding:16px;text-align:center;color:#fff">
-<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:28px;font-weight:700;color:#A89035">${((totalSavings5yr / (projections.reduce((s, p) => s + p.fee, 0))) * 100).toFixed(0)}%</div>
-<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;opacity:0.7">5-Year Avg ROI</div>
+<div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:28px;font-weight:700;color:${totalSavings5yr >= 0 ? '#A89035' : '#dc2626'}">${((totalSavings5yr / (projections.reduce((s, p) => s + p.fee, 0))) * 100).toFixed(0)}%</div>
+<div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-top:4px;opacity:0.7">5-Year Avg Ratio</div>
 </div>
 </div>`;
 })()}
@@ -6550,7 +6552,7 @@ ${cumSavings.map((val, i) => {
 
 <!-- OpEx Breakdown — Donut Chart (CSS) -->
 <div style="margin-top:24px">
-<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A89035;font-weight:600;margin-bottom:14px;padding-left:16px;border-left:4px solid #A89035">Typical Operating Expense Breakdown</div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A89035;font-weight:600;margin-bottom:14px;padding-left:16px;border-left:4px solid #A89035">Typical Operating Expense Mix</div>
 <div style="display:flex;gap:24px;align-items:center">
 <div style="width:180px;height:180px;border-radius:50%;flex-shrink:0;position:relative;background:conic-gradient(#dc2626 0deg 97deg,#A89035 97deg 169deg,#3A4B5B 169deg 230deg,#16a34a 230deg 280deg,#0073b7 280deg 320deg,#888 320deg 360deg)">
 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90px;height:90px;background:#FDFAF3;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center">
@@ -6571,13 +6573,13 @@ ${[
 <div style="font-size:11px;color:#555;flex:1">${c.label}</div>
 <div style="font-size:11px;font-weight:700;color:#2C3240">${c.pct}</div>
 </div>`).join('\n')}
-<div style="font-size:9px;color:#888;margin-top:8px;font-style:italic">★ Camelot targets Insurance, Utilities, Maintenance & Mgmt for direct savings</div>
+<div style="font-size:9px;color:#888;margin-top:8px;font-style:italic">Benchmark mix only. Actual expense categories must be reconciled against the building's budget, audited financials, and monthly reports.</div>
 </div>
 </div>
 </div>
 
 <div style="background:#EDE9DF;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:12px 16px;margin-top:20px">
-<p style="font-size:11px;color:#555;line-height:1.6"><strong style="color:#A89035">Note:</strong> All projections are estimates based on Camelot portfolio benchmarks across 42 managed properties. Actual results vary by building. Year 1 estimates are conservative; savings typically compound as vendor contracts are rebid, energy optimization matures, and resident retention improves. Management fee assumes 4% annual escalation (3–5% per board agreement); value creation assumes 4% annual improvement.</p>
+<p style="font-size:11px;color:#555;line-height:1.6"><strong style="color:#A89035">Note:</strong> This is not a savings guarantee. It is a preliminary diligence model using public-record signals, neighborhood operating-expense benchmarks, and Camelot portfolio experience where available. The model should be replaced with a true building-specific analysis once Camelot receives the budget, prior manager report, audited financials, utility bills, insurance, vendor contracts, arrears, payroll/staffing data, and debt schedule.</p>
 </div>
 </div>
 
@@ -6799,25 +6801,25 @@ Tribeca: $2,100/sf · $5,200 1BR
 </div>
 </div>
 
-<!-- PAGE 20: CAMELOT ADVANTAGE QUANTIFIED -->
+<!-- PAGE 20: CAMELOT ADVANTAGE REVIEW AREAS -->
 <div class="section section-white">
-<div class="section-title">The Camelot Advantage — Quantified</div>
-<div class="section-sub">Verified outcomes across 42 managed buildings and 196 tracked in SCOUT</div>
+<div class="section-title">The Camelot Advantage — Review Areas</div>
+<div class="section-sub">Board-facing operating themes; quantify only after budgets, contracts, bills, and board records are reviewed</div>
 
 <table class="invest-table">
-<thead><tr><th>Value Driver</th><th>Estimated Impact</th><th>Applied to ${d.buildingName}</th></tr></thead>
+<thead><tr><th>Value Driver</th><th>Board Benefit</th><th>How It Is Verified for ${d.buildingName}</th></tr></thead>
 <tbody>
-<tr><td>Compliance Management (zero violations)</td><td>+3–8% sale premium on units</td><td style="color:#16a34a;font-weight:600">${d.units > 0 ? `${d.units} units \u00D7 avg value = significant portfolio uplift` : 'Premium positioning for all units'}</td></tr>
-<tr><td>Resident Retention (Merlin AI)</td><td>+$3,500–8,000 per unit/yr</td><td style="color:#16a34a;font-weight:600">${d.units} units \u00D7 $4,500 avg = ~$${Math.round(d.units * 4500).toLocaleString()}/yr saved</td></tr>
-<tr><td>Online Banking Services</td><td>Reduced payment friction and clearer bank visibility</td><td style="color:#16a34a;font-weight:600">BankUnited workflow supports zero bank fees and better balance visibility</td></tr>
-<tr><td>Technology Premium (ConciergePlus)</td><td>+2–5% building value premium</td><td style="color:#16a34a;font-weight:600">${d.buildingArea > 0 ? `${d.units} units — tech-enabled management increases building appeal and resale value` : 'Measurable value uplift'}</td></tr>
-<tr><td>Energy Optimization (Parity)</td><td>+$0.25–0.75/sqft/yr savings</td><td style="color:#16a34a;font-weight:600">${d.buildingArea > 0 ? `${d.buildingArea.toLocaleString()} SF \u00D7 $0.40 = ~$${Math.round(d.buildingArea * 0.4).toLocaleString()}/yr` : 'Utility cost reduction'}</td></tr>
-<tr><td>Technology-Enabled Leasing</td><td>20–30% faster absorption</td><td>Fewer vacant months; stronger maintenance fee sustainability</td></tr>
-<tr><td>Camelot Capital Advisory</td><td>+5–15% building value</td><td>Strategic refinancing + capital planning = lower shareholder cost</td></tr>
+<tr><td>Compliance Management</td><td>Cleaner compliance posture, fewer surprises, and better board visibility</td><td>Review HPD, DOB, ECB/OATH, LL84/LL97, FISP applicability, insurance requirements, and professional reports</td></tr>
+<tr><td>Resident / Shareholder Communication</td><td>Better issue tracking, fewer lost requests, and clearer response history</td><td>Measure through work-order logs, board minutes, complaint history, portal adoption, and resident communication patterns</td></tr>
+<tr><td>Online Banking Services</td><td>Reduced payment friction and clearer bank visibility</td><td>BankUnited workflow can support zero bank fees and better balance visibility once accounts and controls are approved</td></tr>
+<tr><td>Technology Platform</td><td>Trackable work orders, board packets, meeting minutes, document storage, and management reporting</td><td>Scope through the selected Intelligence package, implementation checklist, and user permissions</td></tr>
+<tr><td>Energy / Utility Review</td><td>Practical utility benchmarking and conservation planning</td><td>Requires utility bills, meters, LL84/LL97 filings, equipment inventory, and building operating schedules</td></tr>
+<tr><td>Brokerage / Leasing Support</td><td>Market context for resale, rental, sublet, or leasing questions where applicable</td><td>Use RealtyMX and market comps when credentials or current listings are connected to the run</td></tr>
+<tr><td>Camelot Capital Advisory</td><td>Better refinancing, reserve, and capital-planning preparation</td><td>Requires debt schedule, mortgage statements, reserve position, budget, engineering reports, and board objectives</td></tr>
 </tbody>
 </table>
 
-<div style="font-size:10px;color:#888;margin-top:8px;text-align:center">Source: Camelot Q1 2026 SCOUT Market Report. Impact estimates based on portfolio averages across 42 managed buildings.</div>
+<div style="font-size:10px;color:#888;margin-top:8px;text-align:center">Source discipline: public records, board-provided documents, Camelot operating experience, and industry benchmarks. This page identifies review areas, not guaranteed outcomes.</div>
 </div>
 
 <!-- PAGE 21: OPERATING COST INTELLIGENCE -->

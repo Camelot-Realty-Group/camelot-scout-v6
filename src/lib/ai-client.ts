@@ -295,7 +295,7 @@ export function localQueryEngine(
     resp += `- Preventive maintenance to avoid emergency pricing and resident disruption\n`;
     resp += `- Automation for work orders, payments, reporting, board packets, meeting minutes, document access, and resident communication\n`;
     resp += `- Project oversight that reduces change-order drift and improves closeout documentation\n\n`;
-    resp += `**Report rule:** show a five-year value case with controllable savings and board-time savings as benefits. Do not show negative ROI as the headline unless the user explicitly asks for a downside-only underwriting case.`;
+    resp += `**Report rule:** do not force a positive ROI or promise savings. Show a conservative five-year planning view only when the assumptions are labeled, separate cash savings from non-cash board-time benefits, and clearly state which figures are direct data pulls, which are benchmark references, and which still require actual budgets, management reports, utility bills, insurance, contracts, arrears, payroll, and debt schedules.`;
     return resp;
   }
 
