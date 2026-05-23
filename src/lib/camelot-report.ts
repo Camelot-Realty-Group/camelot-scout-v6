@@ -320,14 +320,28 @@ interface KnownPropertyFacts {
   bbl?: string;
   buildingClass?: string;
   buildingArea?: number;
+  lotArea?: number;
   marketValue?: number;
   assessedValue?: number;
+  propertyTax?: number;
+  latitude?: number;
+  longitude?: number;
   dofOwner?: string;
   managementCompany?: string;
   units?: number;
+  alternateUnits?: number;
   stories?: number;
   yearBuilt?: number;
+  taxClass?: string;
   propertyType?: string;
+  energyStarScore?: number | null;
+  hpdViolationsTotal?: number;
+  hpdViolationsOpen?: number;
+  dobViolationCount?: number;
+  lastSaleDate?: string | null;
+  lastSalePrice?: number;
+  lastSaleBuyer?: string | null;
+  lastSaleSeller?: string | null;
   neighborhoodName?: string;
   streetEasyUrl?: string;
   officialWebsite?: string;
@@ -1718,6 +1732,115 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       ],
     };
   }
+  if (/88[-\s]?32\s+155th|88[-\s]?02\s+155th|88[-\s]?06\s+155th|88[-\s]?10\s+155th|howard\s+coop|howard\s+cooperative|lindenwood/i.test(key)) {
+    return {
+      canonicalAddress: '88-32 155th Ave, Howard Beach, NY 11414',
+      buildingName: 'Howard Coop Corp.',
+      borough: 'Queens',
+      bbl: '4114660025',
+      buildingClass: 'C6',
+      taxClass: '2',
+      buildingArea: 74104,
+      lotArea: 170300,
+      marketValue: 5506000,
+      assessedValue: 2477700,
+      propertyTax: 202245,
+      latitude: 40.66535,
+      longitude: -73.84604,
+      dofOwner: 'Howard Coop Corp.',
+      managementCompany: 'Delkap Management',
+      units: 80,
+      alternateUnits: 86,
+      stories: 2,
+      yearBuilt: 1958,
+      propertyType: 'Walk-up Cooperative Building',
+      energyStarScore: 47,
+      hpdViolationsTotal: 86,
+      hpdViolationsOpen: 86,
+      dobViolationCount: 4,
+      lastSaleDate: '08/04/2004',
+      lastSalePrice: 0,
+      lastSaleBuyer: 'Howard Coop Corp.',
+      lastSaleSeller: null,
+      neighborhoodName: 'Lindenwood / Howard Beach',
+      description: 'Howard Coop Corp. at 88-32 155th Avenue is a multi-building walk-up cooperative in the Lindenwood / Howard Beach section of Queens. The uploaded PropertyShark-style report identifies the property as a 23-building lot with a large garden-apartment operating profile, a current DOF residential count of 80 units, and a separate report reference to 86 units that must be reconciled during transition.',
+      amenities: [
+        'Multi-building garden-apartment cooperative setting',
+        'Two-story walk-up operating profile',
+        'Large 170,300 sq. ft. lot with common-area and grounds oversight needs',
+        'Parking, laundry, storage, superintendent, and resident-service programs to verify',
+        'Energy Star score 47; utility and efficiency review recommended',
+      ],
+      commercialSignals: [
+        'Unit-count conflict: DOF/residential data shows 80 units while the uploaded report narrative references 86 units; reconcile against board records, proprietary lease/share register, HPD, DOF, and offering-plan records.',
+        'Owner record: Howard Coop Corp.; care-of address and management trail point to Delkap Management records in the uploaded report.',
+        'Public-record operating signal: uploaded report shows 86 HPD violations and 4 DOB violations; verify open/closed status directly through HPD Online, DOB BIS/NOW, and OATH/ECB before board-facing release.',
+        'Large site / FAR context: R5 zoning, current FAR about 0.44, max buildable area reported at 255,450 sq. ft., and reported buildable area about 180,518 sq. ft.; treat as planning context only until confirmed by zoning counsel or architect.',
+      ],
+      revenueOpportunities: [
+        'Maintenance billing, arrears, shareholder communication, and financial reporting review for a multi-building co-op.',
+        'Grounds, landscaping, snow, exterior maintenance, insurance, and vendor contract rebid.',
+        'Energy benchmarking and utility review given Energy Star score of 47.',
+        'Parking, laundry, storage, alteration, transfer, sublet, refinancing, closing, and document fee schedule review.',
+        'Compliance calendar for HPD, DOB, boiler, fire/life-safety, facade/FISP applicability, lead paint, and insurance inspection items.',
+        'Capital planning and lender-readiness review if the board is evaluating refinancing, reserve planning, or credit-line options.',
+      ],
+      landmarks: [
+        'Lindenwood / Howard Beach residential co-op corridor: immediate area',
+        'JFK Airport employment and transportation market: nearby',
+        'Howard Beach / Cross Bay Boulevard retail and service corridor: nearby',
+        'Belt Parkway and Cross Bay Boulevard access: nearby',
+        'Queens Community District 10 context: source record',
+      ],
+      locationTitle: 'Lindenwood / Howard Beach Cooperative Positioning',
+      locationCopy: 'The property sits in Queens Community District 10 within the Lindenwood / Howard Beach co-op market, where grounds management, resident communication, insurance, compliance, and cost controls matter as much as monthly accounting.',
+      lifestyleTitle: 'Multi-Building Co-op Operations With Compliance Discipline',
+      lifestyleCopy: 'A 23-building, two-story cooperative requires stronger file control, vendor supervision, violation tracking, grounds oversight, and board reporting than a single-entry building of similar unit count.',
+      brandingTitle: 'Howard Coop Corp. - 88-32 155th Avenue',
+      brandingDescription: 'Known-property guard: Jackie uses the uploaded 88-32 155th Avenue report as the source profile, flags the 80-vs-86 unit-count conflict, and treats Delkap Management and Howard Coop Corp. records as source leads to verify before client-facing release.',
+      researchSources: [
+        'Uploaded PropertyShark-style report: 88-32_155th_Ave__Howard_Beach__NY_11414.pdf, generated May 23, 2026',
+        'NYC DOF / PROS tax, assessment, exemption, abatement, and lien records for BBL 4114660025',
+        'ACRIS official deed, mortgage, UCC, satisfaction, assignment, release, and party records for BBL 4114660025',
+        'HPD MDR / HPD Online registration, contacts, complaints, and violations for Howard Coop Corp. / 88-32 155th Ave',
+        'DOB BIS / DOB NOW permits, boiler, facade/FISP, OATH/ECB, complaint, and violation records',
+        'Offering plan, proprietary lease, shareholder roster, board records, current budget, insurance, vendor files, and prior management reports requested before formal proposal',
+      ],
+      currentManagement: 'Delkap Management appears in the uploaded report; verify current authority against HPD MDR, board materials, and the active management agreement',
+      boardMembers: [
+        { name: 'Howard Coop Corp.', title: 'Co-op Corporation / Ownership Authority' },
+        { name: 'Paula Palazzo', title: 'Officer contact in uploaded HPD registration trail - verify before outreach' },
+        { name: 'Barbara McNamara', title: 'Head officer contact in uploaded HPD registration trail - verify before outreach' },
+      ],
+      buildingStaff: [
+        { role: 'Managing Agent', name: 'Allison Nero / Delkap Management (uploaded HPD registration trail; verify current status)' },
+        { role: 'Current Management Company', name: 'Delkap Management' },
+        { role: 'Building staff / superintendent', name: 'Staffing model to verify during transition diligence' },
+      ],
+      professionalEngineers: [
+        { name: 'Neal Rudikoff', title: 'Professional engineer / applicant signal from uploaded permit trail', license: 'Verify against DOB filings' },
+      ],
+      professionalSources: [
+        'Uploaded PropertyShark-style report pages for ownership, HPD contacts, DOB contacts, violations, tax, sales, assessment, zoning, and document history',
+        'NYC DOF / PROS',
+        'ACRIS',
+        'HPD MDR / HPD Online',
+        'DOB BIS / DOB NOW',
+        'OATH / ECB',
+      ],
+      professionalNotes: [
+        'Primary identity: Howard Coop Corp., 88-32 155th Ave, Howard Beach, NY 11414; alternate addresses in the uploaded report include 88-02, 88-06, and 88-10 155th Ave.',
+        'BBL: 4114660025; block/lot reported as 11466-0025; coop number 400929.',
+        'Unit-count conflict: DOF/residential data shows 80 units while the uploaded report narrative references 86 units. Jackie must show this as a reconciliation item, not silently choose one in final diligence.',
+        'Uploaded report identifies 23 buildings on the lot, 2 stories, 1958 construction, 74,104 residential square feet, 170,300 lot square feet, R5 zoning, Community District 10, School District 27, Census Tract 62, and Energy Star score 47.',
+        'Uploaded report shows 86 HPD violations and 4 DOB violations. Before a client-facing pitch, confirm current open/closed counts and any penalty balances through HPD Online, DOB BIS/NOW, and OATH/ECB.',
+        'Owner / management trail: Howard Coop Corp. C/O Delkap Management; managing-agent contact trail includes Allison Nero / Delkap Management, 15921 Crossbay Blvd, Howard Beach, NY 11414.',
+        'Uploaded report shows 2025/26 market value $5,506,000, assessed value $2,477,700, taxable assessed value $2,077,506, tax rate 12.439%, and property tax about $202,245.',
+        'Recent unit-sale trail in uploaded report includes Unit 62 at $235,000 on 03/02/2026, Unit 71 at $330,000 on 10/23/2025, Unit 6 at $205,000 on 02/28/2025, Unit 60 at $310,000 on 05/30/2024, and Unit 24 at $270,000 on 05/23/2024.',
+        'Document-history signal includes 2023 UCC/satisfaction/release records and 2012 mortgage / assignment of leases and rents records involving Howard Cooperative Corp.; verify directly through ACRIS before publishing financing conclusions.',
+      ],
+    };
+  }
   if (/chesapeake\s+house/i.test(key) || /201\s+e(ast)?\s+28/i.test(key)) {
     return {
       canonicalAddress: '201 East 28th Street, New York, NY 10016',
@@ -3104,11 +3227,11 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     stories,
     yearBuilt: knownFacts?.yearBuilt || dof?.yearBuilt || streetEasy?.yearBuilt || 0,
     buildingClass: effectiveBuildingClass,
-    taxClass: dof?.taxClass || '',
+    taxClass: knownFacts?.taxClass || dof?.taxClass || '',
     marketValue: effectiveMarketValue,
     assessedValue: knownFacts?.assessedValue || dof?.assessedValue || 0,
     landValue: dof?.landValue || 0,
-    lotArea: dof?.lotArea || 0,
+    lotArea: knownFacts?.lotArea || dof?.lotArea || 0,
     buildingArea: knownFacts?.buildingArea || gfa,
     dofOwner: knownFacts?.dofOwner
       || dof?.owner
@@ -3123,8 +3246,8 @@ export async function buildMasterReport(address: string, borough?: string): Prom
       || raw.dofAbatement?.ownerName
       || null,
     managementCompany: knownFacts?.managementCompany || knownFacts?.currentManagement || raw.registration?.managementCompany || null,
-    violationsTotal: raw.violations?.total || 0,
-    violationsOpen: raw.violations?.open || 0,
+    violationsTotal: knownFacts?.hpdViolationsTotal ?? raw.violations?.total ?? 0,
+    violationsOpen: knownFacts?.hpdViolationsOpen ?? raw.violations?.open ?? 0,
     violationClassA: classA,
     violationClassB: classB,
     violationClassC: classC,
@@ -3133,22 +3256,22 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     ecbPenaltyBalance: raw.ecb?.totalPenaltyBalance || 0,
     permitsCount: raw.permits?.count || 0,
     hasRecentPermits: raw.permits?.hasRecent || false,
-    energyStarScore: raw.energy?.energyStarScore ?? null,
+    energyStarScore: knownFacts?.energyStarScore ?? raw.energy?.energyStarScore ?? null,
     siteEUI: raw.energy?.siteEUI ?? null,
     ghgEmissions: raw.energy?.ghgEmissions ?? null,
     occupancy: raw.energy?.occupancy ?? null,
     ll97: ll97Data,
-    lastSaleDate: raw.acris?.lastSaleDate || null,
-    lastSalePrice: raw.acris?.lastSalePrice || 0,
-    lastSaleBuyer: raw.acris?.lastSaleBuyer || null,
-    lastSaleSeller: raw.acris?.lastSaleSeller || null,
+    lastSaleDate: knownFacts?.lastSaleDate || raw.acris?.lastSaleDate || null,
+    lastSalePrice: knownFacts?.lastSalePrice ?? raw.acris?.lastSalePrice ?? 0,
+    lastSaleBuyer: knownFacts?.lastSaleBuyer || raw.acris?.lastSaleBuyer || null,
+    lastSaleSeller: knownFacts?.lastSaleSeller || raw.acris?.lastSaleSeller || null,
     deedCount: raw.acris?.deeds?.length || 0,
     mortgageCount: raw.acris?.mortgages?.length || 0,
     litigationCount: raw.litigation?.count || 0,
     hasActiveLitigation: raw.litigation?.hasActive || false,
     isRentStabilized: raw.rentStabilization?.isStabilized || false,
-    dobViolationCount: violationSummary?.violations.filter(v => v.source === 'DOB').length || 0,
-    dobViolationOpen: violationSummary?.dobOpen || 0,
+    dobViolationCount: knownFacts?.dobViolationCount ?? violationSummary?.violations.filter(v => v.source === 'DOB').length ?? 0,
+    dobViolationOpen: knownFacts?.dobViolationCount ?? violationSummary?.dobOpen ?? 0,
     facadeFilingCount: raw.facade?.count || 0,
     facadeIssueCount: raw.facade?.issueCount || 0,
     dhcrRecordCount: raw.rentStabilization?.data?.length || 0,
@@ -3162,8 +3285,8 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     scoutScore: score,
     scoutGrade: grade,
     complaint311Count,
-    latitude: geo?.lat ?? null,
-    longitude: geo?.lng ?? null,
+    latitude: knownFacts?.latitude ?? geo?.lat ?? null,
+    longitude: knownFacts?.longitude ?? geo?.lng ?? null,
     propertyType,
     neighborhoodName: effectiveNeighborhoodName,
     zipCode: neighborhoodSearchContext.zipCode,
