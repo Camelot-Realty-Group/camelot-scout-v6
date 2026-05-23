@@ -13,7 +13,11 @@ import {
   Font,
 } from '@react-pdf/renderer';
 import type { ProposalData } from '@/lib/proposal-generator';
-import { DAVID_GOLDOFF_SIGNATURE, DAVID_GOLDOFF_SIGNATURE_LINES } from '@/lib/camelot-signature';
+import {
+  DAVID_GOLDOFF_SIGNATURE,
+  DAVID_GOLDOFF_SIGNATURE_IMAGE,
+  DAVID_GOLDOFF_SIGNATURE_LINES,
+} from '@/lib/camelot-signature';
 
 // ============================================================
 // Color Palette
@@ -382,11 +386,11 @@ const s = StyleSheet.create({
     borderTopWidth: 0.75,
     borderTopColor: GOLD,
   },
-  signatureScript: {
-    fontSize: 24,
-    fontFamily: 'Times-Italic',
-    color: NAVY,
-    marginBottom: 6,
+  signatureImage: {
+    width: 175,
+    height: 50,
+    objectFit: 'contain',
+    marginBottom: 4,
   },
   signatureLine: {
     fontSize: 8.5,
@@ -425,7 +429,7 @@ function sectionEnabled(data: ProposalData, id: string): boolean {
 function DavidSignatureBlock() {
   return (
     <View style={s.signatureBlock}>
-      <Text style={s.signatureScript}>David Goldoff</Text>
+      <Image src={DAVID_GOLDOFF_SIGNATURE_IMAGE} style={s.signatureImage} />
       <Text style={s.signatureName}>{DAVID_GOLDOFF_SIGNATURE.name}</Text>
       {DAVID_GOLDOFF_SIGNATURE_LINES.slice(1).map((line, i) =>
         line ? (
