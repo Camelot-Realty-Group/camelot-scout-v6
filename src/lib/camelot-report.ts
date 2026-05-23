@@ -178,6 +178,7 @@ export type ReportFocusKey =
   | 'resident_experience'
   | 'staffing'
   | 'energy_savings'
+  | 'financing'
   | 'budget_savings'
   | 'hoa_recovery';
 
@@ -264,6 +265,14 @@ export const REPORT_FOCUS_THEMES: Record<ReportFocusKey, ReportFocusTheme> = {
     headline: 'Energy, utility, and carbon savings with a compliance lens',
     narrative: 'Camelot will emphasize utility benchmarking, LL97 exposure, Parity-style energy monitoring, vendor/rebate opportunities, and capital upgrades that reduce operating cost and carbon risk.',
     proofPoints: ['LL97 penalty modeling', 'Utility tracking and energy monitoring', 'Rebates, incentives, and upgrade path review'],
+  },
+  financing: {
+    key: 'financing',
+    label: 'Financing',
+    icon: 'FIN',
+    headline: 'Capital advisory for refinancing, credit lines, and project funding',
+    narrative: 'Camelot will emphasize its lender-facing process for boards and owners that need refinancing, new loan origination, capital improvement financing, operating credit lines, bridge debt, or long-term bank products. Camelot can run an RFP, level lender quotes, organize the bank file, coordinate counsel and closing, and help deploy proceeds after funding.',
+    proofPoints: ['Lender RFP and apples-to-apples comparison matrix', 'Sensitivity analysis, bank-file coordination, and closing support', 'Separate capital advisory fee structure outside base management'],
   },
   budget_savings: {
     key: 'budget_savings',
@@ -4413,6 +4422,7 @@ export function generateBrochureHTML(d: MasterReportData): string {
     .filter((key): key is ReportFocusKey => Boolean(REPORT_FOCUS_THEMES[key as ReportFocusKey]));
   const selectedFocusThemes = selectedFocusKeys.map(key => REPORT_FOCUS_THEMES[key]);
   const primaryFocus = selectedFocusThemes[0] || REPORT_FOCUS_THEMES.property_management;
+  const hasFinancingFocus = selectedFocusKeys.includes('financing');
   const inquiryMeta = [
     reportFocus.inquiryContact ? `Contact: ${reportFocus.inquiryContact}` : null,
     reportFocus.inquiryEmail ? `Email: ${reportFocus.inquiryEmail}` : null,
@@ -5177,6 +5187,59 @@ ${theme.proofPoints.map(point => `<li>${safe(point)}</li>`).join('')}
 </div>
 <div style="background:#3A4B5B;color:#fff;padding:16px 20px;font-size:12px;line-height:1.7"><strong style="color:#D4AF37">Camelot report rule:</strong> the report may be tailored around one or more selected focus areas, but Camelot will not change facts, scoring, source status, or release blockers to fit the sales angle.</div>
 </div>
+
+${hasFinancingFocus ? `
+<!-- PAGE 2C: FINANCING ADVISORY -->
+<div class="section section-cream">
+<div class="section-title">Financing &amp; Capital Advisory</div>
+<div class="section-sub">Refinancing, credit lines, capital-improvement debt, and lender RFP support for ${safe(d.buildingName)}</div>
+<p style="font-size:13px;color:#3A4B5B;line-height:1.75;margin-bottom:16px">When an owner, co-op, condominium, HOA, receiver, or rental landlord has a mortgage maturity, capital project, reserve shortfall, bridge loan, credit-line need, or refinance opportunity, Camelot can support the process from first review through closing. This service is separate from ordinary property management and is structured as a capital advisory / financing coordination engagement.</p>
+<div style="display:grid;grid-template-columns:1.04fr .96fr;gap:18px;margin-bottom:18px">
+<div style="background:#fff;border:1px solid #D5D0C6;border-left:4px solid #A89035;padding:18px">
+<h4 style="font-size:16px;color:#0D2E63;margin:0 0 10px">Camelot Financing Workflow</h4>
+<ul style="padding-left:18px;margin:0;color:#3A4B5B;font-size:11px;line-height:1.75">
+<li>Review the existing debt stack, maturity dates, payment history, reserve position, arrears, operating budget, insurance, capital plan, and collateral profile.</li>
+<li>Build an RFP package so banks and lenders respond to the same facts, terms, assumptions, and requested loan structure.</li>
+<li>Bid the financing need across appropriate banks, agency lenders, portfolio lenders, credit unions, private lenders, and short-term / long-term capital providers.</li>
+<li>Level the quotes into an apples-to-apples comparison: rate, term, amortization, IO period, recourse, fees, reserves, covenants, closing conditions, prepayment, and timing.</li>
+<li>Present ownership with a sensitivity analysis and Camelot's operational opinion so the decision is not made on rate alone.</li>
+<li>Coordinate the selected lender's due-diligence request list, bank file, engineer/accountant/attorney inputs, board approvals, and closing logistics.</li>
+<li>Assist after closing with funding deployment for the approved project, reserve cushion, compliance plan, or stabilization objective.</li>
+</ul>
+</div>
+<div style="display:grid;gap:12px">
+<div style="background:#3A4B5B;color:#fff;padding:16px;border:1px solid #2C3D4C">
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#D4AF37;font-weight:800;margin-bottom:6px">Separate Advisory Fee</div>
+<p style="font-size:12px;line-height:1.6;margin:0"><strong style="color:#fff">New loan / capital improvement / credit-line placement:</strong> 1.00% of the full loan amount, separately approved.</p>
+<p style="font-size:12px;line-height:1.6;margin:8px 0 0"><strong style="color:#fff">Refinance / incremental proceeds:</strong> 0.05% of the difference between the original loan amount and the new loan amount, subject to final engagement terms.</p>
+</div>
+<div style="background:#fff;border:1px solid #D5D0C6;padding:16px">
+<h4 style="font-size:14px;color:#0D2E63;margin:0 0 8px">Ownership / Board Deliverables</h4>
+<ul style="padding-left:18px;margin:0;color:#3A4B5B;font-size:11px;line-height:1.7">
+<li>Lender RFP and quote matrix</li>
+<li>Rate, payment, proceeds, and amortization sensitivity</li>
+<li>Closing checklist and bank-file tracker</li>
+<li>Attorney / accountant / engineer coordination</li>
+<li>Capital deployment plan after closing</li>
+</ul>
+</div>
+</div>
+</div>
+<div style="background:#fff;border:1px solid #D5D0C6;padding:16px;margin-bottom:14px">
+<h4 style="font-size:16px;color:#0D2E63;margin:0 0 10px">Current Market Rate Screen</h4>
+<table style="width:100%;border-collapse:collapse;font-size:11px">
+<tr style="background:#3A4B5B;color:#fff"><th style="padding:9px;text-align:left">Product / Need</th><th style="padding:9px;text-align:left">Indicative Public Range</th><th style="padding:9px;text-align:left">Jackie Read</th></tr>
+<tr><td style="padding:9px;border-bottom:1px solid #E5E3DE">Stabilized multifamily / apartment permanent debt</td><td style="padding:9px;border-bottom:1px solid #E5E3DE">Generally mid-5% to low-7% depending on leverage, agency/bank execution, term, and collateral</td><td style="padding:9px;border-bottom:1px solid #E5E3DE">Best fit when financials, insurance, violations, arrears, and reserves are clean enough for bank review.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid #E5E3DE">Portfolio bank / co-op / condo association refinance</td><td style="padding:9px;border-bottom:1px solid #E5E3DE">Quoted by bank RFP; rate often depends on deposits, debt service, collateral, reserves, governance, and building condition</td><td style="padding:9px;border-bottom:1px solid #E5E3DE">Camelot should run a lender RFP instead of relying on one relationship or a renewal quote.</td></tr>
+<tr><td style="padding:9px;border-bottom:1px solid #E5E3DE">Bridge / transitional / high-urgency capital</td><td style="padding:9px;border-bottom:1px solid #E5E3DE">Often high single digits to low teens, with fees and shorter duration</td><td style="padding:9px;border-bottom:1px solid #E5E3DE">Useful only when timing or distress requires speed; exit strategy must be underwritten up front.</td></tr>
+<tr><td style="padding:9px">Capital improvement line / reserve cushion</td><td style="padding:9px">Bank-specific; may be term loan, line of credit, or staged capital project facility</td><td style="padding:9px">Useful for LL/FISP, roof, facade, elevator, mechanical, insurance, or emergency reserve planning.</td></tr>
+</table>
+</div>
+<div style="background:#F8F6EF;border:1px solid #D8C894;padding:12px 14px;font-size:10px;color:#555;line-height:1.6">
+<strong style="color:#A89035">Rate-source note:</strong> Public rate screens are directional only and must be replaced with live lender quotes before board action. Current market context should be checked against MBA commercial/multifamily finance updates, agency/bank apartment-loan rate sheets, bank treasury spreads, and actual lender RFP responses. Underwriting can move materially based on DSCR, LTV, rate-lock timing, violations, litigation, insurance, reserves, arrears, sponsor/board strength, collateral condition, and closing timeline.
+</div>
+</div>
+` : ''}
 
 <div class="deck-slide">
 <div class="brand-logo"><img src="./images/camelot-logo.png" alt="Camelot Realty Group" onerror="this.style.display='none'"></div>
