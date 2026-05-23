@@ -7501,7 +7501,7 @@ function generateProposal() {
   '</div>' +
 
   '<div class="hr"></div>' +
-  '<p style="font-size:9px;color:#888;text-align:center">Please refer to our property management agreement for a detailed description of all terms, conditions, and rates.<br>Camelot Property Management Services Corp. &nbsp;\u00B7&nbsp; 57 West 57th Street, Suite 410, New York, NY 10019 &nbsp;\u00B7&nbsp; (212) 206-9939 &nbsp;\u00B7&nbsp; www.camelot.nyc &nbsp;\u00B7&nbsp; Licensed Broker ID #10491200104</p>' +
+  '<p style="font-size:9px;color:#888;text-align:center;line-height:1.55">Please refer to our property management agreement for a detailed description of all terms, conditions, and rates.<br>Camelot Property Management Services Corp. &nbsp;&middot;&nbsp; 57 West 57th Street, Suite 410, New York, NY 10019<br>Main: (212) 206-9939 &nbsp;&middot;&nbsp; www.camelot.nyc &nbsp;&middot;&nbsp; Licensed Broker ID #10491200104</p>' +
 
   '</body></html>';
 

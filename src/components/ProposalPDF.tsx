@@ -312,8 +312,8 @@ const s = StyleSheet.create({
     bottom: 25,
     left: 50,
     right: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'center',
     borderTopWidth: 0.5,
     borderTopColor: '#ddd',
     paddingTop: 6,
@@ -321,6 +321,15 @@ const s = StyleSheet.create({
   footerText: {
     fontSize: 7,
     color: MEDIUM_GRAY,
+    textAlign: 'center',
+    lineHeight: 1.35,
+  },
+  footerContact: {
+    fontSize: 7,
+    color: MEDIUM_GRAY,
+    textAlign: 'center',
+    lineHeight: 1.35,
+    marginTop: 1,
   },
 
   // Two-column
@@ -454,8 +463,8 @@ function PageFooter({ data, pageNum }: { data: ProposalData; pageNum: number }) 
   return (
     <View style={s.footer} fixed>
       <Text style={s.footerText}>Confidential — Prepared for {data.buildingAddress}</Text>
-      <Text style={s.footerText}>{data.company.name}</Text>
-      <Text style={s.footerText}>Page {pageNum}</Text>
+      <Text style={s.footerText}>{data.company.name} · Page {pageNum}</Text>
+      <Text style={s.footerContact}>Main: (212) 206-9939  ·  www.camelot.nyc  ·  Licensed Broker ID #10491200104</Text>
     </View>
   );
 }
