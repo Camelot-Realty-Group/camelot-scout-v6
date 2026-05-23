@@ -7140,12 +7140,14 @@ function generateProposal() {
   var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Services \u2014 ' + buildingNameClean + '</title>' +
   '<style>' +
   '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }' +
-  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.65; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1.16in .72in .72in; }' +
+  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.58; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1.08in .72in .68in; }' +
   'h1 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 800; color: #111; text-align: center; margin: 20px 0 4px 0; letter-spacing: 1.2px; }' +
   'h2 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 800; color: #A89035; margin: 18px 0 7px 0; padding-bottom: 4px; border-bottom: 1.5px solid #A89035; text-transform: uppercase; letter-spacing: 0.7px; }' +
   'h3 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 800; color: #111; margin: 13px 0 4px 0; }' +
   '.cover-title { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; color: #A89035; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }' +
   'p { margin-bottom: 8px; text-align: justify; }' +
+  '.cover-letter-page { min-height: calc(11in - 1.76in); display:flex; flex-direction:column; justify-content:flex-start; }' +
+  '.cover-letter-page p { font-size:11.2px; line-height:1.68; }' +
   '.section-intro { font-size: 11.2px; color:#3A4B5B; line-height:1.65; margin: 2px 0 9px; text-align:left; }' +
   'ul { margin: 6px 0 10px 18px; }' +
   'ul li { margin-bottom: 4px; }' +
@@ -7168,15 +7170,18 @@ function generateProposal() {
   '.type-sign { border:1px solid #D5D0C6; background:#fff; padding:8px; min-height:34px; margin: 8px 0 2px; color:#999; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:10px; }' +
   '.phase { background: #F5F0E5; border-left: 3px solid #3A4B5B; padding: 10px 14px; margin: 8px 0; }' +
   '.phase-title { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700; color: #3A4B5B; font-size: 11px; margin-bottom: 4px; }' +
-  '.page-break { page-break-before: always; }' +
+  '.page-break { break-before: page; page-break-before: always; height:0; }' +
+  'h2, h3, .fee-box, .phase, .fact-grid, .sig-row { break-inside: avoid; page-break-inside: avoid; }' +
+  'table, tr, td, th { break-inside: avoid; page-break-inside: avoid; }' +
   '.signature-page { min-height: 8.2in; display:flex; flex-direction:column; justify-content:center; }' +
-  '@media print { @page { size: letter; margin: 1in .55in .5in; } body { padding: .2in 0 .28in; max-width: none; font-size: 11px; } .proposal-header,.proposal-footer{position:fixed} }' +
+  '@media print { @page { size: letter; margin: .72in .62in .58in; } body { padding: 1.05in 0 .55in; max-width: none; font-size: 11px; } .proposal-header,.proposal-footer{position:fixed} .proposal-header{height:.78in;padding:.08in 0 .08in}.proposal-footer{height:.34in;padding:.06in 0}.page-break{break-before:page;page-break-before:always} }' +
   '</style></head><body>' +
   '<div class="proposal-header"><div class="brand-box"><img src="./images/camelot-gold-logo.png" alt="Camelot Realty Group" onerror="this.style.display=&quot;none&quot;"></div><div class="hdr-contact"><strong>Camelot Property Management Services Corp.</strong><br>57 West 57th Street, Suite 410, New York, NY 10019<br>Office: (212) 206-9939 x701 &middot; info@camelot.nyc<br>www.camelot.nyc</div></div>' +
   '<div class="proposal-footer"><span>Camelot Property Management Services Corp. &middot; ' + addressClean + '</span><span>Page <span class="page-num"></span></span></div>' +
 
   /* ══════════════════════════════════════════════════════════════ */
   /* COVER */
+  '<div class="cover-letter-page">' +
   '<h1>' + buildingNameClean + '</h1>' +
   '<div style="text-align:center;font-size:11px;color:#3A4B5B;font-weight:700;letter-spacing:0.5px;margin-bottom:10px">PROPOSAL OF PROPERTY MANAGEMENT SERVICES</div>' +
   '<div style="text-align:center;font-size:10.5px;color:#555;line-height:1.65;margin-bottom:18px">Prepared for the ' + boardLabel + '<br><strong>' + buildingNameClean + '</strong><br>' + addressClean + '</div>' +
@@ -7187,14 +7192,6 @@ function generateProposal() {
   '<strong>To:</strong> ' + boardLabel + '<br>' +
   buildingNameClean + '<br>' +
   (contactName ? 'c/o ' + contactName + (boardNames.length > 0 && boardNames[0].indexOf(',') > 0 ? ', ' + boardNames[0].split(',').slice(1).join(',').trim() : '') : 'c/o ' + owner) + '</p>' +
-  '<div class="fact-grid">' +
-  '<div><strong>Property:</strong> ' + addressClean + '</div>' +
-  '<div><strong>BBL / Block-Lot:</strong> ' + (d.bbl || 'To be confirmed') + ' &middot; ' + blockLotLabel + '</div>' +
-  '<div><strong>Asset Type:</strong> ' + agreementType + ' / ' + titleCase(d.propertyType) + '</div>' +
-  '<div><strong>Units:</strong> ' + d.units + '</div>' +
-  '<div><strong>Square Footage:</strong> ' + squareFeetLabel + '</div>' +
-  '<div><strong>Year Built:</strong> ' + (d.yearBuilt || 'To be confirmed') + '</div>' +
-  '</div>' +
 
   '<p><strong>Re: Management Proposal &amp; Scope of Services</strong></p>' +
 
@@ -7208,6 +7205,23 @@ function generateProposal() {
 
   /* ══════════════════════════════════════════════════════════════ */
   /* OUR COMMITMENT */
+  '</div>' +
+  '<div class="page-break"></div>' +
+
+  /* PROPERTY SUMMARY */
+  '<h2>Property Summary</h2>' +
+  '<p class="section-intro">The property summary below anchors the proposal to the subject building and keeps factual assumptions separate from the cover letter. Any public-record conflicts should be reconciled during transition before final operating budgets or service assumptions are locked.</p>' +
+  '<div class="fact-grid">' +
+  '<div><strong>Property:</strong> ' + addressClean + '</div>' +
+  '<div><strong>BBL / Block-Lot:</strong> ' + (d.bbl || 'To be confirmed') + ' &middot; ' + blockLotLabel + '</div>' +
+  '<div><strong>Asset Type:</strong> ' + agreementType + ' / ' + titleCase(d.propertyType) + '</div>' +
+  '<div><strong>Units:</strong> ' + d.units + '</div>' +
+  '<div><strong>Square Footage:</strong> ' + squareFeetLabel + '</div>' +
+  '<div><strong>Year Built:</strong> ' + (d.yearBuilt || 'To be confirmed') + '</div>' +
+  '</div>' +
+
+  '<div class="hr"></div>' +
+
   '<h2>Our Commitment</h2>' +
   '<p class="section-intro">This section frames the management philosophy behind the proposal: senior accountability, practical communication, financial discipline, and a service model that fits the actual building rather than a generic package.</p>' +
   '<p>Camelot\u2019s mission is to provide a boutique, hands-on management approach tailored to the needs of your ' + (isCoop ? 'cooperative' : isCondo ? 'condominium' : 'property') + '. Our team brings a \u201Cwhite-glove\u201D service model \u2014 designed to strengthen on-site operations, enhance financial clarity, and create long-term value for all ' + ownerLabel + '.</p>' +
