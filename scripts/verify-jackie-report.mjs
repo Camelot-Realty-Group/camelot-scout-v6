@@ -26,6 +26,9 @@ const nyResearchSourcesFile = resolve(root, 'src/lib/ny-research-sources.ts');
 const aiClientFile = resolve(root, 'src/lib/ai-client.ts');
 const agreementsFile = resolve(root, 'src/pages/Agreements.tsx');
 const excaliburFile = resolve(root, 'src/lib/excalibur.ts');
+const proposalsPageFile = resolve(root, 'src/pages/Proposals.tsx');
+const proposalGeneratorFile = resolve(root, 'src/lib/proposal-generator.ts');
+const proposalPdfFile = resolve(root, 'src/components/ProposalPDF.tsx');
 const jackieReportQaSkillFile = resolve(root, '.codex/skills/jackie-report-qa/SKILL.md');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
@@ -46,12 +49,15 @@ const nyResearchSourcesSource = readFileSync(nyResearchSourcesFile, 'utf8');
 const aiClientSource = readFileSync(aiClientFile, 'utf8');
 const agreementsSource = readFileSync(agreementsFile, 'utf8');
 const excaliburSource = readFileSync(excaliburFile, 'utf8');
+const proposalsPageSource = readFileSync(proposalsPageFile, 'utf8');
+const proposalGeneratorSource = readFileSync(proposalGeneratorFile, 'utf8');
+const proposalPdfSource = readFileSync(proposalPdfFile, 'utf8');
 const jackieReportQaSkillSource = readFileSync(jackieReportQaSkillFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${jackieReportQaSkillSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${jackieReportQaSkillSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -97,6 +103,13 @@ const requiredTokens = [
   ['Lease renewal ancillary fee', '$350 per lease'],
   ['Closing ancillary fee', "camelotRate: '$1,500'"],
   ['Alteration agreement ancillary fee', 'Review of Alteration Agreements'],
+  ['Generated Proposal Library UI', 'Generated Proposal Library'],
+  ['Local generated proposal archive key', 'camelot_generated_proposal_library_v1'],
+  ['Association ancillary fees in proposal generator', 'ASSOCIATION_ANCILLARY_FEES'],
+  ['Individual ancillary fees in proposal generator', 'INDIVIDUAL_ANCILLARY_FEES'],
+  ['Proposal PDF Schedule A page', 'Schedule A / Ancillary Fees'],
+  ['Proposal email opens draft', 'openEmailDraft'],
+  ['Proposal number archive record', 'proposal_number'],
   ['Corinthian official website', 'https://thecorinthiannyc.com/'],
   ['Corinthian official image', 'The-Corinthian-building-NYC-Condos.jpg'],
   ['345 West 58 display-name guard', '345 West 58th Street, New York, NY 10019'],

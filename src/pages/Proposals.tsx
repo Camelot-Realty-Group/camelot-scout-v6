@@ -15,6 +15,7 @@ import {
   type ProposalOptions,
 } from '@/lib/proposal-generator';
 import ProposalPDF from '@/components/ProposalPDF';
+import { openEmailDraft } from '@/lib/pdf-generator';
 import { cn, formatDate, formatCurrency } from '@/lib/utils';
 import { pdf } from '@react-pdf/renderer';
 import type { Building } from '@/types';
@@ -38,6 +39,9 @@ import {
   Trash2,
   RefreshCw,
   Settings2,
+  Printer,
+  FolderOpen,
+  Archive,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -49,6 +53,7 @@ interface SavedProposal {
   id: string;
   building_id: string;
   building_address: string;
+  proposal_number?: string;
   contact_name?: string;
   contact_email?: string;
   pricing_per_unit: number;
@@ -59,8 +64,87 @@ interface SavedProposal {
   sent_at?: string;
   viewed_at?: string;
   created_by?: string;
+  generated_by?: string;
+  sent_to?: string;
+  proposal_data?: ProposalData;
+  attachments?: ProposalData['attachments'];
   created_at: string;
   updated_at: string;
+}
+
+const PROPOSAL_LIBRARY_KEY = 'camelot_generated_proposal_library_v1';
+
+function safeProposalFilename(data: ProposalData): string {
+  const address = data.buildingAddress.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-');
+  return `Camelot-Proposal-${address}-${data.proposalNumber}.pdf`;
+}
+
+function loadLocalProposalLibrary(): SavedProposal[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(PROPOSAL_LIBRARY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    console.warn('Unable to load generated proposal library.', err);
+    return [];
+  }
+}
+
+function writeLocalProposalLibrary(records: SavedProposal[]) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(PROPOSAL_LIBRARY_KEY, JSON.stringify(records.slice(0, 100)));
+}
+
+function saveLocalProposalRecord(record: SavedProposal): SavedProposal[] {
+  const existing = loadLocalProposalLibrary().filter((p) => p.id !== record.id);
+  const next = [record, ...existing].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+  writeLocalProposalLibrary(next);
+  return next;
+}
+
+function updateLocalProposalRecord(id: string, patch: Partial<SavedProposal>): SavedProposal[] {
+  const next = loadLocalProposalLibrary().map((record) =>
+    record.id === id ? { ...record, ...patch, updated_at: new Date().toISOString() } : record
+  );
+  writeLocalProposalLibrary(next);
+  return next;
+}
+
+function deleteLocalProposalRecord(id: string): SavedProposal[] {
+  const next = loadLocalProposalLibrary().filter((record) => record.id !== id);
+  writeLocalProposalLibrary(next);
+  return next;
+}
+
+function makeArchiveRecord(
+  data: ProposalData,
+  building: Building,
+  sections: ProposalSection[]
+): SavedProposal {
+  return {
+    id: `local-${data.proposalNumber}`,
+    building_id: building.id,
+    building_address: data.buildingAddress,
+    proposal_number: data.proposalNumber,
+    contact_name: data.contactName,
+    contact_email: data.contactEmail,
+    pricing_per_unit: data.pricing.totalPerUnit,
+    total_monthly: data.pricing.totalMonthly,
+    total_annual: data.pricing.totalAnnual,
+    sections: Object.fromEntries(sections.map((s) => [s.id, s.enabled])),
+    status: 'draft',
+    created_by: data.generatedBy,
+    generated_by: data.generatedBy,
+    sent_to: data.sentTo,
+    proposal_data: data,
+    attachments: data.attachments,
+    created_at: data.generatedAt,
+    updated_at: data.generatedAt,
+  };
 }
 
 // ============================================================
@@ -143,8 +227,24 @@ export default function Proposals() {
     return { perUnit: p.totalPerUnit, monthly: p.totalMonthly, annual: p.totalAnnual };
   }, [selectedBuilding, rentStabilized, ll97Services, customPricing]);
 
-  // Load saved proposals from Supabase
+  const groupedProposals = useMemo(() => {
+    const groups = new Map<string, SavedProposal[]>();
+    savedProposals.forEach((proposal) => {
+      const key = proposal.building_address || 'Unassigned Address';
+      groups.set(key, [...(groups.get(key) || []), proposal]);
+    });
+    return Array.from(groups.entries()).map(([address, proposals]) => ({
+      address,
+      proposals: proposals.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ),
+    }));
+  }, [savedProposals]);
+
+  // Load saved proposals from local archive first, then optional Supabase sync
   const loadSavedProposals = useCallback(async () => {
+    const localRecords = loadLocalProposalLibrary();
+    setSavedProposals(localRecords);
     if (!isSupabaseConfigured()) return;
     setLoadingProposals(true);
     try {
@@ -154,10 +254,16 @@ export default function Proposals() {
         .order('created_at', { ascending: false })
         .limit(50);
       if (error) throw error;
-      setSavedProposals(data || []);
+      const remoteRecords = data || [];
+      const localIds = new Set(localRecords.map((p) => p.id));
+      setSavedProposals(
+        [...localRecords, ...remoteRecords.filter((p) => !localIds.has(p.id))].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+      );
     } catch (err: any) {
       console.warn('Supabase proposal table unavailable; proposal library will stay in local/demo mode.', err?.message || err);
-      setSavedProposals([]);
+      setSavedProposals(localRecords);
     } finally {
       setLoadingProposals(false);
     }
@@ -183,10 +289,19 @@ export default function Proposals() {
         ll97Services,
         sections,
         customPricingPerUnit: customPricing ? parseFloat(customPricing) : undefined,
+        generatedBy: 'Camelot OS Proposal Builder',
       };
 
       const data = generateProposalData(selectedBuilding, options);
       setProposalData(data);
+      const archiveRecord = makeArchiveRecord(data, selectedBuilding, sections);
+      const localRows = saveLocalProposalRecord(archiveRecord);
+      setSavedProposals((prev) => {
+        const remoteOnly = prev.filter((p) => p.id !== archiveRecord.id && !p.id.startsWith('local-'));
+        return [...localRows, ...remoteOnly].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      });
 
       // Save to Supabase
       if (isSupabaseConfigured()) {
@@ -204,7 +319,7 @@ export default function Proposals() {
         loadSavedProposals();
       }
 
-      toast.success('Proposal generated!');
+      toast.success('Proposal generated and archived in Generated Proposal Library');
     } catch (err: any) {
       console.error('Failed to generate proposal:', err);
       toast.error('Failed to generate proposal');
@@ -229,44 +344,104 @@ export default function Proposals() {
     }
   }, [proposalData]);
 
+  const downloadProposalPdf = useCallback(async (data: ProposalData) => {
+    const blob = await pdf(<ProposalPDF data={data} />).toBlob();
+    const filename = safeProposalFilename(data);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return filename;
+  }, []);
+
+  const openProposalPdf = useCallback(async (data: ProposalData) => {
+    const blob = await pdf(<ProposalPDF data={data} />).toBlob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }, []);
+
   // Download PDF
-  const handleDownload = useCallback(async () => {
-    if (!proposalData) return;
+  const handleDownload = useCallback(async (dataOverride?: ProposalData) => {
+    const data = dataOverride || proposalData;
+    if (!data) return;
     try {
-      const blob = await pdf(<ProposalPDF data={proposalData} />).toBlob();
-      const filename = `Camelot-Proposal-${proposalData.buildingAddress.replace(/[^a-zA-Z0-9]/g, '-')}-${proposalData.proposalNumber}.pdf`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      await downloadProposalPdf(data);
       toast.success('PDF downloaded!');
     } catch (err: any) {
       console.error('Download failed:', err);
       toast.error('Download failed');
     }
-  }, [proposalData]);
+  }, [proposalData, downloadProposalPdf]);
 
-  // Send (mailto)
-  const handleSend = useCallback(() => {
-    if (!proposalData) return;
-    const to = proposalData.contactEmail || '';
-    const subject = encodeURIComponent(
-      `Property Management Proposal — ${proposalData.buildingName || proposalData.buildingAddress}`
-    );
-    const body = encodeURIComponent(
-      `Dear ${proposalData.contactName || 'Board'},\n\nPlease find attached our property management proposal for ${proposalData.buildingName || proposalData.buildingAddress}.\n\nWe would love to schedule a meeting to discuss how Camelot can serve your building.\n\nBest regards,\nCamelot Property Management\n${CAMELOT_INFO.phone}\n${CAMELOT_INFO.website}`
-    );
-    window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_blank');
-    toast.success('Email client opened — attach the downloaded PDF');
-  }, [proposalData]);
+  const handlePrint = useCallback(async (dataOverride?: ProposalData) => {
+    const data = dataOverride || proposalData;
+    if (!data) return;
+    try {
+      await openProposalPdf(data);
+      toast.success('PDF opened for print / save');
+    } catch (err: any) {
+      console.error('Print preview failed:', err);
+      toast.error('Print preview failed');
+    }
+  }, [proposalData, openProposalPdf]);
+
+  // Send (download PDF, then open addressed email draft)
+  const handleSend = useCallback(async (dataOverride?: ProposalData) => {
+    const data = dataOverride || proposalData;
+    if (!data) return;
+    try {
+      const filename = await downloadProposalPdf(data);
+      const buildingLabel = data.buildingName || data.buildingAddress;
+      openEmailDraft({
+        to: data.contactEmail || '',
+        subject: `Camelot Property Management Proposal - ${buildingLabel}`,
+        body:
+          `Dear ${data.contactName || 'Board'},\n\n` +
+          `Thank you for considering Camelot for ${buildingLabel}. I am forwarding our property management proposal for your review, including the proposed management scope, Schedule A / ancillary fee structure, transition approach, and next steps.\n\n` +
+          `The proposal PDF has been downloaded as ${filename} so it can be attached to this email before sending.\n\n` +
+          `We would welcome a short board Zoom or on-site meet-and-greet to answer questions and refine the proposal around the building's financials, service needs, and transition timing.\n\n` +
+          `Best regards,\n` +
+          `Camelot Property Management\n` +
+          `${CAMELOT_INFO.phone}\n` +
+          `${CAMELOT_INFO.website}`,
+      });
+
+      const sentAt = new Date().toISOString();
+      if (data.proposalNumber) {
+        const localRows = updateLocalProposalRecord(`local-${data.proposalNumber}`, {
+          status: 'sent',
+          sent_at: sentAt,
+        });
+        setSavedProposals((prev) => {
+          const remoteOnly = prev.filter((p) => !p.id.startsWith('local-'));
+          return [...localRows, ...remoteOnly].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        });
+      }
+      toast.success('PDF downloaded and email draft opened');
+    } catch (err: any) {
+      console.error('Email draft failed:', err);
+      toast.error('Email draft failed');
+    }
+  }, [proposalData, downloadProposalPdf]);
 
   // Delete saved proposal
   const handleDeleteProposal = useCallback(
     async (id: string) => {
+      if (id.startsWith('local-')) {
+        const localRows = deleteLocalProposalRecord(id);
+        setSavedProposals((prev) => {
+          const remoteOnly = prev.filter((p) => !p.id.startsWith('local-') && p.id !== id);
+          return [...localRows, ...remoteOnly];
+        });
+        toast.success('Proposal deleted');
+        return;
+      }
       if (!isSupabaseConfigured()) return;
       try {
         await supabase.from('scout_proposals').delete().eq('id', id);
@@ -557,14 +732,21 @@ export default function Proposals() {
                       Preview
                     </button>
                     <button
-                      onClick={handleDownload}
+                      onClick={() => handleDownload()}
                       className="flex items-center gap-2 bg-camelot-navy-light border border-camelot-navy-lighter text-white px-4 py-2.5 rounded-lg hover:border-camelot-gold/40 transition-colors"
                     >
                       <Download size={16} />
                       Download PDF
                     </button>
                     <button
-                      onClick={handleSend}
+                      onClick={() => handlePrint()}
+                      className="flex items-center gap-2 bg-camelot-navy-light border border-camelot-navy-lighter text-white px-4 py-2.5 rounded-lg hover:border-camelot-gold/40 transition-colors"
+                    >
+                      <Printer size={16} />
+                      Print
+                    </button>
+                    <button
+                      onClick={() => handleSend()}
                       className="flex items-center gap-2 bg-camelot-navy-light border border-camelot-navy-lighter text-white px-4 py-2.5 rounded-lg hover:border-camelot-gold/40 transition-colors"
                     >
                       <Send size={16} />
@@ -615,11 +797,14 @@ export default function Proposals() {
           )}
         </div>
 
-        {/* Right Column — Saved Proposals */}
+        {/* Right Column - Generated Proposal Library */}
         <div className="w-80 flex-shrink-0">
           <div className="bg-camelot-navy rounded-lg border border-camelot-navy-lighter">
             <div className="flex items-center justify-between px-4 py-3 border-b border-camelot-navy-lighter">
-              <h2 className="text-sm font-medium text-white">Recent Proposals</h2>
+              <h2 className="text-sm font-medium text-white flex items-center gap-2">
+                <Archive size={14} className="text-camelot-gold" />
+                Generated Proposal Library
+              </h2>
               <button
                 onClick={loadSavedProposals}
                 className="text-gray-400 hover:text-camelot-gold transition-colors"
@@ -631,59 +816,103 @@ export default function Proposals() {
             <div className="max-h-[calc(100vh-220px)] overflow-y-auto">
               {loadingProposals ? (
                 <div className="flex items-center justify-center py-12 text-gray-400">
-                  <Loader2 size={18} className="animate-spin mr-2" /> Loading…
+                  <Loader2 size={18} className="animate-spin mr-2" /> Loading...
                 </div>
               ) : savedProposals.length === 0 ? (
                 <div className="text-center py-12 px-4">
                   <FileText size={32} className="mx-auto text-gray-600 mb-3" />
                   <p className="text-sm text-gray-500">No proposals yet</p>
                   <p className="text-xs text-gray-600 mt-1">
-                    {isSupabaseConfigured()
-                      ? 'Generated proposals will appear here'
-                      : 'Connect Supabase to save proposals'}
+                    Generated proposals are archived by address with timestamp, recipient, and proposal number.
                   </p>
                 </div>
               ) : (
-                savedProposals.map((p) => (
-                  <div
-                    key={p.id}
-                    className="px-4 py-3 border-b border-camelot-navy-lighter hover:bg-camelot-navy-light transition-colors group"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-white font-medium truncate">
-                          {p.building_address}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span
-                            className={cn(
-                              'inline-block px-1.5 py-0.5 rounded text-xs font-medium',
-                              p.status === 'draft'
-                                ? 'bg-gray-500/20 text-gray-400'
-                                : p.status === 'sent'
-                                  ? 'bg-blue-500/20 text-blue-400'
-                                  : 'bg-green-500/20 text-green-400'
-                            )}
-                          >
-                            {p.status}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ${p.total_monthly?.toLocaleString()}/mo
-                          </span>
-                        </div>
-                        {p.contact_name && (
-                          <p className="text-xs text-gray-500 mt-1">To: {p.contact_name}</p>
-                        )}
-                        <p className="text-xs text-gray-600 mt-0.5">{formatDate(p.created_at)}</p>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteProposal(p.id)}
-                        className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all ml-2"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                groupedProposals.map((group) => (
+                  <div key={group.address} className="border-b border-camelot-navy-lighter">
+                    <div className="px-4 py-3 bg-camelot-navy-light/60">
+                      <p className="text-sm text-white font-medium flex items-center gap-2">
+                        <FolderOpen size={14} className="text-camelot-gold" />
+                        <span className="truncate">{group.address}</span>
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {group.proposals.length} archived proposal{group.proposals.length !== 1 ? 's' : ''}
+                      </p>
                     </div>
+                    {group.proposals.map((p) => (
+                      <div
+                        key={p.id}
+                        className="px-4 py-3 border-t border-camelot-navy-lighter hover:bg-camelot-navy-light transition-colors group"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-white font-medium truncate">
+                              {p.proposal_number || p.id}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span
+                                className={cn(
+                                  'inline-block px-1.5 py-0.5 rounded text-xs font-medium',
+                                  p.status === 'draft'
+                                    ? 'bg-gray-500/20 text-gray-400'
+                                    : p.status === 'sent'
+                                      ? 'bg-blue-500/20 text-blue-400'
+                                      : 'bg-green-500/20 text-green-400'
+                                )}
+                              >
+                                {p.status}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {formatCurrency(p.total_monthly || 0)}/mo
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              To: {p.contact_name || p.contact_email || p.sent_to || 'To be confirmed'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              By: {p.generated_by || p.created_by || 'Camelot OS'}
+                            </p>
+                            <p className="text-xs text-gray-600 mt-0.5">
+                              {new Date(p.created_at).toLocaleString()}
+                            </p>
+                            {p.attachments?.length ? (
+                              <p className="text-[10px] text-gray-600 mt-1 line-clamp-2">
+                                Attachments: {p.attachments.map((a) => a.label).join(', ')}
+                              </p>
+                            ) : null}
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              <button
+                                onClick={() => p.proposal_data && handlePrint(p.proposal_data)}
+                                disabled={!p.proposal_data}
+                                className="text-[10px] px-2 py-1 rounded bg-camelot-navy border border-camelot-navy-lighter text-gray-300 hover:border-camelot-gold/50 disabled:opacity-40"
+                              >
+                                Open
+                              </button>
+                              <button
+                                onClick={() => p.proposal_data && handleDownload(p.proposal_data)}
+                                disabled={!p.proposal_data}
+                                className="text-[10px] px-2 py-1 rounded bg-camelot-navy border border-camelot-navy-lighter text-gray-300 hover:border-camelot-gold/50 disabled:opacity-40"
+                              >
+                                PDF
+                              </button>
+                              <button
+                                onClick={() => p.proposal_data && handleSend(p.proposal_data)}
+                                disabled={!p.proposal_data}
+                                className="text-[10px] px-2 py-1 rounded bg-camelot-gold text-camelot-navy font-semibold hover:bg-camelot-gold-light disabled:opacity-40"
+                              >
+                                Email
+                              </button>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteProposal(p.id)}
+                            className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))
               )}

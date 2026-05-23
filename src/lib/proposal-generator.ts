@@ -121,6 +121,13 @@ export interface ServiceItem {
   included: boolean;
 }
 
+export interface AncillaryFeeItem {
+  service: string;
+  fee: string;
+  notes: string;
+  billedTo: 'Association' | 'Individual';
+}
+
 export const STANDARD_SERVICES: ServiceItem[] = [
   { name: 'Property Management', description: 'Day-to-day building operations, staff oversight, vendor management', included: true },
   { name: 'Financial Management', description: 'Budgeting, accounts payable/receivable, monthly board reporting', included: true },
@@ -139,6 +146,144 @@ export const PREMIUM_SERVICES: ServiceItem[] = [
   { name: 'Legal Coordination', description: 'Attorney liaison for building-related legal matters', included: false },
 ];
 
+export const ASSOCIATION_ANCILLARY_FEES: AncillaryFeeItem[] = [
+  {
+    service: 'Client account establishment',
+    fee: '$250 per account',
+    notes: 'Bank/account setup, opening control file, and onboarding coordination.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'RPIE / RPIE exception filing',
+    fee: '$400 per filing',
+    notes: 'Preparation support and submission coordination when applicable.',
+    billedTo: 'Association',
+  },
+  {
+    service: '1098 / 1099 processing',
+    fee: '$25 per form',
+    notes: 'Year-end form preparation and administrative processing.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'Energy benchmarking / LL84-LL97 annual filing',
+    fee: '$250 per year',
+    notes: 'Annual data coordination and filing support; remediation work separately scoped.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'Violation research and filing',
+    fee: '$95 per violation',
+    notes: 'Administrative tracking, filing, and dismissal package coordination.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'Administrative hearings / agency appearances',
+    fee: '$150 per hour',
+    notes: 'DOB, HPD, ECB/OATH, or similar agency support when requested.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'Construction / capital project supervision',
+    fee: '10% of project cost',
+    notes: 'Bid coordination, contractor follow-up, invoice review, and progress reporting.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'Insurance administration',
+    fee: '$450 per year',
+    notes: 'Certificate tracking, policy coordination, claim file support, and renewal follow-up.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'Mortgage / lender coordination',
+    fee: '$150-$200 per hour',
+    notes: 'Bank, accountant, attorney, and board coordination for refinancing or lender requests.',
+    billedTo: 'Association',
+  },
+  {
+    service: 'After-hours or special board meetings',
+    fee: '$250 per meeting',
+    notes: 'Meetings outside the agreed management cadence or standard business hours.',
+    billedTo: 'Association',
+  },
+];
+
+export const INDIVIDUAL_ANCILLARY_FEES: AncillaryFeeItem[] = [
+  {
+    service: 'Lease application processing',
+    fee: '$200 per application',
+    notes: 'Applicant intake, package review, and administrative processing.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Move-in coordination',
+    fee: '$150 per move',
+    notes: 'Move scheduling, insurance review, building access, and elevator/common-area coordination.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Move-out coordination',
+    fee: '$150 per move',
+    notes: 'Move scheduling, insurance review, building access, and closeout coordination.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Lease renewal processing',
+    fee: '$350 per renewal',
+    notes: 'Renewal package administration and management review.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Sublease / assignment review',
+    fee: '$500 per application',
+    notes: 'Board package processing and administrative review support.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Condo resale / waiver package',
+    fee: '$500 per package',
+    notes: 'Application package preparation, coordination, and document handling.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Alteration application review',
+    fee: '$500 per application',
+    notes: 'Administrative review, insurance/license tracking, and agreement coordination.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Estoppel certificate',
+    fee: '$250 per certificate',
+    notes: 'Account status research and certificate preparation.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Co-op transfer / sale package',
+    fee: '$500 per package',
+    notes: 'Shareholder transfer package processing and board coordination.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Recognition agreement processing',
+    fee: '$300 per agreement',
+    notes: 'Lender recognition agreement intake, review routing, and execution coordination.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Stock certificate / proprietary lease processing',
+    fee: '$200 per item',
+    notes: 'Administrative preparation and delivery coordination where applicable.',
+    billedTo: 'Individual',
+  },
+  {
+    service: 'Year-end tax package',
+    fee: '$150 per package',
+    notes: 'Unit/shareholder tax-support package when requested outside standard reporting.',
+    billedTo: 'Individual',
+  },
+];
+
 // ============================================================
 // Proposal Data Structure
 // ============================================================
@@ -155,14 +300,25 @@ export const DEFAULT_SECTIONS: ProposalSection[] = [
   { id: 'management_assessment', title: 'Current Management Assessment', enabled: true },
   { id: 'services_overview', title: 'Camelot Services Overview', enabled: true },
   { id: 'pricing', title: 'Pricing Estimate', enabled: true },
+  { id: 'ancillary_fees', title: 'Schedule A / Ancillary Fees', enabled: true },
   { id: 'why_camelot', title: 'Why Camelot', enabled: true },
   { id: 'next_steps', title: 'Next Steps', enabled: true },
 ];
+
+export interface ProposalAttachmentRecord {
+  type: 'proposal_pdf' | 'jackie_report' | 'board_deck' | 'source_packet' | 'other';
+  label: string;
+  status: 'generated' | 'available' | 'pending' | 'attached';
+  generatedAt?: string;
+}
 
 export interface ProposalData {
   // Meta
   generatedAt: string;
   proposalNumber: string;
+  generatedBy: string;
+  sentTo?: string;
+  archiveFolder: string;
 
   // Building
   buildingAddress: string;
@@ -205,6 +361,9 @@ export interface ProposalData {
   // Services
   standardServices: ServiceItem[];
   premiumServices: ServiceItem[];
+  associationAncillaryFees: AncillaryFeeItem[];
+  individualAncillaryFees: AncillaryFeeItem[];
+  attachments: ProposalAttachmentRecord[];
 
   // Company
   company: typeof CAMELOT_INFO;
@@ -222,6 +381,8 @@ export interface ProposalOptions {
   ll97Services?: boolean;
   sections?: ProposalSection[];
   customPricingPerUnit?: number;
+  generatedBy?: string;
+  attachments?: ProposalAttachmentRecord[];
 }
 
 // ============================================================
@@ -284,10 +445,18 @@ export function generateProposalData(
       : building.contacts?.find((c) => c.email) ?? building.contacts?.[0];
 
   const sections = options?.sections ?? DEFAULT_SECTIONS;
+  const generatedAt = new Date().toISOString();
+  const proposalNumber = generateProposalNumber();
+  const contactName = options?.contactName ?? contact?.name;
+  const contactEmail = options?.contactEmail ?? contact?.email;
+  const archiveFolder = building.address.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   return {
-    generatedAt: new Date().toISOString(),
-    proposalNumber: generateProposalNumber(),
+    generatedAt,
+    proposalNumber,
+    generatedBy: options?.generatedBy || 'Camelot OS Proposal Builder',
+    sentTo: contactEmail || contactName || 'To be confirmed',
+    archiveFolder,
 
     buildingAddress: building.address,
     buildingName: building.name,
@@ -299,8 +468,8 @@ export function generateProposalData(
     stories: building.stories,
     buildingClass: building.building_class,
 
-    contactName: options?.contactName ?? contact?.name,
-    contactEmail: options?.contactEmail ?? contact?.email,
+    contactName,
+    contactEmail,
 
     violationsCount: building.violations_count ?? 0,
     openViolationsCount: building.open_violations_count ?? 0,
@@ -322,6 +491,14 @@ export function generateProposalData(
 
     standardServices: [...STANDARD_SERVICES],
     premiumServices,
+    associationAncillaryFees: [...ASSOCIATION_ANCILLARY_FEES],
+    individualAncillaryFees: [...INDIVIDUAL_ANCILLARY_FEES],
+    attachments:
+      options?.attachments ??
+      [
+        { type: 'proposal_pdf', label: 'Property management proposal PDF', status: 'generated', generatedAt },
+        { type: 'jackie_report', label: 'Jackie report / diligence support packet', status: 'pending' },
+      ],
 
     company: CAMELOT_INFO,
     advantages: COMPETITIVE_ADVANTAGES,
