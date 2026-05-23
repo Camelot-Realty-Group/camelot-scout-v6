@@ -6987,8 +6987,8 @@ ${buildPortfolioSection(d)}
 <div style="font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:13px;color:#A89035;font-weight:700;margin-top:10px">Jackie Kennedy</div>
 <div style="font-size:9px;color:rgba(255,255,255,0.38);letter-spacing:1px;text-transform:uppercase;margin-top:3px">Referencing the Broadway musical Camelot and President Kennedy's administration</div>
 <div style="font-family:'Cardo',Georgia,serif;font-size:31px;color:#D5B24A;line-height:1.18;font-weight:600;letter-spacing:0.2px;text-shadow:0 2px 12px rgba(0,0,0,0.22);margin-top:18px;text-align:center">New Yorkers for New Yorkers.<br>A management partner for a New Yorker&rsquo;s state of mind.</div>
-<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(168,144,53,0.25);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:11.5px;color:rgba(255,255,255,0.72);line-height:1.7;font-style:normal;text-align:center">
-Camelot's vision, core values, and mission resonate with that spirit: service that feels thoughtful, distinctive, and worthy of the communities we are trusted to protect. Camelot combines senior attention, practical technology, in-house accounting, and hands-on property management so clients have clearer answers, faster response, and a stronger operating partner.
+<div style="margin:16px auto 0;padding-top:14px;border-top:1px solid rgba(168,144,53,0.25);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:11.5px;color:rgba(255,255,255,0.72);line-height:1.7;font-style:normal;text-align:center;max-width:560px">
+Camelot's vision, core values, and mission resonate with that spirit: service that feels thoughtful, distinctive, and worthy of the communities we are trusted to protect. Camelot combines senior attention, practical technology, in-house accounting, and hands-on property management so clients have clearer answers, faster response, and a stronger&nbsp;operating&nbsp;partner.
 </div>
 </div>
 </div>
