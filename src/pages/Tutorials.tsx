@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
-  Search, LayoutGrid, GitBranch, Mail, MessageSquare, Upload, Download,
-  Settings, ChevronDown, ChevronRight, Clock, BookOpen, Sparkles,
-  MapPin, Filter, GripVertical, FileText, Zap, PlayCircle, Video,
+  Search, GitBranch, Mail, MessageSquare, Upload, Download,
+  Settings, ChevronDown, Clock, BookOpen, Sparkles,
+  MapPin, Filter, GripVertical, FileText, Zap, PlayCircle, Video, MonitorPlay,
 } from 'lucide-react';
 import { APP_NAME, V10_RELEASE_NOTE } from '@/lib/app-brand';
+import TutorialDemoPlayer from '@/components/TutorialDemoPlayer';
 
 interface Tutorial {
   id: string;
@@ -640,6 +641,7 @@ const TUTORIALS: Tutorial[] = [
 
 export default function Tutorials() {
   const [expandedTutorial, setExpandedTutorial] = useState<string | null>(null);
+  const [activeDemo, setActiveDemo] = useState<Tutorial | null>(null);
 
   const toggleTutorial = (id: string) => {
     setExpandedTutorial((prev) => {
@@ -658,6 +660,13 @@ export default function Tutorials() {
 
   return (
     <div className="min-h-screen">
+      {activeDemo && (
+        <TutorialDemoPlayer
+          tutorialId={activeDemo.id}
+          title={activeDemo.title}
+          onClose={() => setActiveDemo(null)}
+        />
+      )}
       {/* Header */}
       <div className="bg-white text-slate-950 px-8 py-10 border-b border-slate-200">
         <div className="max-w-4xl mx-auto">
@@ -667,26 +676,57 @@ export default function Tutorials() {
             </div>
             <div>
               <h1 className="text-3xl font-bold">{APP_NAME} Academy</h1>
-              <p className="text-slate-500">Video-ready tutorials for every bot, report, and workflow.</p>
+              <p className="text-slate-500">Interactive, video-ready tutorials for every bot, report, and workflow.</p>
             </div>
           </div>
           <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">{V10_RELEASE_NOTE}</p>
           <div className="flex items-center gap-4 mt-4 text-sm text-slate-500">
             <span className="flex items-center gap-1"><FileText size={14} /> {TUTORIALS.length} tutorials</span>
             <span className="flex items-center gap-1"><Clock size={14} /> ~20 minutes total</span>
-            <span className="flex items-center gap-1"><Video size={14} /> Video slots for every section</span>
+            <span className="flex items-center gap-1"><Video size={14} /> Guided demos for every section</span>
           </div>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-8 py-8">
+        <div className="mb-8 rounded-2xl border border-camelot-gold/30 bg-[#FFFEFB] p-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-camelot-gold/15 text-camelot-gold flex items-center justify-center flex-shrink-0">
+                <MonitorPlay size={24} />
+              </div>
+              <div>
+                <h2 className="font-heading text-xl text-slate-950">Automated Training Mode</h2>
+                <p className="text-sm text-slate-600 leading-relaxed mt-1">
+                  Each lesson now has a playable guided demo with cursor movement, highlighted interface areas, captions, pause/step controls, and a direct link into the live Camelot OS section. It is also ready to screen-record into a real tutorial movie.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveDemo(TUTORIALS[0])}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800"
+            >
+              <PlayCircle size={17} />
+              Play Getting Started
+            </button>
+          </div>
+        </div>
+
         {/* Tutorial Cards Grid */}
         <div className="grid grid-cols-2 gap-4 mb-10">
           {TUTORIALS.map((tutorial) => (
-            <button
+            <div
               key={tutorial.id}
+              role="button"
+              tabIndex={0}
               onClick={() => toggleTutorial(tutorial.id)}
-              className={`text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg group ${
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleTutorial(tutorial.id);
+                }
+              }}
+              className={`text-left p-5 rounded-xl border-2 transition-all duration-200 hover:shadow-lg group cursor-pointer ${
                 expandedTutorial === tutorial.id
                   ? 'border-camelot-gold bg-camelot-gold/5 shadow-md'
                   : 'border-gray-200 bg-white hover:border-camelot-gold/40'
@@ -706,13 +746,25 @@ export default function Tutorials() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 leading-relaxed">{tutorial.description}</p>
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#F8F6EF] px-3 py-1 text-[11px] font-semibold text-camelot-gold">
-                    <PlayCircle size={12} />
-                    Open tutorial
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F8F6EF] px-3 py-1 text-[11px] font-semibold text-camelot-gold">
+                      <ChevronDown size={12} />
+                      Written guide
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDemo(tutorial);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-3 py-1 text-[11px] font-semibold text-white hover:bg-slate-800"
+                    >
+                      <PlayCircle size={12} />
+                      Play guided demo
+                    </button>
                   </div>
                 </div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
 
@@ -754,8 +806,15 @@ export default function Tutorials() {
                   <div>
                     <div className="font-semibold text-slate-950">Tutorial walkthrough</div>
                     <p className="text-sm text-slate-600 leading-relaxed">
-                      This opens the written training now and is wired for a future uploaded video at <code className="bg-white px-1.5 py-0.5 rounded">public/tutorials/{tutorial.id}.mp4</code>.
+                      Use the guided demo to watch the workflow play out with a moving cursor and highlighted interface areas. The written notes stay here for quick reference.
                     </p>
+                    <button
+                      onClick={() => setActiveDemo(tutorial)}
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800"
+                    >
+                      <MonitorPlay size={14} />
+                      Play automated walkthrough
+                    </button>
                   </div>
                 </div>
                 {tutorial.content.map((section, si) => (
