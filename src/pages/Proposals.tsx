@@ -42,6 +42,7 @@ import {
   Printer,
   FolderOpen,
   Archive,
+  Phone,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -162,6 +163,7 @@ export default function Proposals() {
   // Options
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
   const [rentStabilized, setRentStabilized] = useState(false);
   const [ll97Services, setLl97Services] = useState(false);
   const [customPricing, setCustomPricing] = useState('');
@@ -200,9 +202,11 @@ export default function Proposals() {
       if (contact) {
         setContactName(contact.name || '');
         setContactEmail(contact.email || '');
+        setContactPhone(contact.phone || '');
       } else {
         setContactName('');
         setContactEmail('');
+        setContactPhone('');
       }
       // Infer options
       setRentStabilized(selectedBuilding.type === 'rental' && (selectedBuilding.units || 0) >= 6);
@@ -285,6 +289,7 @@ export default function Proposals() {
       const options: ProposalOptions = {
         contactName: contactName || undefined,
         contactEmail: contactEmail || undefined,
+        contactPhone: contactPhone || undefined,
         rentStabilized,
         ll97Services,
         sections,
@@ -326,7 +331,7 @@ export default function Proposals() {
     } finally {
       setIsGenerating(false);
     }
-  }, [selectedBuilding, contactName, contactEmail, rentStabilized, ll97Services, sections, customPricing, loadSavedProposals]);
+  }, [selectedBuilding, contactName, contactEmail, contactPhone, rentStabilized, ll97Services, sections, customPricing, loadSavedProposals]);
 
   // Preview PDF inline
   const handlePreview = useCallback(async () => {
@@ -571,7 +576,7 @@ export default function Proposals() {
           {selectedBuilding && (
             <div className="bg-camelot-navy rounded-lg border border-camelot-navy-lighter p-4 space-y-4">
               {/* Contact */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1 block">
                     Contact Name
@@ -598,6 +603,21 @@ export default function Proposals() {
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
                       placeholder="email@example.com"
+                      className="w-full bg-camelot-navy-light border border-camelot-navy-lighter rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-camelot-gold/50"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1 block">
+                    Contact Phone
+                  </label>
+                  <div className="relative">
+                    <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input
+                      type="tel"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="Optional phone"
                       className="w-full bg-camelot-navy-light border border-camelot-navy-lighter rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-camelot-gold/50"
                     />
                   </div>
@@ -647,7 +667,7 @@ export default function Proposals() {
               {pricingPreview && (
                 <div className="bg-camelot-navy-light rounded-lg border border-camelot-gold/20 p-3">
                   <p className="text-xs text-camelot-gold font-medium mb-2 uppercase tracking-wider">
-                    Pricing Preview
+                    Recommended Intelligence Package Preview
                   </p>
                   <div className="flex items-center gap-6">
                     <div>
@@ -727,28 +747,28 @@ export default function Proposals() {
                       ) : (
                         <Eye size={16} />
                       )}
-                      Preview
+                      Preview PDF
                     </button>
                     <button
                       onClick={() => handleDownload()}
                       className="flex items-center gap-2 bg-camelot-navy-light border border-camelot-navy-lighter text-white px-4 py-2.5 rounded-lg hover:border-camelot-gold/40 transition-colors"
                     >
                       <Download size={16} />
-                      Download PDF
+                      Save as PDF
                     </button>
                     <button
                       onClick={() => handlePrint()}
                       className="flex items-center gap-2 bg-camelot-navy-light border border-camelot-navy-lighter text-white px-4 py-2.5 rounded-lg hover:border-camelot-gold/40 transition-colors"
                     >
                       <Printer size={16} />
-                      Print
+                      Print / Save PDF
                     </button>
                     <button
                       onClick={() => handleSend()}
                       className="flex items-center gap-2 bg-camelot-navy-light border border-camelot-navy-lighter text-white px-4 py-2.5 rounded-lg hover:border-camelot-gold/40 transition-colors"
                     >
                       <Send size={16} />
-                      Send
+                      Email PDF Draft
                     </button>
                   </>
                 )}

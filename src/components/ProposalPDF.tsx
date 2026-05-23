@@ -8,6 +8,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
   Font,
 } from '@react-pdf/renderer';
@@ -25,6 +26,7 @@ const WHITE = '#FFFFFF';
 const LIGHT_GRAY = '#F5F5F5';
 const MEDIUM_GRAY = '#888888';
 const DARK_TEXT = '#1a1a2e';
+const CAMELOT_GOLD_LOGO = '/images/camelot-gold-logo.png';
 
 // ============================================================
 // Styles
@@ -36,76 +38,113 @@ const s = StyleSheet.create({
     fontFamily: 'Helvetica',
     fontSize: 10,
     color: DARK_TEXT,
-    paddingTop: 50,
+    paddingTop: 72,
     paddingBottom: 60,
     paddingHorizontal: 50,
+  },
+  pageHeader: {
+    position: 'absolute',
+    top: 18,
+    left: 50,
+    right: 50,
+    height: 38,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#ddd',
+    paddingBottom: 8,
+  },
+  headerLogo: {
+    width: 86,
+    height: 38,
+    objectFit: 'contain',
+  },
+  headerContact: {
+    fontSize: 7.5,
+    color: MEDIUM_GRAY,
+    textAlign: 'right',
+    lineHeight: 1.35,
   },
 
   // Cover page
   coverPage: {
     fontFamily: 'Helvetica',
-    backgroundColor: NAVY,
+    backgroundColor: WHITE,
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 0,
+    paddingTop: 54,
+    paddingHorizontal: 54,
+    paddingBottom: 50,
   },
-  coverLogoArea: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: GOLD,
-    marginBottom: 20,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+  coverTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 52,
   },
-  coverLogoText: {
-    fontSize: 36,
-    fontFamily: 'Helvetica-Bold',
-    color: NAVY,
-    textAlign: 'center',
+  coverLogo: {
+    width: 140,
+    height: 64,
+    objectFit: 'contain',
   },
-  coverCompany: {
-    fontSize: 14,
-    fontFamily: 'Helvetica',
-    color: GOLD_LIGHT,
-    letterSpacing: 3,
-    marginBottom: 40,
-    textTransform: 'uppercase',
+  coverContact: {
+    fontSize: 8.5,
+    color: DARK_TEXT,
+    textAlign: 'right',
+    lineHeight: 1.45,
   },
   coverTitle: {
-    fontSize: 32,
+    fontSize: 29,
     fontFamily: 'Helvetica-Bold',
-    color: WHITE,
-    textAlign: 'center',
-    marginBottom: 8,
+    color: NAVY,
+    marginBottom: 10,
   },
   coverSubtitle: {
     fontSize: 16,
+    fontFamily: 'Helvetica-Bold',
     color: GOLD,
-    textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   coverDivider: {
-    width: 80,
+    width: 120,
     height: 2,
     backgroundColor: GOLD,
-    marginVertical: 30,
+    marginVertical: 24,
   },
   coverAddress: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: 'Helvetica-Bold',
-    color: WHITE,
-    textAlign: 'center',
+    color: DARK_TEXT,
     marginBottom: 6,
   },
   coverMeta: {
-    fontSize: 11,
+    fontSize: 10,
     color: MEDIUM_GRAY,
-    textAlign: 'center',
     marginBottom: 4,
+  },
+  coverFacts: {
+    flexDirection: 'row',
+    marginTop: 28,
+    borderTopWidth: 1,
+    borderTopColor: GOLD,
+    borderBottomWidth: 1,
+    borderBottomColor: GOLD,
+    paddingVertical: 14,
+  },
+  coverFact: {
+    width: '25%',
+  },
+  coverFactValue: {
+    fontSize: 16,
+    fontFamily: 'Helvetica-Bold',
+    color: GOLD,
+  },
+  coverFactLabel: {
+    fontSize: 7.5,
+    color: MEDIUM_GRAY,
+    textTransform: 'uppercase',
+    marginTop: 3,
   },
   coverFooter: {
     position: 'absolute',
@@ -392,6 +431,21 @@ function DavidSignatureBlock() {
   );
 }
 
+function PageHeader({ data }: { data: ProposalData }) {
+  return (
+    <View style={s.pageHeader} fixed>
+      <Image src={CAMELOT_GOLD_LOGO} style={s.headerLogo} />
+      <Text style={s.headerContact}>
+        {data.company.address}
+        {'\n'}
+        {data.company.phone} | {data.company.website}
+        {'\n'}
+        Proposal #{data.proposalNumber}
+      </Text>
+    </View>
+  );
+}
+
 // ============================================================
 // Page Footer
 // ============================================================
@@ -411,38 +465,58 @@ function PageFooter({ data, pageNum }: { data: ProposalData; pageNum: number }) 
 // ============================================================
 
 function CoverPage({ data }: { data: ProposalData }) {
+  const buildingLabel = data.buildingName || data.buildingAddress;
   return (
     <Page size="LETTER" style={s.coverPage}>
-      <View style={s.coverLogoArea}>
-        <Text style={s.coverLogoText}>C</Text>
+      <View style={s.coverTop}>
+        <Image src={CAMELOT_GOLD_LOGO} style={s.coverLogo} />
+        <Text style={s.coverContact}>
+          {data.company.address}
+          {'\n'}
+          {data.company.phone}
+          {'\n'}
+          {data.company.website}
+        </Text>
       </View>
-      <Text style={s.coverCompany}>Camelot</Text>
-      <Text style={s.coverTitle}>Property Management</Text>
-      <Text style={s.coverTitle}>Proposal</Text>
+      <Text style={s.coverTitle}>Proposal of Property Management Services</Text>
+      <Text style={s.coverSubtitle}>{buildingLabel}</Text>
+      <Text style={s.coverAddress}>{data.buildingAddress}</Text>
       <View style={s.coverDivider} />
-      <Text style={s.coverAddress}>
-        {data.buildingName ? `${data.buildingName}` : data.buildingAddress}
-      </Text>
-      {data.buildingName && <Text style={s.coverMeta}>{data.buildingAddress}</Text>}
+      <Text style={s.coverMeta}>Prepared for {data.preparedFor}</Text>
+      <Text style={s.coverMeta}>{fmtDate(data.generatedAt)}</Text>
+      <Text style={s.coverMeta}>Proposal #{data.proposalNumber}</Text>
+      <View style={s.coverFacts}>
+        <View style={s.coverFact}>
+          <Text style={s.coverFactValue}>{data.units || 'TBD'}</Text>
+          <Text style={s.coverFactLabel}>Units</Text>
+        </View>
+        <View style={s.coverFact}>
+          <Text style={s.coverFactValue}>{data.stories || 'TBD'}</Text>
+          <Text style={s.coverFactLabel}>Stories</Text>
+        </View>
+        <View style={s.coverFact}>
+          <Text style={s.coverFactValue}>{data.yearBuilt || 'TBD'}</Text>
+          <Text style={s.coverFactLabel}>Year Built</Text>
+        </View>
+        <View style={s.coverFact}>
+          <Text style={s.coverFactValue}>{data.buildingType.replace('-', ' ')}</Text>
+          <Text style={s.coverFactLabel}>Property Type</Text>
+        </View>
+      </View>
       <Text style={s.coverMeta}>
-        {data.units} Units • {data.buildingType.replace('-', ' ')}
-        {data.borough ? ` • ${data.borough}` : ''}
-      </Text>
-      {data.contactName && (
-        <Text style={{ ...s.coverMeta, marginTop: 12 }}>Prepared for: {data.contactName}</Text>
-      )}
-      <Text style={s.coverMeta}>
-        {fmtDate(data.generatedAt)} • Proposal #{data.proposalNumber}
+        {data.borough ? `${data.borough}` : 'Borough to be confirmed'}
+        {data.neighborhood ? ` | ${data.neighborhood}` : ''}
       </Text>
       <Text style={s.coverMeta}>
-        Generated by: {data.generatedBy} {data.sentTo ? `- Sent to: ${data.sentTo}` : ''}
+        Generated by {data.generatedBy}
+        {data.sentTo ? ` | Recipient: ${data.sentTo}` : ''}
       </Text>
       <View style={s.coverFooter}>
         <Text style={s.coverFooterText}>
-          {data.company.name} • {data.company.address}
+          {data.company.name} | {data.company.address}
         </Text>
         <Text style={s.coverFooterText}>
-          {data.company.phone} • {data.company.website}
+          {data.company.phone} | {data.company.website}
         </Text>
       </View>
     </Page>
@@ -452,6 +526,40 @@ function CoverPage({ data }: { data: ProposalData }) {
 // ============================================================
 // Executive Summary Page
 // ============================================================
+
+function CoverLetterPage({ data }: { data: ProposalData }) {
+  const buildingLabel = data.buildingName || data.buildingAddress;
+  return (
+    <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
+      <View style={s.sectionHeader}>
+        <Text style={s.sectionTitle}>Executive Cover Letter</Text>
+        <Text style={s.sectionSubtitle}>Prepared for {data.preparedFor}</Text>
+      </View>
+
+      <Text style={s.body}>Dear {data.preparedFor},</Text>
+      <Text style={s.body}>
+        Thank you for considering Camelot Property Management for {buildingLabel}. This
+        proposal is intended to outline our management scope, recommended Intelligence
+        package, transition process, fee structure, and Schedule A / ancillary fee menu.
+      </Text>
+      <Text style={s.body}>
+        Our role is to give the property a practical operating partner: clean accounting,
+        responsive maintenance coordination, disciplined vendor oversight, compliance
+        tracking, board reporting, and a transition process that reduces confusion rather
+        than creating more of it.
+      </Text>
+      <Text style={s.body}>
+        We would welcome the opportunity to review the latest financials, budget,
+        insurance summary, vendor list, and current management materials so the final
+        management agreement can be priced around actual service needs and not guesswork.
+      </Text>
+
+      <DavidSignatureBlock />
+      <PageFooter data={data} pageNum={2} />
+    </Page>
+  );
+}
 
 function ExecutiveSummaryPage({ data }: { data: ProposalData }) {
   const buildingLabel = data.buildingName || data.buildingAddress;
@@ -478,6 +586,7 @@ function ExecutiveSummaryPage({ data }: { data: ProposalData }) {
 
   return (
     <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
       <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>Executive Summary</Text>
         <Text style={s.sectionSubtitle}>Why {buildingLabel} Deserves Camelot</Text>
@@ -516,7 +625,7 @@ function ExecutiveSummaryPage({ data }: { data: ProposalData }) {
         </>
       )}
 
-      <PageFooter data={data} pageNum={2} />
+      <PageFooter data={data} pageNum={3} />
     </Page>
   );
 }
@@ -528,6 +637,7 @@ function ExecutiveSummaryPage({ data }: { data: ProposalData }) {
 function BuildingAnalysisPage({ data }: { data: ProposalData }) {
   return (
     <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
       <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>Building Analysis</Text>
         <Text style={s.sectionSubtitle}>
@@ -672,7 +782,7 @@ function BuildingAnalysisPage({ data }: { data: ProposalData }) {
         </>
       )}
 
-      <PageFooter data={data} pageNum={3} />
+      <PageFooter data={data} pageNum={4} />
     </Page>
   );
 }
@@ -686,6 +796,7 @@ function ServicesPricingPage({ data }: { data: ProposalData }) {
 
   return (
     <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
       <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>Services & Pricing</Text>
         <Text style={s.sectionSubtitle}>Comprehensive Management for {data.units} Units</Text>
@@ -727,7 +838,10 @@ function ServicesPricingPage({ data }: { data: ProposalData }) {
 
       {/* Pricing Breakdown */}
       <View style={{ ...s.highlight, marginTop: 18 }}>
-        <Text style={s.highlightTitle}>Pricing Summary</Text>
+        <Text style={s.highlightTitle}>Recommended Management Package</Text>
+        <Text style={{ ...s.body, fontFamily: 'Helvetica-Bold', color: NAVY }}>
+          {pricing.packageName}
+        </Text>
         <View style={s.pricingRow}>
           <Text style={s.pricingLabel}>
             Base Management ({pricing.baseRateLabel})
@@ -756,22 +870,28 @@ function ServicesPricingPage({ data }: { data: ProposalData }) {
         </View>
         <View style={s.pricingRow}>
           <Text style={s.pricingLabel}>Monthly Total</Text>
-          <Text style={s.pricingValue}>{fmtCurrency(pricing.totalMonthly)}</Text>
+          <Text style={{ ...s.pricingValue, textDecoration: 'underline' }}>
+            {fmtCurrency(pricing.totalMonthly)}
+          </Text>
         </View>
         <View style={s.pricingTotal}>
           <Text style={s.pricingTotalLabel}>Annual Total</Text>
-          <Text style={s.pricingTotalValue}>{fmtCurrency(pricing.totalAnnual)}</Text>
+          <Text style={{ ...s.pricingTotalValue, textDecoration: 'underline' }}>
+            {fmtCurrency(pricing.totalAnnual)}
+          </Text>
         </View>
       </View>
 
       <Text style={s.bodySmall}>
-        Pricing is based on building size, service burden, and complexity. Schedule A / ancillary
-        fees are outlined on the next page and will be tailored by property type in the final
-        management agreement. Final rates may be adjusted after document review and on-site
-        assessment. All prices exclude applicable taxes.
+        The Intelligence package is the recommended starting point because today's market
+        requires automation, clean reporting, board minutes, banking visibility, compliance
+        tracking, and resident communication support. Classic or Premier service can be
+        discussed if the board wants a lighter or deeper scope. Schedule A / ancillary fees are
+        outlined on the next page and tailored by property type in the final management
+        agreement. Final rates may be adjusted after document review and on-site assessment.
       </Text>
 
-      <PageFooter data={data} pageNum={4} />
+      <PageFooter data={data} pageNum={5} />
     </Page>
   );
 }
@@ -783,6 +903,7 @@ function ServicesPricingPage({ data }: { data: ProposalData }) {
 function AncillaryFeesPage({ data }: { data: ProposalData }) {
   return (
     <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
       <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>Schedule A / Ancillary Fees</Text>
         <Text style={s.sectionSubtitle}>
@@ -853,6 +974,7 @@ function AncillaryFeesPage({ data }: { data: ProposalData }) {
 function WhyCamelotPage({ data }: { data: ProposalData }) {
   return (
     <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
       <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>Why Camelot</Text>
         <Text style={s.sectionSubtitle}>
@@ -912,7 +1034,7 @@ function WhyCamelotPage({ data }: { data: ProposalData }) {
         </View>
       </View>
 
-      <PageFooter data={data} pageNum={5} />
+      <PageFooter data={data} pageNum={7} />
     </Page>
   );
 }
@@ -920,6 +1042,54 @@ function WhyCamelotPage({ data }: { data: ProposalData }) {
 // ============================================================
 // Next Steps & Contact Page
 // ============================================================
+
+function TransitionPlanPage({ data }: { data: ProposalData }) {
+  const steps = [
+    ['Days 1-5', 'Document intake and control', 'Collect governing documents, owner records, arrears, vendor files, insurance, mortgage statements, prior reports, compliance files, and bank setup needs.'],
+    ['Days 6-10', 'Financial baseline', 'Review cash position, recurring payables, budget, arrears, mortgage obligations, tax exposure, insurance cost, and operating pressure points.'],
+    ['Days 11-15', 'Building walkthrough', 'Inspect common areas and building systems where accessible, review staffing/superintendent coverage, vendor quality, emergency protocols, and open repair priorities.'],
+    ['Days 16-20', 'Board communication setup', 'Set monthly reporting cadence, AP approval flow, maintenance request workflow, resident/shareholder communication channel, and board meeting rhythm.'],
+    ['Days 21-30', 'Transition findings', 'Deliver a first-month transition memo with compliance calendar, staffing recommendation, vendor recommendations, budget flags, and 60/90-day priorities.'],
+  ];
+
+  return (
+    <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
+      <View style={s.sectionHeader}>
+        <Text style={s.sectionTitle}>Transition & Implementation</Text>
+        <Text style={s.sectionSubtitle}>First 30 days, then 90-day stabilization</Text>
+      </View>
+      <Text style={s.body}>
+        Camelot treats transition as a controlled operating handoff. Within the first 30
+        days, our objective is to take control of records, finances, vendors, reporting,
+        resident communication, and time-sensitive compliance items without overwhelming the
+        board or the building.
+      </Text>
+      {steps.map(([range, title, desc]) => (
+        <View style={s.bulletRow} key={range}>
+          <Text style={s.bulletDot}>-</Text>
+          <Text style={s.bulletText}>
+            <Text style={{ fontFamily: 'Helvetica-Bold', color: NAVY }}>{range}: {title}. </Text>
+            {desc}
+          </Text>
+        </View>
+      ))}
+      <Text style={s.subHeader}>Meet & Greet</Text>
+      <Text style={s.body}>
+        During the first 30 days, Camelot recommends a board and resident/shareholder meet
+        and greet, either on-site or over Zoom. Accounting, compliance, administration, and
+        the property management team can join so the community can put a face to the email.
+      </Text>
+      <Text style={s.subHeader}>90-Day Stabilization</Text>
+      <Text style={s.body}>
+        The 90-day period focuses on vendor review, insurance review, budget review,
+        compliance calendar, staffing recommendation, arrears review, and refinancing or
+        lender coordination where applicable.
+      </Text>
+      <PageFooter data={data} pageNum={8} />
+    </Page>
+  );
+}
 
 function NextStepsPage({ data }: { data: ProposalData }) {
   const steps = [
@@ -952,6 +1122,7 @@ function NextStepsPage({ data }: { data: ProposalData }) {
 
   return (
     <Page size="LETTER" style={s.page}>
+      <PageHeader data={data} />
       <View style={s.sectionHeader}>
         <Text style={s.sectionTitle}>Next Steps</Text>
         <Text style={s.sectionSubtitle}>Getting Started with Camelot</Text>
@@ -1025,7 +1196,7 @@ function NextStepsPage({ data }: { data: ProposalData }) {
 
       <DavidSignatureBlock />
 
-      <PageFooter data={data} pageNum={7} />
+      <PageFooter data={data} pageNum={9} />
     </Page>
   );
 }
@@ -1046,14 +1217,14 @@ export default function ProposalPDF({ data }: ProposalPDFProps) {
       subject="Property Management Proposal"
     >
       <CoverPage data={data} />
+      <CoverLetterPage data={data} />
       {sectionEnabled(data, 'executive_summary') && <ExecutiveSummaryPage data={data} />}
       {sectionEnabled(data, 'building_analysis') && <BuildingAnalysisPage data={data} />}
       {sectionEnabled(data, 'pricing') && <ServicesPricingPage data={data} />}
       {sectionEnabled(data, 'ancillary_fees') && <AncillaryFeesPage data={data} />}
       {sectionEnabled(data, 'why_camelot') && <WhyCamelotPage data={data} />}
+      <TransitionPlanPage data={data} />
       {sectionEnabled(data, 'next_steps') && <NextStepsPage data={data} />}
     </Document>
   );
 }
-
-

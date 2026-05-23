@@ -64,6 +64,7 @@ export const COMPETITIVE_ADVANTAGES = [
 export interface PricingBreakdown {
   baseRate: number;
   baseRateLabel: string;
+  packageName: string;
   rentStabilizedSurcharge: number;
   ll97Surcharge: number;
   totalPerUnit: number;
@@ -80,28 +81,30 @@ export function calculatePricing(
   let baseRateLabel: string;
 
   if (units < 30) {
-    baseRate = 65;
-    baseRateLabel = 'Boutique (under 30 units)';
+    baseRate = 79;
+    baseRateLabel = 'Small-building minimum / Intelligence';
   } else if (units <= 75) {
-    baseRate = 50;
-    baseRateLabel = 'Mid-size (30–75 units)';
+    baseRate = 58;
+    baseRateLabel = 'Mid-size Intelligence';
   } else if (units <= 150) {
-    baseRate = 42;
-    baseRateLabel = 'Large (75–150 units)';
+    baseRate = 48;
+    baseRateLabel = 'Large-building Intelligence';
   } else {
-    baseRate = 35;
-    baseRateLabel = 'Portfolio (150+ units)';
+    baseRate = 40;
+    baseRateLabel = 'Portfolio Intelligence';
   }
 
   const rentStabilizedSurcharge = options?.rentStabilized ? 5 : 0;
   const ll97Surcharge = options?.ll97Services ? 3 : 0;
   const totalPerUnit = baseRate + rentStabilizedSurcharge + ll97Surcharge;
-  const totalMonthly = totalPerUnit * units;
+  const calculatedMonthly = totalPerUnit * units;
+  const totalMonthly = units < 30 ? Math.max(calculatedMonthly, 1500) : calculatedMonthly;
   const totalAnnual = totalMonthly * 12;
 
   return {
     baseRate,
     baseRateLabel,
+    packageName: 'Camelot Intelligence Package (Recommended)',
     rentStabilizedSurcharge,
     ll97Surcharge,
     totalPerUnit,
@@ -318,6 +321,7 @@ export interface ProposalData {
   proposalNumber: string;
   generatedBy: string;
   sentTo?: string;
+  preparedFor: string;
   archiveFolder: string;
 
   // Building
@@ -334,6 +338,7 @@ export interface ProposalData {
   // Contact
   contactName?: string;
   contactEmail?: string;
+  contactPhone?: string;
 
   // Analysis
   violationsCount: number;
@@ -377,6 +382,7 @@ export interface ProposalData {
 export interface ProposalOptions {
   contactName?: string;
   contactEmail?: string;
+  contactPhone?: string;
   rentStabilized?: boolean;
   ll97Services?: boolean;
   sections?: ProposalSection[];
@@ -398,6 +404,15 @@ function generateProposalNumber(): string {
   return `CML-${y}${m}${d}-${seq}`;
 }
 
+function isCoopLike(type?: string): boolean {
+  return /co-?op|cooperative|tenancy/i.test(type || '');
+}
+
+function defaultPreparedFor(building: Building, contactName?: string): string {
+  if (contactName?.trim()) return contactName.trim();
+  return isCoopLike(building.type) ? 'the Shareholders' : 'the Board of Directors';
+}
+
 export function generateProposalData(
   building: Building,
   options?: ProposalOptions
@@ -413,7 +428,8 @@ export function generateProposalData(
   const pricing = options?.customPricingPerUnit
     ? {
         baseRate: options.customPricingPerUnit,
-        baseRateLabel: 'Custom',
+        baseRateLabel: 'Custom Intelligence',
+        packageName: 'Camelot Intelligence Package (Recommended)',
         rentStabilizedSurcharge: rentStabilized ? 5 : 0,
         ll97Surcharge: ll97Services ? 3 : 0,
         totalPerUnit:
@@ -449,13 +465,16 @@ export function generateProposalData(
   const proposalNumber = generateProposalNumber();
   const contactName = options?.contactName ?? contact?.name;
   const contactEmail = options?.contactEmail ?? contact?.email;
+  const contactPhone = options?.contactPhone ?? contact?.phone;
   const archiveFolder = building.address.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const preparedFor = defaultPreparedFor(building, contactName);
 
   return {
     generatedAt,
     proposalNumber,
     generatedBy: options?.generatedBy || 'Camelot OS Proposal Builder',
     sentTo: contactEmail || contactName || 'To be confirmed',
+    preparedFor,
     archiveFolder,
 
     buildingAddress: building.address,
@@ -470,6 +489,7 @@ export function generateProposalData(
 
     contactName,
     contactEmail,
+    contactPhone,
 
     violationsCount: building.violations_count ?? 0,
     openViolationsCount: building.open_violations_count ?? 0,
