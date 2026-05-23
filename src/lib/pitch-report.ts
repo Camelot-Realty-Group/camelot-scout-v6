@@ -21,7 +21,7 @@ const CAMELOT_EXECUTIVE_TEAM = [
   { name: 'David Goldoff', title: 'Founder & President', note: 'Owner-minded leadership, client relationships, compliance strategy', photo: 'https://www.camelot.nyc/wp-content/uploads/2026/03/david_headshot.jpg' },
   { name: 'Valerie Ann Fiume', title: 'Director of Co-Ops & Condos / Vice President', note: 'Board operations, resident relations, property management execution', photo: 'https://camelot.realtymx.com/images/agents/4.jpg' },
   { name: 'Anthony Abruzzo, CPA', title: 'Chief Financial Officer, Senior Managing Tax Director', note: 'Financial controls, tax, reporting, accounting oversight', photo: 'https://camelot.realtymx.com/images/agents/12.jpg' },
-  { name: 'Steven Milewicz', title: 'Chief Legal Officer, M&A', note: 'Legal guidance, transactions, acquisitions, governance support' },
+  { name: 'Steven Milewicz', title: 'Chief Legal Officer, M&A', note: 'Legal guidance, transactions, acquisitions, governance support', photo: '/images/team/steven-milewicz.jpeg' },
   { name: 'Robert Isaacs', title: 'Senior Managing Director, Asset Management & Compliance', note: 'Asset management, compliance, risk and operating standards' },
   { name: 'Anthony Tavaglione', title: 'Senior Controller & Accounting Manager', note: 'Controller-level reporting, accounting workflows, monthly close support', photo: 'https://www.camelot.nyc/wp-content/uploads/2026/03/anthony_tavaglione.jpg' },
   { name: 'Tim Kelly', title: 'Senior Facility Manager', note: 'Facilities, field operations, staff/vendor coordination', photo: 'https://camelot.realtymx.com/images/agents/50.jpg' },
