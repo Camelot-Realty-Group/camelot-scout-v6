@@ -1732,7 +1732,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       ],
     };
   }
-  if (/88[-\s]?32\s+155th|88[-\s]?02\s+155th|88[-\s]?06\s+155th|88[-\s]?10\s+155th|howard\s+coop|howard\s+cooperative|lindenwood/i.test(key)) {
+  if (/88[-\s]?32\s+155th|88[-\s]?02\s+155th|88[-\s]?06\s+155th|88[-\s]?10\s+155th|155[-\s]?22\s+89th|155[-\s]?24\s+89th|howard\s+coop|howard\s+cooperative|lindenwood/i.test(key)) {
     return {
       canonicalAddress: '88-32 155th Ave, Howard Beach, NY 11414',
       buildingName: 'Howard Coop Corp.',
@@ -1798,8 +1798,17 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       lifestyleCopy: 'A 23-building, two-story cooperative requires stronger file control, vendor supervision, violation tracking, grounds oversight, and board reporting than a single-entry building of similar unit count.',
       brandingTitle: 'Howard Coop Corp. - 88-32 155th Avenue',
       brandingDescription: 'Known-property guard: Jackie uses the uploaded 88-32 155th Avenue report as the source profile, flags the 80-vs-86 unit-count conflict, and treats Delkap Management and Howard Coop Corp. records as source leads to verify before client-facing release.',
+      imageUrls: [
+        '/images/howard-coop/155-22-89th-st-front.jpg',
+        '/images/howard-coop/155-22-89th-st-community.jpeg',
+        '/images/howard-coop/155-24-89th-st-aerial.jpeg',
+        '/images/howard-coop/155-24-89th-st-red-door.jpeg',
+        '/images/howard-coop/155-24-89th-st-front.jpeg',
+        '/images/howard-coop/155-24-89th-st-front-side.jpeg',
+      ],
       researchSources: [
         'Uploaded PropertyShark-style report: 88-32_155th_Ave__Howard_Beach__NY_11414.pdf, generated May 23, 2026',
+        'Camelot-uploaded 155-22 / 155-24 89th Street Lindenwood / Howard Beach property photo set',
         'NYC DOF / PROS tax, assessment, exemption, abatement, and lien records for BBL 4114660025',
         'ACRIS official deed, mortgage, UCC, satisfaction, assignment, release, and party records for BBL 4114660025',
         'HPD MDR / HPD Online registration, contacts, complaints, and violations for Howard Coop Corp. / 88-32 155th Ave',
@@ -1829,7 +1838,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
         'OATH / ECB',
       ],
       professionalNotes: [
-        'Primary identity: Howard Coop Corp., 88-32 155th Ave, Howard Beach, NY 11414; alternate addresses in the uploaded report include 88-02, 88-06, and 88-10 155th Ave.',
+        'Primary identity: Howard Coop Corp., 88-32 155th Ave, Howard Beach, NY 11414; alternate addresses in the uploaded report include 88-02, 88-06, and 88-10 155th Ave, while the uploaded property photo set references 155-22 and 155-24 89th Street in the same Lindenwood / Howard Beach cooperative context.',
         'BBL: 4114660025; block/lot reported as 11466-0025; coop number 400929.',
         'Unit-count conflict: DOF/residential data shows 80 units while the uploaded report narrative references 86 units. Jackie must show this as a reconciliation item, not silently choose one in final diligence.',
         'Uploaded report identifies 23 buildings on the lot, 2 stories, 1958 construction, 74,104 residential square feet, 170,300 lot square feet, R5 zoning, Community District 10, School District 27, Census Tract 62, and Energy Star score 47.',
