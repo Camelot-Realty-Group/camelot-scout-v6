@@ -1171,6 +1171,7 @@ export function generatePitchReport(d: MasterReportData): string {
     </div>
   </div>
 </div>
+</div>
 
 <!-- SLIDE 9: Technology Platform -->
 <div class="slide slide-cream">
