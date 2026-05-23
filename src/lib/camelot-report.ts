@@ -3730,10 +3730,16 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   });
   const imageSources = [...html.matchAll(/<img\b[^>]*?\s+src=(["'])(.*?)\1/gi)].map(m => m[2]);
   const badImages = imageSources.filter(isBrokenImageSrc);
+  const badEmbeddedImages = badImages.filter(src => /^data:image\//i.test(src));
+  const badExternalImages = badImages.filter(src => !/^data:image\//i.test(src));
   checks.push({
     name: 'Picture Links',
-    status: badImages.length === 0 ? 'pass' : 'fail',
-    detail: badImages.length === 0 ? `${imageSources.length} image link(s) checked` : `Broken/dirty image src: ${badImages.slice(0, 2).map(summarizeImageSrc).join(', ')}`,
+    status: badExternalImages.length === 0 ? (badEmbeddedImages.length === 0 ? 'pass' : 'warn') : 'fail',
+    detail: badImages.length === 0
+      ? `${imageSources.length} image link(s) checked`
+      : badExternalImages.length
+        ? `Broken/dirty image src: ${badExternalImages.slice(0, 2).map(summarizeImageSrc).join(', ')}`
+        : `Uploaded embedded image needs review but will not block internal preview/export: ${badEmbeddedImages.slice(0, 2).map(summarizeImageSrc).join(', ')}`,
   });
   if (/one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`)) {
     const oneMuseumAssets = imageSources.filter(src => src.includes('./images/one-museum-mile/'));

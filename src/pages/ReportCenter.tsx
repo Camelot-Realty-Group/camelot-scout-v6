@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 type EmailType = 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty';
 const REPORT_FOCUS_OPTIONS = Object.values(REPORT_FOCUS_THEMES);
 const REPORT_CENTER_INPUT_SCOPE = 'jackie-report-center';
+const PHOTO_UPLOAD_LIMIT = 12;
 
 type ReportCenterSavedInputs = {
   address: string;
@@ -318,24 +319,49 @@ export default function ReportCenter() {
   };
 
   // Photo upload handler — converts files to data URLs and stores them
+  const photoStorageKey = useCallback(() => {
+    const keyAddress = (data?.address || address).trim();
+    if (!keyAddress) return '';
+    return `camelot_photos_${keyAddress.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+  }, [address, data?.address]);
+
+  const persistUploadedPhotos = useCallback((photos: string[]) => {
+    const key = photoStorageKey();
+    if (!key) return;
+    try {
+      localStorage.setItem(key, JSON.stringify(photos));
+      return;
+    } catch {
+      try {
+        sessionStorage.setItem(key, JSON.stringify(photos));
+        toast('Photos are saved for this browser session. Browser storage is full for permanent save.', { icon: 'Warning', duration: 5000 });
+      } catch {
+        toast('Photos loaded for this report, but browser storage is full.', { icon: 'Warning', duration: 5000 });
+      }
+    }
+  }, [photoStorageKey]);
+
   const readPhotoAsDataUrl = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    if (/\.hei[cf]$/i.test(file.name) || /heic|heif/i.test(file.type)) {
+      reject(new Error(`${file.name} is HEIC/HEIF. Please export it as JPG or PNG first.`));
+      return;
+    }
     const reader = new FileReader();
     reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
     reader.onload = () => {
       const raw = String(reader.result || '');
       const img = new Image();
-      img.onerror = () => resolve(raw);
+      img.onerror = () => reject(new Error(`${file.name} could not be rendered by the browser. Try a JPG, PNG, or WEBP.`));
       img.onload = () => {
-        const maxSide = 1800;
+        const maxSide = 1200;
         const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-        if (scale >= 1 && raw.length < 1_500_000) return resolve(raw);
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(img.width * scale));
         canvas.height = Math.max(1, Math.round(img.height * scale));
         const ctx = canvas.getContext('2d');
         if (!ctx) return resolve(raw);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.86));
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
       };
       img.src = raw;
     };
@@ -345,7 +371,7 @@ export default function ReportCenter() {
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name));
     if (imageFiles.length === 0) {
       toast.error('Choose an image file: JPG, PNG, WEBP, or HEIC converted by your browser.');
       e.target.value = '';
@@ -354,20 +380,22 @@ export default function ReportCenter() {
 
     try {
       const dataUrls = await Promise.all(imageFiles.map(readPhotoAsDataUrl));
-      const next = [...uploadedPhotos, ...dataUrls];
-      setUploadedPhotos(next);
-      if (address.trim()) {
-        const key = `camelot_photos_${address.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-        try {
-          localStorage.setItem(key, JSON.stringify(next));
-        } catch {
-          toast.error('Photo loaded, but browser storage is full. It will stay for this session only.');
-        }
+      const remainingSlots = Math.max(0, PHOTO_UPLOAD_LIMIT - uploadedPhotos.length);
+      if (remainingSlots === 0) {
+        toast.error(`Jackie can include up to ${PHOTO_UPLOAD_LIMIT} uploaded photos per report. Remove one before adding more.`);
+        return;
       }
-      toast.success(`${dataUrls.length} photo(s) uploaded`);
+      const acceptedUrls = dataUrls.slice(0, remainingSlots);
+      const next = [...uploadedPhotos, ...acceptedUrls];
+      setUploadedPhotos(next);
+      persistUploadedPhotos(next);
+      toast.success(`${acceptedUrls.length} photo(s) uploaded`);
+      if (dataUrls.length > remainingSlots) {
+        toast(`Only the first ${remainingSlots} photo(s) were added. Limit is ${PHOTO_UPLOAD_LIMIT}.`, { icon: 'Warning', duration: 4500 });
+      }
     } catch (err) {
       console.error('Photo upload failed:', err);
-      toast.error('Photo upload failed. Try a smaller JPG or PNG.');
+      toast.error(err instanceof Error ? err.message : 'Photo upload failed. Try a smaller JPG or PNG.');
     } finally {
       e.target.value = '';
     }
@@ -375,16 +403,17 @@ export default function ReportCenter() {
 
   // Load saved photos when address changes
   const loadSavedPhotos = useCallback(() => {
-    if (!address.trim()) return;
-    const key = `camelot_photos_${address.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    const key = photoStorageKey();
+    if (!key) return;
     try {
-      const saved = JSON.parse(localStorage.getItem(key) || '[]');
+      const saved = JSON.parse(localStorage.getItem(key) || sessionStorage.getItem(key) || '[]');
       if (Array.isArray(saved)) setUploadedPhotos(saved);
     } catch {
       localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
       setUploadedPhotos([]);
     }
-  }, [address]);
+  }, [photoStorageKey]);
 
   useEffect(() => {
     loadSavedPhotos();
@@ -428,6 +457,56 @@ export default function ReportCenter() {
     }
     return true;
   };
+
+  const clearUploadedPhotos = () => {
+    setUploadedPhotos([]);
+    const key = photoStorageKey();
+    if (key) {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+    toast.success('Photos cleared');
+  };
+
+  const removeUploadedPhoto = (index: number) => {
+    const updated = uploadedPhotos.filter((_, idx) => idx !== index);
+    setUploadedPhotos(updated);
+    persistUploadedPhotos(updated);
+  };
+
+  const renderPhotoUploadPanel = (compact = false) => (
+    <div className="bg-white rounded-xl border p-6 shadow-sm">
+      <h2 className="text-lg font-semibold text-gray-900 mb-2">Building Photos</h2>
+      <p className="text-xs text-gray-500 mb-3">
+        Upload exterior, lobby, or interior photos before or after running Jackie. Photos are compressed for report use and saved per address.
+      </p>
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <label htmlFor="jackie-photo-upload" className="cursor-pointer bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Photos
+          <input id="jackie-photo-upload" ref={photoInputRef} type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.heic,.heif" multiple onChange={handlePhotoUpload} className="sr-only" />
+        </label>
+        <span className="text-xs text-gray-500">{uploadedPhotos.length}/{PHOTO_UPLOAD_LIMIT} photo(s) uploaded</span>
+        {uploadedPhotos.length > 0 && (
+          <button type="button" onClick={clearUploadedPhotos} className="text-xs text-red-500 hover:text-red-700 underline">Clear all</button>
+        )}
+      </div>
+      {uploadedPhotos.length > 0 && (
+        <div className={`grid ${compact ? 'grid-cols-6' : 'grid-cols-4'} gap-2`}>
+          {uploadedPhotos.map((url, i) => (
+            <div key={`${url.slice(0, 28)}-${i}`} className="relative rounded-lg overflow-hidden border border-gray-200 h-20">
+              <img src={url} alt={`Building photo ${i + 1}`} className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeUploadedPhoto(i)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+              >×</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   const emailDraft = data ? generateEmailDraft(data, emailType) : null;
   const callerSheet = data ? generateColdCallerSheet(data) : '';
@@ -590,6 +669,8 @@ export default function ReportCenter() {
         </div>
       </div>
 
+      {renderPhotoUploadPanel(!data)}
+
       {/* Loading */}
       {loading && (
         <div className="bg-white rounded-xl border p-12 shadow-sm flex flex-col items-center justify-center">
@@ -711,7 +792,9 @@ export default function ReportCenter() {
             </div>
           </div>
 
-          {/* Photo Upload */}
+          {uploadedPhotos.length < 0 && (
+          /* Legacy photo upload kept disabled; renderPhotoUploadPanel is used above. */
+          <>{/* Photo Upload */}
           <div className="bg-white rounded-xl border p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Building Photos</h2>
             <p className="text-xs text-gray-500 mb-3">Upload exterior, lobby, or interior photos to include in the report. Photos are saved per address.</p>
@@ -759,6 +842,8 @@ export default function ReportCenter() {
               </div>
             )}
           </div>
+
+          </>)}
 
           {/* Action Buttons */}
           <div className="bg-white rounded-xl border p-6 shadow-sm">
