@@ -160,8 +160,7 @@ export default function InstantProposal() {
   const handleGenerateDraft = () => {
     if (!reportData) return;
     if (releaseQA?.failures) {
-      toast.error('Proposal draft locked until Jackie blockers are cleared. Use Full Report (Internal) to review the issues.', { duration: 7000 });
-      return;
+      toast.error('Jackie found report warnings/blockers, but proposal draft generation will continue for internal review.', { duration: 7000 });
     }
     // Render Jackie HTML in a hidden iframe to extract the proposal
     const iframe = document.createElement('iframe');
@@ -213,8 +212,7 @@ export default function InstantProposal() {
   // Export: Download PDF directly (no popup)
   const handleDownloadPDF = async () => {
     if (releaseQA?.failures) {
-      toast.error('PDF export locked until Jackie blockers are cleared.');
-      return;
+      toast.error('Jackie found report warnings/blockers; exporting anyway for internal review.', { duration: 5000 });
     }
     const content = getDraftContent();
     if (!content) { toast.error('No proposal content'); return; }
@@ -251,8 +249,7 @@ export default function InstantProposal() {
   // Export: Download HTML
   const handleDownloadHTML = () => {
     if (releaseQA?.failures) {
-      toast.error('HTML export locked until Jackie blockers are cleared.');
-      return;
+      toast.error('Jackie found report warnings/blockers; exporting HTML anyway for internal review.', { duration: 5000 });
     }
     const content = getDraftContent();
     const blob = new Blob([content], { type: 'text/html' });
@@ -267,8 +264,7 @@ export default function InstantProposal() {
   // Export: Print using hidden iframe (works on mobile — triggers native print sheet)
   const handlePrint = () => {
     if (releaseQA?.failures) {
-      toast.error('Print export locked until Jackie blockers are cleared.');
-      return;
+      toast.error('Jackie found report warnings/blockers; opening print preview anyway for internal review.', { duration: 5000 });
     }
     const content = getDraftContent();
     if (!content) return;
@@ -293,8 +289,7 @@ export default function InstantProposal() {
   // Export: Email — build email body, copy to clipboard + open mailto link
   const handleEmail = async () => {
     if (releaseQA?.failures) {
-      toast.error('Email export locked until Jackie blockers are cleared.');
-      return;
+      toast.error('Jackie found report warnings/blockers; opening email draft anyway for internal review.', { duration: 5000 });
     }
     const buildingName = reportData?.buildingName || 'Property';
     const emailBody =

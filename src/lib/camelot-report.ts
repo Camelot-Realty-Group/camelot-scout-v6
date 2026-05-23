@@ -7202,7 +7202,7 @@ function generateProposal() {
 
   '<p>We want to thank you for the opportunity to present this management proposal and for your time in discussing the future of ' + buildingNameClean + '. Following our review of the property, Camelot Property Management Services Corp. is pleased to submit this summary outlining our scope of services, dedicated team, and transition plan for the property\u2019s continued success.</p>' +
 
-  '<p>Warm regards,</p>' + buildDavidGoldoffSignatureHtml({ includeImage: true }) +
+  '<p>Warm regards,</p>' + ${JSON.stringify(buildDavidGoldoffSignatureHtml({ includeImage: true }))} +
 
   '<div class="hr"></div>' +
 
@@ -7506,12 +7506,23 @@ function generateProposal() {
   '</body></html>';
 
   var w = window.open('', '_blank');
-  if (w) {
+  if (w && w.document && typeof w.document.write === 'function') {
     w.document.write(html);
     w.document.close();
     // Preview only — user clicks Print button when ready
     // setTimeout(function() { w.print(); }, 800);
+    return;
   }
+
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'Proposal of Services - ' + buildingNameClean.replace(/[^a-z0-9]+/gi, '-') + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
 }
 </script>
 </body>

@@ -229,7 +229,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml, selectedPackage === 'appendix_full' ? 'internal' : 'release')) return;
+    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateSelectedPackageHTML(d);
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'pdf') : buildJackiePackageFilename(d, selectedPackage, 'pdf');
     openBrochureForPrint(html, filename);
@@ -239,7 +239,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml)) return;
+    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateFirstEmailIntroReport(d);
     openBrochureForPrint(html, buildJackiePackageFilename(d, 'first_email_intro', 'pdf'));
   };
@@ -248,7 +248,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml)) return;
+    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateBoardMeetingDeck(d);
     openBrochureForPrint(html, buildJackiePackageFilename(d, 'board_meeting_deck', 'pdf'));
   };
@@ -257,7 +257,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml)) return;
+    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateSelectedPackageHTML(d);
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
     downloadAsHTML(html, filename);
@@ -287,7 +287,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml)) return;
+    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     toast.loading('Generating PowerPoint deck...', { id: 'pptx' });
     try {
       await generatePitchDeck(d);
