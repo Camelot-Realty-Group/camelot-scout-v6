@@ -242,6 +242,29 @@ export default function Agreements() {
     { key: 'premier', label: 'Camelot Premier', desc: 'White-glove, dedicated PM, insurance rebid' },
   ];
 
+  const currentTierFee = input.tieredPricing ? input.tieredPricing[input.selectedTier].monthly : 0;
+  const currentMonthlyFee = input.customMonthlyFee || currentTierFee;
+  const jackieIntelligenceMonthly = jackieData?.tieredPricing?.intelligence?.monthly || jackieData?.monthlyFee || 0;
+  const pricingMatchesJackie = Boolean(
+    jackieIntelligenceMonthly &&
+    currentMonthlyFee &&
+    Math.abs(currentMonthlyFee - jackieIntelligenceMonthly) < 1 &&
+    input.selectedTier === 'intelligence' &&
+    !input.customMonthlyFee
+  );
+  const resetPricingToJackie = () => {
+    if (!jackieData) {
+      toast.error('Load Jackie data first');
+      return;
+    }
+    update({
+      selectedTier: 'intelligence',
+      tieredPricing: jackieData.tieredPricing,
+      customMonthlyFee: null,
+    });
+    toast.success('Agreement pricing reset to Jackie Intelligence');
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-4xl">
       {/* Header */}
@@ -440,6 +463,62 @@ export default function Agreements() {
               <label className="text-xs text-gray-500 block mb-1">Startup / Onboarding Fee (optional)</label>
               <input type="number" placeholder="$0" value={input.startupFee || ''} onChange={e => update({ startupFee: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50" />
             </div>
+          </div>
+        </div>
+
+        {/* SECTION: Final Review */}
+        <div className="p-6 bg-[#F8F3E3]/60">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-[#5B4A1F] uppercase tracking-wider">Final Review Before Agreement</h2>
+              <p className="text-xs text-gray-600 mt-1">
+                Edit these key controls before generating the final agreement. Overrides here affect the agreement only and do not rewrite the archived Jackie report.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={resetPricingToJackie}
+              disabled={!jackieData}
+              className="px-4 py-2 bg-white border border-camelot-gold/40 text-[#5B4A1F] rounded-lg text-xs font-semibold hover:bg-camelot-gold/10 disabled:opacity-50"
+            >
+              Reset to Jackie Intelligence
+            </button>
+          </div>
+          <div className="grid lg:grid-cols-3 gap-3">
+            <div className="bg-white rounded-lg border border-camelot-gold/25 p-3">
+              <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Jackie Source</div>
+              <div className="mt-1 text-sm font-bold text-gray-900">
+                {linkedJackieReport ? linkedJackieReport.reportNumber : jackieData ? 'Fresh Jackie Data' : 'Not linked'}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {linkedJackieReport ? `${linkedJackieReport.packageLabel} - ${formatLibraryDate(linkedJackieReport.generatedAt)}` : 'Load a saved Jackie report or pull fresh data first.'}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-camelot-gold/25 p-3">
+              <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Recommended Fee</div>
+              <div className="mt-1 text-sm font-bold text-gray-900">
+                {jackieIntelligenceMonthly ? `$${jackieIntelligenceMonthly.toLocaleString()}/mo` : 'To be set'}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Jackie Intelligence package should be the starting point.</div>
+            </div>
+            <div className={cn(
+              'rounded-lg border p-3',
+              pricingMatchesJackie ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'
+            )}>
+              <div className="text-[11px] uppercase tracking-wider text-gray-500 font-semibold">Agreement Pricing Check</div>
+              <div className={cn('mt-1 text-sm font-bold', pricingMatchesJackie ? 'text-emerald-700' : 'text-amber-700')}>
+                {pricingMatchesJackie ? 'Matches Jackie Intelligence' : 'Review before sending'}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">
+                Current agreement fee: {currentMonthlyFee ? `$${currentMonthlyFee.toLocaleString()}/mo` : 'not set'}.
+              </div>
+            </div>
+          </div>
+          <div className="grid lg:grid-cols-4 gap-3 mt-3">
+            <input type="text" placeholder="Prepared for / client" value={input.clientName} onChange={e => update({ clientName: e.target.value })} className="px-3 py-2 border border-camelot-gold/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50" />
+            <input type="text" placeholder="Property entity / owner" value={input.clientEntityName} onChange={e => update({ clientEntityName: e.target.value })} className="px-3 py-2 border border-camelot-gold/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50" />
+            <input type="number" placeholder="Final monthly fee" value={currentMonthlyFee || ''} onChange={e => update({ customMonthlyFee: e.target.value ? parseInt(e.target.value) : null })} className="px-3 py-2 border border-camelot-gold/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50" />
+            <input type="number" placeholder="Onboarding fee" value={input.startupFee || ''} onChange={e => update({ startupFee: parseInt(e.target.value) || 0 })} className="px-3 py-2 border border-camelot-gold/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50" />
           </div>
         </div>
 

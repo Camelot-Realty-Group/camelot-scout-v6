@@ -392,14 +392,14 @@ ${input.assetClass === 'single-tenant' ? `
 </ul>
 <p>The management fee shall be deducted directly from the Client Account on the first business day of each month.</p>
 <div class="article-sub">5.2 Accounting & Reporting Fee.</div>
-<p>The monthly accounting and reporting fee is <strong>WAIVED</strong> as a base recurring charge for this engagement. Accounting and reporting services shall be billed at <strong>$150/hour</strong> only when required for:</p>
+<p>Baseline monthly accounting coordination and board-facing reporting are included in the selected management package. Tax returns, audits, historical cleanup, litigation support, agency proceedings, and special financial projects are separately scoped or billed under Schedule A.</p>
 <ul style="margin:6px 0 8px 24px;list-style:disc">
 <li style="margin-bottom:4px">Property or financial <strong>audits</strong> of the Property</li>
 <li style="margin-bottom:4px">Tenant <strong>rent disputes</strong>, rent overcharge proceedings, or arrears litigation</li>
 <li style="margin-bottom:4px">City agency proceedings involving <strong>rent treble charge</strong> calculations or DHCR overcharge investigations</li>
 </ul>
 <div class="article-sub">5.3 Technology Fee.</div>
-<p>The Client shall pay a monthly technology fee of <strong>$50.00/month</strong>, covering:</p>
+<p>The selected Camelot Intelligence package includes the planned technology workflow in the management pricing shown in Schedule A. Third-party licensing, implementation, customization, resident portal modules, payment processor charges, and expanded automation beyond the agreed package are separately scoped or passed through at cost with board approval.</p>
 <ul style="margin:6px 0 8px 24px;list-style:disc">
 <li style="margin-bottom:4px"><strong>Merlin AI</strong> portfolio intelligence platform</li>
 <li style="margin-bottom:4px"><strong>ConciergePlus</strong> resident portal (26 modules)</li>
@@ -407,7 +407,6 @@ ${input.assetClass === 'single-tenant' ? `
 <li style="margin-bottom:4px">Digital work order system</li>
 <li style="margin-bottom:4px">Electronic rent collection infrastructure</li>
 </ul>
-<p><strong>Promotional incentive:</strong> The technology fee is <strong>fully waived for the first six (6) months</strong> from the Effective Date.</p>
 ${input.startupFee > 0 ? `<div class="article-sub">5.4 Startup/Onboarding Fee.</div>
 <p>The Client shall pay a one-time onboarding fee of $${input.startupFee.toLocaleString()} upon execution of this Agreement, covering initial property audit, file migration, technology setup, vendor onboarding, and transition coordination.</p>` : ''}
 <div class="article-sub">5.${input.startupFee > 0 ? '5' : '4'} Payment for Additional Services.</div>
@@ -611,8 +610,8 @@ ${input.specialTerms ? `
 <thead><tr><th colspan="3">Base Monthly Fees</th></tr></thead>
 <tbody>
 <tr><td><strong>Management Fee</strong></td><td><strong>$${fee.toLocaleString()}/month</strong> ($${perUnit}/unit × ${input.units} units)</td><td>Greater of fixed fee or 5% of gross rent</td></tr>
-<tr><td>Accounting & Reporting</td><td class="free">WAIVED</td><td>$150/hr for audits, disputes & agency proceedings</td></tr>
-<tr><td>Technology Fee</td><td>$50/month</td><td class="free">FREE for first 6 months</td></tr>
+<tr><td>Accounting & Reporting</td><td>Included in selected package</td><td>Tax returns, audits, cleanup, litigation, and special projects separately scoped</td></tr>
+<tr><td>Technology Platform</td><td>Included in Intelligence pricing</td><td>Third-party licensing, customization, and expanded workflows by board approval</td></tr>
 ${input.startupFee > 0 ? `<tr><td>Onboarding Fee</td><td><strong>$${input.startupFee.toLocaleString()}</strong></td><td>One-time startup/transition</td></tr>` : ''}
 </tbody>
 </table>
