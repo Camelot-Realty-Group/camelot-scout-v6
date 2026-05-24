@@ -2,8 +2,8 @@ export const DAVID_GOLDOFF_SIGNATURE_IMAGE = '/images/signatures/david-goldoff-s
 
 export const DAVID_GOLDOFF_SIGNATURE = {
   name: 'David A. Goldoff',
-  title: 'President/Owner',
-  company: 'Camelot Realty Group',
+  title: 'President',
+  company: 'Camelot Property Management Services Corp.',
   executiveOffice: '501 Madison Avenue, 4th, New York, NY 10022',
   mainOffice: '57 West 57th Street, Suite 410, New York, NY 10019',
   phone: 'Office: (212) 206-9939 x701',

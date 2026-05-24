@@ -48,7 +48,7 @@ const CAMELOT_PROFILE = {
 };
 
 function davidGoldoffClientSignatureHtml(): string {
-  return `<div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:12px;color:#1a2744;line-height:1.35"><strong>Sincerely yours,</strong><div style="margin-top:14px"><img src="${DAVID_GOLDOFF_SIGNATURE_IMAGE}" alt="David Goldoff signature" style="display:block;width:250px;max-width:64%;height:auto;margin:0 0 6px 0"><div style="font-size:13px;font-weight:800">David Goldoff</div><div style="font-size:12px;font-weight:700">David A. Goldoff</div><div style="font-size:11px;color:#333">President</div></div></div>`;
+  return `<div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:12px;color:#1a2744;line-height:1.35"><strong>Sincerely yours,</strong><div style="margin-top:14px"><img src="${DAVID_GOLDOFF_SIGNATURE_IMAGE}" alt="David Goldoff signature" style="display:block;width:250px;max-width:64%;height:auto;margin:0 0 6px 0"><div style="font-size:13px;font-weight:800">David A. Goldoff</div><div style="font-size:11px;color:#333">President</div><div style="font-size:11px;color:#333;font-weight:700">Camelot Property Management Services Corp.</div></div></div>`;
 }
 
 function preparedForBlock(d: MasterReportData): string {
@@ -281,6 +281,9 @@ function externalDeckCss(): string {
   .image-frame { height:260px;background:#EDE9DF;overflow:hidden;position:relative; }
   .image-frame img, .image-frame iframe { width:100%;height:100%;object-fit:cover;display:block;border:0; }
   .image-caption { padding:9px 12px;font-size:10px;color:#6b7280;border-top:1px solid #eee; }
+  .context-photo-chip { position:absolute;right:42px;bottom:42px;width:230px;height:132px;border:1px solid rgba(184,151,58,.42);border-radius:8px;overflow:hidden;background:#EDE9DF;box-shadow:0 14px 32px rgba(26,31,54,.16);z-index:3; }
+  .context-photo-chip img { width:100%;height:100%;object-fit:cover;display:block; }
+  .context-photo-chip-label { position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(26,39,68,.88),rgba(26,39,68,.24));color:#F4D26A;font-size:9px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;padding:18px 10px 8px;text-align:center; }
   .stat-box { background:#fff;border:1px solid rgba(184,151,58,0.25);border-radius:10px;padding:18px;text-align:center;box-shadow:0 12px 28px rgba(26,31,54,0.07); }
   .stat-val { font-family:'Cormorant Garamond',Georgia,serif;font-size:38px;font-weight:700;color:#B8973A;line-height:1; }
   .stat-label { font-size:12px;color:#6b7280;margin-top:5px;text-transform:uppercase;letter-spacing:.8px; }
@@ -326,6 +329,11 @@ function placeEmbedUrl(d: MasterReportData): string {
   return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(query)}&zoom=16`;
 }
 
+function nearbyServicesEmbedUrl(d: MasterReportData): string {
+  const query = `restaurants grocery pharmacy transit services near ${d.address || d.buildingName || 'New York NY'}`;
+  return `https://www.google.com/maps/embed/v1/search?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(query)}&zoom=15`;
+}
+
 function bestExteriorImage(d: MasterReportData): string {
   return d.buildingPhotos?.exterior?.[0] || d.buildingPhotos?.interior?.[0] || d.commercialIntel?.brandingImages?.[0] || d.streetEasy?.photos?.[0] || streetViewImage(d);
 }
@@ -361,9 +369,43 @@ function neighborhoodMapImage(d: MasterReportData, size = '640x360'): string {
   return `https://maps.googleapis.com/maps/api/staticmap?size=${size}&scale=2&maptype=roadmap&zoom=14&markers=color:red%7Clabel:P%7C${encodeURIComponent(destination)}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
 }
 
+function rotatingPropertyImage(d: MasterReportData, index = 0): string {
+  const photos = propertyPhotoStack(d);
+  if (photos.length) return photos[index % photos.length];
+  const fallbacks = [bestExteriorImage(d), neighborhoodMapImage(d), staticMapImage(d), streetViewImage(d)];
+  return fallbacks[index % fallbacks.length];
+}
+
 function imageCard(src: string, alt: string, caption: string, height = 260): string {
   const safeAlt = escapeHtml(alt);
   return `<div class="visual-card"><div class="image-frame" style="height:${height}px"><img src="${src}" alt="${safeAlt}" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=&quot;height:100%;display:flex;align-items:center;justify-content:center;background:#34444f;color:#B8973A;font-size:12px;font-weight:800;text-align:center;padding:16px&quot;>${safeAlt}</div>'"></div><div class="image-caption">${caption}</div></div>`;
+}
+
+function contextualImageCard(d: MasterReportData, index: number, caption: string, height = 220): string {
+  return imageCard(rotatingPropertyImage(d, index), `${d.buildingName || d.address} contextual image ${index + 1}`, caption, height);
+}
+
+function localServicesCard(d: MasterReportData, height = 220): string {
+  return iframeCard(nearbyServicesEmbedUrl(d), 'Nearby services map', `Nearby services, retail, transit, and neighborhood anchors around ${d.buildingName || d.address}`, height);
+}
+
+function everyOtherPageVisualChip(d: MasterReportData, index: number, label = 'Property / Neighborhood Context'): string {
+  const src = rotatingPropertyImage(d, index);
+  return `<div class="context-photo-chip"><img src="${src}" alt="${escapeHtml(d.buildingName || d.address)} visual context ${index + 1}" onerror="this.parentElement.style.display='none'"><div class="context-photo-chip-label">${escapeHtml(label)}</div></div>`;
+}
+
+function enrichEveryOtherDeckPage(slides: string, d: MasterReportData): string {
+  let visualIndex = 0;
+  const parts = slides.split(/(?=<div class="slide\b)/g);
+  return parts.map((part, index) => {
+    if (!part.startsWith('<div class="slide')) return part;
+    const slideNumber = index + 1;
+    const alreadyHasVisual = /<img\b|<iframe\b|class="context-photo-chip"|class="photo-frame"|class="visual-card"|class="image-frame"/i.test(part);
+    if (slideNumber % 2 === 0 && !alreadyHasVisual) {
+      return part.replace(/<\/div>\s*$/s, `${everyOtherPageVisualChip(d, visualIndex++, 'Property / Neighborhood')}\n</div>`);
+    }
+    return part;
+  }).join('');
 }
 
 function propertyImageCard(d: MasterReportData, caption: string, height = 392): string {
@@ -566,8 +608,8 @@ function mdsAccountingSlide(): string {
   return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Accounting &amp; Reporting Proof</div><p class="body-text" style="margin-bottom:16px">Camelot's accounting package is built around board-ready monthly reporting, MDS workflows, clean backup, in-house CPA oversight, and a predictable reporting cadence.</p><div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:18px"><div class="gold-card"><div style="height:58px;margin-bottom:12px"><img src="${MDS_LOGO_IMAGE}" alt="MDS property management software" style="max-width:230px;height:58px;object-fit:contain"></div><div class="sub-heading" style="font-size:20px">Monthly Package Includes</div>${MDS_REPORT_PROOF_POINTS.map(item => `<div class="check"><span>&#10003;</span><div>${item}</div></div>`).join('')}<div class="check"><span>&#10003;</span><div>In-house CPA, controller, account managers, and bookkeepers supporting tax returns, collections, budgets, and custom board reports.</div></div></div><div><div class="visual-card" style="padding:18px;margin-bottom:14px"><div class="sub-heading" style="font-size:18px">Reporting Cadence</div>${[['Close + reconciliation', 80], ['Board package QA', 88], ['Management report delivery by 20th-25th', 96], ['Follow-up action list', 76]].map(([label, pct]) => `<div style="margin-bottom:13px"><div style="font-size:12px;font-weight:800;color:#1a2744">${label}</div><div class="mini-bar"><span style="width:${pct}%"></span></div></div>`).join('')}</div><div class="gold-card"><div class="sub-heading" style="font-size:18px">Why It Matters</div><p class="small">Boards should not chase basic financial answers. Camelot can deliver recurring financials, budget comparisons, arrears tracking, disbursement backup, paid-invoice images, and accounting advisory so meetings focus on decisions instead of missing data.</p></div></div></div><div class="source-note">Sources: MDS sample report packages uploaded by Camelot | monthly reporting cadence supplied by Camelot.</div></div></div>`;
 }
 
-function onboardingChecklistSlide(): string {
-  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Onboarding Checklist</div><p class="body-text" style="margin-bottom:16px">The transition is treated like an operating handoff, not just a contract start date.</p><div style="display:grid;grid-template-columns:1fr .9fr;gap:18px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${ONBOARDING_CHECKLIST.map((item, idx) => `<div class="gold-card" style="padding:13px 14px"><div style="font-size:11px;color:#B8973A;font-weight:900;letter-spacing:1px;margin-bottom:3px">STEP ${idx + 1}</div><div style="font-size:13px;font-weight:800;color:#1a2744;line-height:1.35">${item}</div></div>`).join('')}</div><div class="visual-card" style="padding:20px"><div class="sub-heading" style="font-size:20px">90-Day Transition Rhythm</div>${[['Month 1 - Assessment', 34], ['Month 2 - Stabilization', 67], ['Month 3 - Optimization', 100]].map(([label, pct]) => `<div style="margin:20px 0"><div style="font-size:13px;font-weight:900;color:#1a2744">${label}</div><div class="mini-bar" style="height:14px"><span style="width:${pct}%"></span></div></div>`).join('')}<div class="small">Designed to show reliability quickly: files, money, staff, vendors, resident experience, and compliance all get organized into a visible plan.</div></div></div><div class="source-note">Sources: Camelot transition procedures, rental portfolio transition case-study workflow, and Jackie 90-day onboarding model.</div></div></div>`;
+function onboardingChecklistSlide(d: MasterReportData): string {
+  return `<div class="slide"><div class="pad">${logoBadge()}<div class="section-title">Onboarding Checklist</div><p class="body-text" style="margin-bottom:16px">The transition is treated like an operating handoff, not just a contract start date.</p><div style="display:grid;grid-template-columns:1fr .9fr;gap:18px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${ONBOARDING_CHECKLIST.map((item, idx) => `<div class="gold-card" style="padding:13px 14px"><div style="font-size:11px;color:#B8973A;font-weight:900;letter-spacing:1px;margin-bottom:3px">STEP ${idx + 1}</div><div style="font-size:13px;font-weight:800;color:#1a2744;line-height:1.35">${item}</div></div>`).join('')}</div><div style="display:grid;gap:10px"><div class="visual-card" style="padding:12px">${contextualImageCard(d, 2, 'Subject property or neighborhood image used to anchor transition planning', 142)}</div><div class="visual-card" style="padding:18px"><div class="sub-heading" style="font-size:20px">90-Day Transition Rhythm</div>${[['Month 1 - Assessment', 34], ['Month 2 - Stabilization', 67], ['Month 3 - Optimization', 100]].map(([label, pct]) => `<div style="margin:12px 0"><div style="font-size:13px;font-weight:900;color:#1a2744">${label}</div><div class="mini-bar" style="height:12px"><span style="width:${pct}%"></span></div></div>`).join('')}<div class="small">Designed to show reliability quickly: files, money, staff, vendors, resident experience, and compliance all get organized into a visible plan.</div></div></div></div><div class="source-note">Sources: Camelot transition procedures, rental portfolio transition case-study workflow, and Jackie 90-day onboarding model.</div></div></div>`;
 }
 
 function standardAgreementSlide(): string {
@@ -755,14 +797,14 @@ export function generateFirstEmailIntroReport(d: MasterReportData): string {
   const landmarks = landmarkLabels(d);
   const slides = `
 <div class="slide slide-dark"><div style="position:absolute;inset:0;background:#1f303d"><img src="${subjectImage}" alt="${escapeHtml(d.buildingName || d.address)} subject property image" style="width:100%;height:100%;object-fit:cover;opacity:.56" onerror="this.style.display='none'"></div><div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(34,47,58,.98) 0%,rgba(34,47,58,.74) 48%,rgba(34,47,58,.34) 100%)"></div><div style="position:absolute;right:62px;bottom:58px;width:410px;display:grid;grid-template-columns:1fr 1fr;gap:10px;z-index:2"><div style="height:150px;border:1px solid rgba(244,210,106,.55);box-shadow:0 18px 40px rgba(0,0,0,.28);overflow:hidden;background:#111">${rawIframeFrame(placeEmbedUrl(d), `${neighborhoodName(d)} neighborhood map`)}</div><div style="height:150px;border:1px solid rgba(244,210,106,.55);box-shadow:0 18px 40px rgba(0,0,0,.28);overflow:hidden;background:#111">${rawIframeFrame(directionsEmbedUrl(d), 'Camelot route map')}</div></div><div class="pad" style="position:relative;z-index:3">${logoBadge()}<div style="height:100%;display:flex;flex-direction:column;justify-content:center;max-width:720px"><div style="font-size:13px;color:#B8973A;text-transform:uppercase;letter-spacing:2.5px;font-weight:800">First Email Intro - Camelot Property Management</div><h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:68px;line-height:.95;color:#F4D26A;font-style:italic;margin:12px 0">${d.buildingName || d.address}</h1><p style="font-size:20px;color:rgba(255,255,255,.84);line-height:1.55">A concise Camelot introduction with property imagery, neighborhood context, and a clear next step.</p><div style="margin-top:18px;max-width:620px;border-left:3px solid #B8973A;padding:10px 14px;background:rgba(255,255,255,.08);font-size:11px;color:rgba(255,255,255,.76);line-height:1.55">${JACKIE_INTELLIGENT_REPORT_NOTE}</div><p style="font-size:12px;color:rgba(255,255,255,.58);margin:26px 0 0">${d.address} - ${neighborhoodName(d)} - ${today}</p>${preparedForBlock(d)}</div></div></div>
-<div class="slide"><div class="pad" style="padding:42px 76px">${logoBadge()}<div class="section-title" style="margin-bottom:14px">Cover Letter</div><div style="max-width:900px;background:#fff;border:1px solid rgba(184,151,58,.38);border-left:5px solid #B8973A;border-radius:6px;padding:26px 34px;box-shadow:0 14px 28px rgba(26,31,54,.06)">${coverLetterParagraphs(d)}</div><div class="source-note">Prepared by Camelot Property Management for ${d.buildingName || d.address} - ${today}</div></div></div>
+<div class="slide"><div class="pad" style="padding:38px 64px 40px">${logoBadge()}<div class="section-title" style="margin-bottom:12px">Cover Letter</div><div style="display:grid;grid-template-columns:1.14fr .86fr;gap:16px;align-items:stretch"><div style="background:#fff;border:1px solid rgba(184,151,58,.38);border-left:5px solid #B8973A;border-radius:6px;padding:21px 28px;box-shadow:0 14px 28px rgba(26,31,54,.06);max-height:548px;overflow:hidden">${coverLetterParagraphs(d)}</div><div style="display:grid;gap:10px">${contextualImageCard(d, 1, 'Additional property / neighborhood context for the first discussion', 254)}${localServicesCard(d, 208)}</div></div><div class="source-note">Prepared by Camelot Property Management for ${d.buildingName || d.address} - ${today}</div></div></div>
 <div class="slide"><div class="pad" style="padding:40px 64px">${logoBadge()}<div class="section-title" style="margin-bottom:13px">Property Snapshot &amp; New York Reach</div><div style="display:grid;grid-template-columns:.9fr 1.1fr;gap:15px"><div><div class="gold-card" style="margin-bottom:10px;padding:15px 16px"><div class="sub-heading">Property Snapshot</div><table><tr><td>Units</td><td>${fmtN(d.units)}</td></tr><tr><td>Type</td><td>${d.propertyType || 'Residential'}</td></tr><tr><td>Year Built</td><td>${d.yearBuilt || 'Verify'}</td></tr><tr><td>Current Management</td><td>${d.managementCompany || 'To verify'}</td></tr></table></div><div class="gold-card" style="margin-bottom:10px;padding:15px 16px"><div class="sub-heading">Initial Read</div><p class="body-text" style="font-size:14px;line-height:1.5">${hasRisks ? `Camelot identified public-record signals worth reviewing: ${d.violationsOpen} open HPD violation(s), ${fmt$(d.ecbPenaltyBalance)} ECB balance, and ${d.ll97?.period1Penalty ? fmt$(d.ll97.period1Penalty) + ' LL97 modeled exposure' : 'LL97 context to verify'}.` : `The building appears suitable for a boutique, high-attention management review focused on financial clarity, resident experience, vendor control, and board support.`}</p></div><div class="gold-card" style="padding:11px 14px"><div class="sub-heading" style="font-size:15px;margin-bottom:5px">Nearby Context</div>${landmarks.slice(0, 3).map(l => `<div class="check" style="font-size:12px;margin-bottom:6px"><span>&#10003;</span><div>${l}</div></div>`).join('')}</div></div><div style="display:grid;grid-template-columns:1fr;gap:9px">${propertyImageCard(d, `${d.buildingName || d.address} - verified property image`, 210)}${propertyPhotoGallery(d, 4)}${iframeCard(directionsEmbedUrl(d), 'Camelot HQ to subject property route map', `Camelot HQ at 57 West 57th Street to ${d.buildingName || d.address}`, 122)}</div></div><div class="source-note">Sources: Google Maps route, neighborhood context, Camelot property intelligence, and uploaded/verified property assets.</div></div></div>
 ${camelotOnePageSlide(d)}
 ${mdsAccountingSlide()}
 ${residentPortalSlide(d)}
-${onboardingChecklistSlide()}
-<div class="slide slide-dark"><div class="pad">${logoBadge()}<div style="height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;max-width:980px;margin:0 auto"><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:48px;font-style:italic;color:#B8973A;margin-bottom:14px">Proposed Next Step</div><p style="font-size:20px;line-height:1.55;color:rgba(255,255,255,.86);margin-bottom:24px">We would welcome the opportunity to meet with the board, ownership, or decision-makers for ${d.buildingName || d.address}.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">Zoom or Google Meet</div><p class="small">Best for a quick first screen share, report review, and Q&amp;A.</p></div><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">Phone Call</div><p class="small">A focused 15-minute call to confirm priorities and timing.</p></div><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">In-Person Meeting</div><p class="small">Camelot can meet near the building or at our New York office.</p></div></div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px auto 22px"><a href="https://calendar.google.com/calendar/u/0/r/eventedit?text=Camelot+Management+Discussion+-+${encodeURIComponent(d.buildingName || d.address)}&details=${encodeURIComponent('Please generate a Google Meet link for this Camelot management discussion.\n\nSubject property: ' + (d.buildingName || d.address))}&add=${CAMELOT_CONTACT_EMAIL}" target="_blank" style="background:#B8973A;color:#fff;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Google Meet</a><a href="https://zoom.us/start/videomeeting" target="_blank" rel="noopener" style="background:#2D8CFF;color:#fff;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Zoom</a><a href="tel:+12122069939;ext=701" style="background:#fff;color:#314655;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Call 212-206-9939 x701</a></div><div style="font-size:15px;color:rgba(255,255,255,.82);line-height:1.9"><strong style="color:#B8973A">${CAMELOT_CONTACT_NAME}, ${CAMELOT_CONTACT_TITLE}</strong><br>${CAMELOT_PHONE}<br>${CAMELOT_CONTACT_EMAIL} | ${CAMELOT_GENERAL_EMAIL}<br>${CAMELOT_WEBSITE}<br>${CAMELOT_OFFICE_ADDRESS}</div></div></div></div>`;
-  return deckShell(`Camelot First Email Intro - ${d.buildingName || d.address}`, slides);
+${onboardingChecklistSlide(d)}
+<div class="slide slide-dark"><div style="position:absolute;inset:0"><img src="${rotatingPropertyImage(d, 3)}" alt="${escapeHtml(d.buildingName || d.address)} closing visual context" style="width:100%;height:100%;object-fit:cover;opacity:.26" onerror="this.style.display='none'"></div><div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(34,47,58,.98),rgba(34,47,58,.9),rgba(34,47,58,.68))"></div><div class="pad" style="position:relative;z-index:3">${logoBadge()}<div style="height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;max-width:980px;margin:0 auto"><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:48px;font-style:italic;color:#B8973A;margin-bottom:14px">Proposed Next Step</div><p style="font-size:20px;line-height:1.55;color:rgba(255,255,255,.86);margin-bottom:24px">We would welcome the opportunity to meet with the board, ownership, or decision-makers for ${d.buildingName || d.address}.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">Zoom or Google Meet</div><p class="small">Best for a quick first screen share, report review, and Q&amp;A.</p></div><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">Phone Call</div><p class="small">A focused 15-minute call to confirm priorities and timing.</p></div><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">In-Person Meeting</div><p class="small">Camelot can meet near the building or at our New York office.</p></div></div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px auto 22px"><a href="https://calendar.google.com/calendar/u/0/r/eventedit?text=Camelot+Management+Discussion+-+${encodeURIComponent(d.buildingName || d.address)}&details=${encodeURIComponent('Please generate a Google Meet link for this Camelot management discussion.\n\nSubject property: ' + (d.buildingName || d.address))}&add=${CAMELOT_CONTACT_EMAIL}" target="_blank" style="background:#B8973A;color:#fff;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Google Meet</a><a href="https://zoom.us/start/videomeeting" target="_blank" rel="noopener" style="background:#2D8CFF;color:#fff;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Zoom</a><a href="tel:+12122069939;ext=701" style="background:#fff;color:#314655;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Call 212-206-9939 x701</a></div><div style="font-size:15px;color:rgba(255,255,255,.82);line-height:1.9"><strong style="color:#B8973A">${CAMELOT_CONTACT_NAME}, ${CAMELOT_CONTACT_TITLE}</strong><br>${CAMELOT_PHONE}<br>${CAMELOT_CONTACT_EMAIL} | ${CAMELOT_GENERAL_EMAIL}<br>${CAMELOT_WEBSITE}<br>${CAMELOT_OFFICE_ADDRESS}</div></div></div></div>`;
+  return deckShell(`Camelot First Email Intro - ${d.buildingName || d.address}`, enrichEveryOtherDeckPage(slides, d));
 }
 
 export function generateBoardMeetingDeck(d: MasterReportData): string {
@@ -987,6 +1029,9 @@ export function generatePitchReport(d: MasterReportData): string {
   .pill { display:inline-flex; align-items:center; border:1px solid rgba(184,151,58,0.45); background:rgba(184,151,58,0.10); color:#1a2744; border-radius:999px; padding:7px 11px; font-size:12px; font-weight:700; margin:0 8px 8px 0; }
   .photo-frame { position:relative; border-radius:18px; overflow:hidden; box-shadow:0 22px 48px rgba(0,0,0,0.28); border:1px solid rgba(184,151,58,0.55); }
   .photo-frame:after { content:''; position:absolute; inset:0; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14); pointer-events:none; }
+  .context-photo-chip { position:absolute;right:42px;bottom:42px;width:230px;height:132px;border:1px solid rgba(184,151,58,.42);border-radius:8px;overflow:hidden;background:#EDE9DF;box-shadow:0 14px 32px rgba(26,31,54,.16);z-index:3; }
+  .context-photo-chip img { width:100%;height:100%;object-fit:cover;display:block; }
+  .context-photo-chip-label { position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(26,39,68,.88),rgba(26,39,68,.24));color:#F4D26A;font-size:9px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;padding:18px 10px 8px;text-align:center; }
 </style>
 </head>
 <body>
@@ -1028,6 +1073,7 @@ export function generatePitchReport(d: MasterReportData): string {
     <div style="width:60px;height:3px;background:#B8973A;margin-bottom:30px"></div>
     <div style="font-size:18px;color:#4a5568;line-height:1.8;max-width:900px">${hookText}</div>
   </div>
+  ${everyOtherPageVisualChip(d, 1, 'Property / Neighborhood')}
 </div>
 
 <!-- SLIDE 3: The Property -->
@@ -1226,6 +1272,7 @@ export function generatePitchReport(d: MasterReportData): string {
       ${['Cleaner reporting', 'Lower avoidable costs', 'Better resident experience', 'Board-ready priorities'].map((item, idx) => `<div class="gold-card" style="padding:14px;margin:0;text-align:center"><div style="width:34px;height:34px;border-radius:50%;background:#B8973A;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-weight:900">${idx + 1}</div><div style="font-size:13px;font-weight:900;color:#1a2744">${item}</div></div>`).join('')}
     </div>
   </div>
+  ${everyOtherPageVisualChip(d, 2, 'Transition Context')}
 </div>
 
 <!-- SLIDE 11: Proposed Investment -->
@@ -1286,8 +1333,10 @@ export function generatePitchReport(d: MasterReportData): string {
 
 <!-- SLIDE 13: Next Steps (Dark) -->
 <div class="slide slide-dark">
+  <div style="position:absolute;inset:0"><img src="${rotatingPropertyImage(d, 3)}" alt="${escapeHtml(displayName)} neighborhood context" style="width:100%;height:100%;object-fit:cover;opacity:.22" onerror="this.style.display='none'"></div>
+  <div style="position:absolute;inset:0;background:rgba(52,68,79,.86)"></div>
   <div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div>
-  <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:60px">
+  <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:60px;position:relative;z-index:2">
     <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:52px;font-style:italic;color:#B8973A;margin-bottom:24px">Next Steps</div>
     <div style="font-size:18px;color:rgba(255,255,255,0.8);margin-bottom:40px">We welcome the opportunity to visit the property<br>and walk through our scope of work and proposed fee.</div>
     <div style="font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:20px;color:#B8973A;margin-bottom:16px">David Goldoff, Founder & President</div>
@@ -1307,8 +1356,10 @@ export function generatePitchReport(d: MasterReportData): string {
 
 <!-- SLIDE 14: Thank You (Dark) -->
 <div class="slide slide-dark">
+  <div style="position:absolute;inset:0"><img src="${neighborhoodMapImage(d, '1280x720')}" alt="${escapeHtml(displayName)} neighborhood map" style="width:100%;height:100%;object-fit:cover;opacity:.18" onerror="this.style.display='none'"></div>
+  <div style="position:absolute;inset:0;background:rgba(52,68,79,.88)"></div>
   <div class="logo-badge"><div class="logo-badge-text">CAMELOT<span class="logo-badge-sub">REALTY GROUP</span></div></div>
-  <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:60px">
+  <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:60px;position:relative;z-index:2">
     <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:52px;letter-spacing:12px;font-weight:400;margin-bottom:6px">C A M E L O T</div>
     <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;color:#B8973A;font-style:italic;margin-bottom:50px">Property Management</div>
     <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:52px;font-style:italic;color:#B8973A;margin-bottom:20px">Thank You</div>

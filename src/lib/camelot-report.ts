@@ -5646,6 +5646,7 @@ ${(() => {
 <div class="section section-cream">
 <div class="section-title">Ownership &amp; Financial History</div>
 <div class="section-sub">ACRIS official deed, mortgage, and party records plus NYC Department of Finance / PROS tax, assessment, exemption, abatement, and lien records</div>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 88, caption: 'Subject-property visuals retained through the ownership and finance review' })}
 <div style="background:#fff;border:1px solid #D5D0C6;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:12px 14px;margin:12px 0 16px">
 <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#A89035;font-weight:800;margin-bottom:6px">Required Official Source Stack</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -5680,6 +5681,7 @@ ${(() => {
 <div class="section section-white">
 <div class="section-title">Building Contacts &amp; Stakeholders</div>
 <div class="section-sub">Key decision-makers, personnel, governance, and professional services for ${d.buildingName}</div>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 84, caption: 'Property image context for stakeholder and management review' })}
 <div style="background:#fff;border:1px solid #D5D0C6;border-left:4px solid #A89035;border-radius:0 8px 8px 0;padding:12px 14px;margin:12px 0 16px">
 <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#A89035;font-weight:800;margin-bottom:6px">Stakeholder Data Sources</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px">
@@ -5997,6 +5999,7 @@ ${[
 <div class="section section-cream">
 <div class="section-title">Local Law &amp; Regulatory Compliance</div>
 <div class="section-sub">NYC local laws applicable to ${d.buildingName} based on building size, age, and type</div>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 82, caption: 'Visual property context paired with compliance and field review' })}
 
 <table class="invest-table">
 <thead><tr><th>Local Law</th><th>Requirement</th><th>Applicability to This Building</th><th>Status</th></tr></thead>
@@ -6090,6 +6093,7 @@ ${isSelfManaged ? `
 <div class="section section-white">
 <div class="section-title">Why Camelot</div>
 <div class="section-sub">The institutional power of a full-service firm. The accountability of a dedicated partner.</div>
+${renderSubjectPhotoStrip(d, { limit: 3, height: 86, caption: 'Property and neighborhood visuals remain part of the board-facing story' })}
 <table class="compare-table">
 <thead><tr><th>Large Firms</th><th>CAMELOT</th><th>Solo Operators</th></tr></thead>
 <tbody>
