@@ -7326,6 +7326,30 @@ function generateProposal() {
   var lotCode = bblRaw.length >= 10 ? String(parseInt(bblRaw.substring(6, 10), 10)) : '';
   var blockLotLabel = blockCode && lotCode ? 'Block ' + blockCode + ' / Lot ' + lotCode : (d.bbl || 'To be confirmed');
   var squareFeetLabel = d.buildingArea > 0 ? d.buildingArea.toLocaleString() + ' SF' : 'To be confirmed';
+  function filePart(value) {
+    return String(value || '')
+      .replace(/&amp;/g, 'and')
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 90);
+  }
+  var proposalDateStamp = new Date().toISOString().slice(0, 10);
+  var addressPart = addressClean || buildingNameClean || 'Property';
+  var namePart = buildingNameClean && buildingNameClean !== addressClean ? buildingNameClean : '';
+  var proposalFileBase = ['Proposal-of-Services', filePart(addressPart), filePart(namePart), proposalDateStamp].filter(Boolean).join('__');
+  var proposalHtmlFile = proposalFileBase + '.html';
+  var proposalPdfFile = proposalFileBase + '.pdf';
+  var contactEmail = '';
+  for (var i = 0; i < (d.boardMembers || []).length; i += 1) {
+    if (d.boardMembers[i] && d.boardMembers[i].email) {
+      contactEmail = d.boardMembers[i].email;
+      break;
+    }
+  }
+  var emailSubject = 'Proposal of Property Management Services - ' + addressPart;
+  var emailBody = 'Dear ' + greetingName + ',\\n\\nPlease find the Camelot Proposal of Property Management Services for ' + addressPart + '.\\n\\nSuggested PDF file name: ' + proposalPdfFile + '\\n\\nWarm regards,\\nDavid A. Goldoff\\nPresident\\nCamelot Property Management Services Corp.\\n(212) 206-9939 x701\\ninfo@camelot.nyc';
+  var emailHref = 'mailto:' + encodeURIComponent(contactEmail) + '?subject=' + encodeURIComponent(emailSubject) + '&body=' + encodeURIComponent(emailBody);
 
   // Dynamic pain points for Management Philosophy section
   var painPoints = [];
@@ -7338,10 +7362,10 @@ function generateProposal() {
     ? '<ul>' + painPoints.map(function(p){ return '<li>' + p + '</li>'; }).join('') + '</ul>'
     : '<p>While the building is in reasonable standing, there are always opportunities to improve operations, reduce costs, and enhance the experience for ' + ownerLabel + '.</p>';
 
-  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Services \u2014 ' + buildingNameClean + '</title>' +
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Services \u2014 ' + addressPart + ' \u2014 ' + proposalDateStamp + '</title>' +
   '<style>' +
   '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }' +
-  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.58; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1.08in .72in .68in; }' +
+  'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.58; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1.55in .72in .68in; }' +
   'h1 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 800; color: #111; text-align: center; margin: 20px 0 4px 0; letter-spacing: 1.2px; }' +
   'h2 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 800; color: #A89035; margin: 18px 0 7px 0; padding-bottom: 4px; border-bottom: 1.5px solid #A89035; text-transform: uppercase; letter-spacing: 0.7px; }' +
   'h3 { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 800; color: #111; margin: 13px 0 4px 0; }' +
@@ -7356,7 +7380,13 @@ function generateProposal() {
   '.fee-box { background: #F5F0E5; border-left: 3px solid #A89035; padding: 12px 16px; margin: 10px 0; }' +
   '.fee-box strong { color: #A89035; }' +
   '.price { color:#111; font-weight:900; text-decoration: underline; text-decoration-color:#A89035; text-underline-offset: 2px; }' +
-  '.proposal-header { position: fixed; top: 0; left: 0; right: 0; height: .9in; padding: .11in .55in .1in; border-bottom: 1px solid #D5D0C6; background: #fff; display:flex; align-items:center; justify-content:space-between; gap:18px; z-index: 10; }' +
+  '.proposal-action-bar { position: fixed; top: 0; left: 0; right: 0; min-height: 46px; padding: 8px 18px; background:#2C3240; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; z-index: 30; box-shadow:0 2px 12px rgba(0,0,0,.18); font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }' +
+  '.proposal-action-title { font-size:11px; letter-spacing:.35px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }' +
+  '.proposal-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }' +
+  '.proposal-action-btn { border:1px solid rgba(255,255,255,.25); border-radius:7px; padding:8px 12px; color:#fff; background:#3A4B5B; text-decoration:none; font-size:11px; font-weight:800; cursor:pointer; line-height:1; display:inline-flex; align-items:center; gap:6px; }' +
+  '.proposal-action-btn.gold { background:#A89035; border-color:#C9A12C; }' +
+  '.proposal-action-btn.light { background:#fff; color:#2C3240; border-color:#fff; }' +
+  '.proposal-header { position: fixed; top: 46px; left: 0; right: 0; height: .9in; padding: .11in .55in .1in; border-bottom: 1px solid #D5D0C6; background: #fff; display:flex; align-items:center; justify-content:space-between; gap:18px; z-index: 10; }' +
   '.proposal-header .brand-box { width: 1.9in; height: .68in; background:#C9A12C; overflow:hidden; border:1px solid #B48D22; display:flex; align-items:center; justify-content:center; }' +
   '.proposal-header .brand-box img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }' +
   '.proposal-header .hdr-contact { font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-size:8.8px; line-height:1.45; letter-spacing:.35px; color:#2C3240; text-align:right; }' +
@@ -7375,8 +7405,14 @@ function generateProposal() {
   'h2, h3, .fee-box, .phase, .fact-grid, .sig-row { break-inside: avoid; page-break-inside: avoid; }' +
   'table, tr, td, th { break-inside: avoid; page-break-inside: avoid; }' +
   '.signature-page { min-height: 8.2in; display:flex; flex-direction:column; justify-content:center; }' +
-  '@media print { @page { size: letter; margin: .72in .62in .58in; } body { padding: 1.05in 0 .55in; max-width: none; font-size: 11px; } .proposal-header,.proposal-footer{position:fixed} .proposal-header{height:.78in;padding:.08in 0 .08in}.proposal-footer{height:.34in;padding:.06in 0}.page-break{break-before:page;page-break-before:always} }' +
+  '@media print { @page { size: letter; margin: .72in .62in .58in; } body { padding: 1.05in 0 .55in; max-width: none; font-size: 11px; } .proposal-action-bar{display:none!important}.proposal-header,.proposal-footer{position:fixed} .proposal-header{top:0;height:.78in;padding:.08in 0 .08in}.proposal-footer{height:.34in;padding:.06in 0}.page-break{break-before:page;page-break-before:always} }' +
   '</style></head><body>' +
+  '<div class="proposal-action-bar no-print"><div class="proposal-action-title"><strong>Proposal of Services</strong> &middot; ' + addressPart + ' &middot; ' + proposalDateStamp + '</div><div class="proposal-actions">' +
+  '<button class="proposal-action-btn gold" onclick="window.print()">Print / Save PDF</button>' +
+  '<button class="proposal-action-btn light" onclick="window.print()">Save as PDF</button>' +
+  '<button class="proposal-action-btn" onclick="(function(){var blob=new Blob([document.documentElement.outerHTML],{type:&quot;text/html;charset=utf-8&quot;});var url=URL.createObjectURL(blob);var a=document.createElement(&quot;a&quot;);a.href=url;a.download=&quot;' + proposalHtmlFile + '&quot;;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},3000);})()">Download HTML</button>' +
+  '<a class="proposal-action-btn" href="' + emailHref + '">Email PDF Draft</a>' +
+  '</div></div>' +
   '<div class="proposal-header"><div class="brand-box"><img src="./images/camelot-gold-logo.png" alt="Camelot Realty Group" onerror="this.style.display=&quot;none&quot;"></div><div class="hdr-contact"><strong>Camelot Property Management Services Corp.</strong><br>57 West 57th Street, Suite 410, New York, NY 10019<br>Office: (212) 206-9939 x701 &middot; info@camelot.nyc<br>www.camelot.nyc</div></div>' +
   '<div class="proposal-footer"><span>Camelot Property Management Services Corp. &middot; ' + addressClean + '</span><span>Page <span class="page-num"></span></span></div>' +
 
@@ -7735,7 +7771,7 @@ function generateProposal() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'Proposal of Services - ' + buildingNameClean.replace(/[^a-z0-9]+/gi, '-') + '.html';
+  a.download = proposalHtmlFile;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
