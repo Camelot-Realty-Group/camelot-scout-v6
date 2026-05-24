@@ -6,6 +6,7 @@ import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
 import { openBrochureForPrint, downloadAsHTML, triggerCSVDownload, copyToClipboard } from '@/lib/pdf-generator';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import { formatLibraryDate, loadLocalJackieReportLibrary, packageLabelFor, removeJackieReportRecord, saveJackieReportRecord, type SavedJackieReport } from '@/lib/jackie-report-library';
 import toast from 'react-hot-toast';
 
 type EmailType = 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty';
@@ -24,84 +25,6 @@ type ReportCenterSavedInputs = {
   inquiryRole: string;
   inquiryNotes: string;
   selectedPackage: JackieReportPackage;
-};
-
-type SavedJackieReport = {
-  id: string;
-  reportNumber: string;
-  address: string;
-  buildingName: string;
-  borough?: string;
-  packageType: JackieReportPackage | 'appendix_full';
-  packageLabel: string;
-  filename: string;
-  html: string;
-  inquiryContact?: string;
-  inquiryEmail?: string;
-  inquiryPhone?: string;
-  focus: ReportFocusKey[];
-  generatedAt: string;
-};
-
-const JACKIE_REPORT_LIBRARY_KEY = 'camelot_generated_jackie_report_library_v1';
-
-const packageLabelFor = (packageType: SavedJackieReport['packageType']) => (
-  packageType === 'appendix_full'
-    ? 'Appendix: Full Jackie'
-    : JACKIE_REPORT_PACKAGES.find(pkg => pkg.key === packageType)?.label || 'Jackie Report'
-);
-
-const formatLibraryDate = (iso: string) => {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString([], {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-};
-
-const loadLocalJackieReportLibrary = (): SavedJackieReport[] => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const parsed = JSON.parse(localStorage.getItem(JACKIE_REPORT_LIBRARY_KEY) || sessionStorage.getItem(JACKIE_REPORT_LIBRARY_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    localStorage.removeItem(JACKIE_REPORT_LIBRARY_KEY);
-    return [];
-  }
-};
-
-const writeLocalJackieReportLibrary = (records: SavedJackieReport[]) => {
-  const trimmed = records.slice(0, 80);
-  try {
-    localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(trimmed));
-    return trimmed;
-  } catch {
-    const tighter = records.slice(0, 20);
-    try {
-      localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(tighter));
-      return tighter;
-    } catch {
-      try {
-        sessionStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(tighter));
-        return tighter;
-      } catch {
-        const metadataOnly = records.slice(0, 20).map(record => ({
-          ...record,
-          html: `<html><body><h1>${record.packageLabel}</h1><p>${record.address}</p><p>This report reference was saved, but browser storage was too full to retain the full HTML package. Re-run Jackie and download the report to preserve a file copy.</p></body></html>`,
-        }));
-        try {
-          localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(metadataOnly));
-        } catch {
-          // Keep the in-memory record list available for the current session even if browser storage is full.
-        }
-        return metadataOnly;
-      }
-    }
-  }
 };
 
 function ReleaseWorkflowPanel({
@@ -310,13 +233,14 @@ export default function ReportCenter() {
       packageLabel: packageLabelFor(packageType),
       filename,
       html,
+      dataSnapshot: reportData,
       inquiryContact: inquiryContact.trim() || undefined,
       inquiryEmail: inquiryEmail.trim() || undefined,
       inquiryPhone: inquiryPhone.trim() || undefined,
       focus: selectedFocus,
       generatedAt,
     };
-    const next = writeLocalJackieReportLibrary([record, ...loadLocalJackieReportLibrary()]);
+    const next = saveJackieReportRecord(record);
     setSavedReports(next);
     toast.success(`Saved to Generated Jackie Report Library: ${record.reportNumber}`);
     return record;
@@ -346,7 +270,7 @@ export default function ReportCenter() {
   };
 
   const deleteSavedReport = (id: string) => {
-    const next = writeLocalJackieReportLibrary(loadLocalJackieReportLibrary().filter(record => record.id !== id));
+    const next = removeJackieReportRecord(id);
     setSavedReports(next);
     toast.success('Removed saved Jackie report');
   };

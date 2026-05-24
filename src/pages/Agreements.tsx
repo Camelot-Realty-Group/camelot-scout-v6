@@ -3,16 +3,92 @@ import { Sword, FileText, Download, Eye, Loader2, Sparkles, ChevronDown } from '
 import { generateAgreement, DEFAULT_INPUT, ASSET_CLASS_LABELS, type AgreementInput, type AssetClass } from '@/lib/excalibur';
 import { buildMasterReport, type MasterReportData } from '@/lib/camelot-report';
 import { openBrochureForPrint, downloadAsHTML } from '@/lib/pdf-generator';
+import { formatLibraryDate, loadLocalJackieReportLibrary, type SavedJackieReport } from '@/lib/jackie-report-library';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+
+type SavedAgreementRecord = {
+  id: string;
+  agreementNumber: string;
+  propertyAddress: string;
+  clientName: string;
+  filename: string;
+  html: string;
+  inputSnapshot: AgreementInput;
+  linkedJackieReportNumber?: string;
+  generatedAt: string;
+};
+
+const AGREEMENT_LIBRARY_KEY = 'camelot_generated_management_agreement_library_v1';
+
+const normalizeAddress = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const loadAgreementLibrary = (): SavedAgreementRecord[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(AGREEMENT_LIBRARY_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    localStorage.removeItem(AGREEMENT_LIBRARY_KEY);
+    return [];
+  }
+};
+
+const writeAgreementLibrary = (records: SavedAgreementRecord[]) => {
+  const trimmed = records.slice(0, 80);
+  localStorage.setItem(AGREEMENT_LIBRARY_KEY, JSON.stringify(trimmed));
+  return trimmed;
+};
+
+const inferAssetClass = (d: MasterReportData): AssetClass => {
+  const text = `${d.propertyType} ${d.buildingClass} ${d.buildingName}`.toLowerCase();
+  if (/co-?op|cooperative|tenancy/.test(text)) return 'coop';
+  if (/condo|hoa|association/.test(text)) return 'condo';
+  if (/office/.test(text)) return 'office';
+  if (/retail|store|commercial/.test(text)) return 'retail';
+  return 'rental';
+};
+
+const agreementFilename = (input: AgreementInput, extension = 'html') => {
+  const subject = input.propertyAddress || input.clientName || 'Draft';
+  const date = new Date().toISOString().slice(0, 10);
+  return `Camelot-Property-Management-Agreement-${subject.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '')}-${date}.${extension}`;
+};
 
 export default function Agreements() {
   const [input, setInput] = useState<AgreementInput>({ ...DEFAULT_INPUT });
   const [jackieLoading, setJackieLoading] = useState(false);
   const [jackieData, setJackieData] = useState<MasterReportData | null>(null);
   const [generated, setGenerated] = useState(false);
+  const [linkedJackieReport, setLinkedJackieReport] = useState<SavedJackieReport | null>(null);
+  const [selectedArchiveId, setSelectedArchiveId] = useState('');
+  const [jackieArchive, setJackieArchive] = useState<SavedJackieReport[]>(() => loadLocalJackieReportLibrary());
+  const [savedAgreements, setSavedAgreements] = useState<SavedAgreementRecord[]>(() => loadAgreementLibrary());
 
   const update = (patch: Partial<AgreementInput>) => setInput(prev => ({ ...prev, ...patch }));
+
+  const applyJackieData = useCallback((data: MasterReportData, source?: SavedJackieReport | null) => {
+    setJackieData(data);
+    setLinkedJackieReport(source || null);
+    const assetClass = inferAssetClass(data);
+    const intelligenceMonthly = data.tieredPricing?.intelligence?.monthly || data.monthlyFee || null;
+    update({
+      jackieData: data,
+      assetClass,
+      selectedTier: 'intelligence',
+      tieredPricing: data.tieredPricing,
+      customMonthlyFee: data.tieredPricing?.intelligence ? null : intelligenceMonthly,
+      units: data.units || input.units,
+      blockLot: data.bbl ? `BBL: ${data.bbl}` : input.blockLot,
+      isRentStabilized: data.isRentStabilized || input.isRentStabilized,
+      buildingType: data.propertyType ? `${data.units || input.units || ''} ${data.propertyType}${data.isRentStabilized ? ' · Rent Stabilized' : ''}`.trim() : input.buildingType,
+      propertyAddress: data.address || input.propertyAddress,
+      propertyCity: data.borough ? 'New York' : input.propertyCity,
+      propertyState: data.borough ? 'NY' : input.propertyState,
+      clientName: input.clientName || (assetClass === 'coop' ? 'Shareholders' : ''),
+      clientEntityName: input.clientEntityName || data.dofOwner || '',
+    });
+  }, [input.units, input.blockLot, input.isRentStabilized, input.buildingType, input.propertyAddress, input.propertyCity, input.propertyState, input.clientName, input.clientEntityName]);
 
   // Auto-populate from Jackie
   const pullFromJackie = useCallback(async () => {
@@ -41,26 +117,102 @@ export default function Agreements() {
     }
   }, [input.propertyAddress, input.units, input.blockLot, input.isRentStabilized, input.buildingType]);
 
+  const pullFromJackieArchiveAware = useCallback(async () => {
+    if (!input.propertyAddress.trim()) {
+      toast.error('Enter a property address first');
+      return;
+    }
+    setJackieLoading(true);
+    try {
+      const archive = loadLocalJackieReportLibrary();
+      setJackieArchive(archive);
+      const query = normalizeAddress(input.propertyAddress.trim());
+      const archived = archive.find(record =>
+        record.dataSnapshot && (normalizeAddress(record.address).includes(query) || query.includes(normalizeAddress(record.address)))
+      );
+      if (archived?.dataSnapshot) {
+        applyJackieData(archived.dataSnapshot, archived);
+        toast.success(`Loaded archived Jackie report ${archived.reportNumber}`);
+        return;
+      }
+      const data = await buildMasterReport(input.propertyAddress.trim());
+      applyJackieData(data, null);
+      toast.success(`Pulled fresh Jackie data for ${data.buildingName || input.propertyAddress}`);
+    } catch (err) {
+      toast.error('Failed to pull Jackie data - fill in manually');
+      console.error(err);
+    } finally {
+      setJackieLoading(false);
+    }
+  }, [input.propertyAddress, applyJackieData]);
+
+  const loadArchivedJackie = () => {
+    const record = jackieArchive.find(item => item.id === selectedArchiveId);
+    if (!record?.dataSnapshot) {
+      toast.error('Choose a saved Jackie report with a data snapshot');
+      return;
+    }
+    applyJackieData(record.dataSnapshot, record);
+    toast.success(`Agreement fields loaded from ${record.reportNumber}`);
+  };
+
+  const archiveAgreement = (html: string) => {
+    const generatedAt = new Date().toISOString();
+    const agreementNumber = `AGMT-${generatedAt.slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-6)}`;
+    const record: SavedAgreementRecord = {
+      id: agreementNumber,
+      agreementNumber,
+      propertyAddress: input.propertyAddress,
+      clientName: input.clientName || input.clientEntityName || 'Draft',
+      filename: agreementFilename(input),
+      html,
+      inputSnapshot: input,
+      linkedJackieReportNumber: linkedJackieReport?.reportNumber,
+      generatedAt,
+    };
+    const next = writeAgreementLibrary([record, ...loadAgreementLibrary()]);
+    setSavedAgreements(next);
+    return record;
+  };
+
   // Generate agreement
   const handleGenerate = () => {
     if (!input.clientName.trim() && !input.propertyAddress.trim()) {
       toast.error('Enter at least a client name or address');
       return;
     }
+    const html = generateAgreement(input);
+    const record = archiveAgreement(html);
     setGenerated(true);
-    toast.success('Agreement generated');
+    toast.success(`Agreement generated and archived: ${record.agreementNumber}`);
   };
 
   const handlePreview = () => {
     const html = generateAgreement(input);
-    openBrochureForPrint(html, `Camelot-Agreement-${input.clientName || 'Draft'}`);
+    const record = archiveAgreement(html);
+    openBrochureForPrint(html, record.filename.replace(/\.html$/i, '.pdf'));
   };
 
   const handleDownload = () => {
     const html = generateAgreement(input);
-    const filename = `Camelot-Agreement-${(input.clientName || 'Draft').replace(/[^a-zA-Z0-9]/g, '-')}.html`;
+    const record = archiveAgreement(html);
+    const filename = record.filename;
     downloadAsHTML(html, filename);
-    toast.success('Agreement downloaded');
+    toast.success(`Agreement downloaded and archived: ${record.agreementNumber}`);
+  };
+
+  const openSavedAgreement = (record: SavedAgreementRecord) => {
+    openBrochureForPrint(record.html, record.filename.replace(/\.html$/i, '.pdf'));
+  };
+
+  const downloadSavedAgreement = (record: SavedAgreementRecord) => {
+    downloadAsHTML(record.html, record.filename);
+  };
+
+  const loadSavedAgreementInputs = (record: SavedAgreementRecord) => {
+    setInput(record.inputSnapshot);
+    setGenerated(true);
+    toast.success(`Loaded editable inputs from ${record.agreementNumber}`);
   };
 
   // Auto-generate all fields from Jackie data
@@ -78,6 +230,8 @@ export default function Agreements() {
       propertyCity: 'New York',
       propertyState: 'NY',
       tieredPricing: d.tieredPricing,
+      selectedTier: 'intelligence',
+      customMonthlyFee: null,
     });
     toast.success('Auto-filled from Jackie data');
   };
@@ -137,13 +291,48 @@ export default function Agreements() {
               className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50"
             />
             <button
-              onClick={pullFromJackie}
+              onClick={pullFromJackieArchiveAware}
               disabled={jackieLoading || !input.propertyAddress.trim()}
               className="bg-camelot-gold/10 text-camelot-gold px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-camelot-gold/20 transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
             >
               {jackieLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
               Pull from Jackie
             </button>
+          </div>
+          <div className="bg-[#F8F3E3] border border-camelot-gold/30 rounded-lg p-3 mb-3">
+            <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+              <div className="flex-1">
+                <div className="text-xs font-bold text-[#5B4A1F] uppercase tracking-wider">Use Saved Jackie Report</div>
+                <p className="text-[11px] text-gray-600 mt-1">
+                  Agreements can pull the same archived Jackie facts, Intelligence pricing, ownership, BBL, and report context instead of starting from a separate script.
+                </p>
+              </div>
+              <select
+                value={selectedArchiveId}
+                onChange={e => setSelectedArchiveId(e.target.value)}
+                onFocus={() => setJackieArchive(loadLocalJackieReportLibrary())}
+                className="lg:w-80 px-3 py-2 border border-camelot-gold/30 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-camelot-gold/40"
+              >
+                <option value="">Select archived Jackie report</option>
+                {jackieArchive.filter(record => record.dataSnapshot).map(record => (
+                  <option key={record.id} value={record.id}>
+                    {record.reportNumber} - {record.address} - {formatLibraryDate(record.generatedAt)}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={loadArchivedJackie}
+                className="px-4 py-2 bg-[#3A4B5B] text-white rounded-lg text-xs font-semibold hover:bg-[#2d3d4d] whitespace-nowrap"
+              >
+                Load Archive
+              </button>
+            </div>
+            {linkedJackieReport && (
+              <div className="mt-2 text-[11px] text-emerald-700 font-semibold">
+                Linked to Jackie report {linkedJackieReport.reportNumber} - {linkedJackieReport.packageLabel}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-3 gap-3">
             <input type="text" placeholder="City" value={input.propertyCity} onChange={e => update({ propertyCity: e.target.value })} className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-camelot-gold/50" />
@@ -303,6 +492,52 @@ export default function Agreements() {
           </div>
         </div>
       )}
+
+      <div className="bg-white rounded-xl border shadow-sm p-6">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Generated Agreement Library</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Saved property management agreements retain the editable input snapshot and the linked Jackie report number when one was used.
+            </p>
+          </div>
+          <span className="text-xs text-camelot-gold font-bold">{savedAgreements.length} saved</span>
+        </div>
+        {savedAgreements.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+            No agreements archived yet. Generate, preview, or download an agreement to create a record.
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+            {savedAgreements.map(record => (
+              <div key={record.id} className="rounded-lg border border-gray-200 p-4">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-camelot-gold font-bold">{record.agreementNumber}</div>
+                    <div className="text-sm font-bold text-gray-900 mt-1">{record.propertyAddress || 'Draft Agreement'}</div>
+                    <div className="text-xs text-gray-500">
+                      {record.clientName} · {formatLibraryDate(record.generatedAt)}
+                      {record.linkedJackieReportNumber ? ` · Jackie ${record.linkedJackieReportNumber}` : ''}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => loadSavedAgreementInputs(record)} className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">
+                      Edit Inputs
+                    </button>
+                    <button type="button" onClick={() => openSavedAgreement(record)} className="px-3 py-2 rounded-lg bg-[#3A4B5B] text-white text-xs font-semibold hover:bg-[#2d3d4d]">
+                      Open / Print
+                    </button>
+                    <button type="button" onClick={() => downloadSavedAgreement(record)} className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50">
+                      Download HTML
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 text-[11px] text-gray-400 truncate">Stored file: {record.filename}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
