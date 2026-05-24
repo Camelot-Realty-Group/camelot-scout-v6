@@ -13,6 +13,12 @@ type EmailType = 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty';
 const REPORT_FOCUS_OPTIONS = Object.values(REPORT_FOCUS_THEMES);
 const REPORT_CENTER_INPUT_SCOPE = 'jackie-report-center';
 const PHOTO_UPLOAD_LIMIT = 12;
+const PHOTO_MAX_SOURCE_BYTES = 18 * 1024 * 1024;
+const PHOTO_MAX_STORED_CHARS = 260_000;
+const PHOTO_INITIAL_MAX_SIDE = 1180;
+const PHOTO_MIN_MAX_SIDE = 520;
+const PHOTO_QUALITY_STEPS = [0.76, 0.68, 0.6, 0.52, 0.46];
+const PHOTO_PERSIST_CHAR_LIMIT = 3_200_000;
 
 type ReportCenterSavedInputs = {
   address: string;
@@ -398,12 +404,15 @@ export default function ReportCenter() {
   const persistUploadedPhotos = useCallback((photos: string[]) => {
     const key = photoStorageKey();
     if (!key) return;
+    const payload = JSON.stringify(photos);
     try {
-      localStorage.setItem(key, JSON.stringify(photos));
+      if (payload.length > PHOTO_PERSIST_CHAR_LIMIT) throw new Error('Photo payload too large for durable storage.');
+      localStorage.setItem(key, payload);
+      sessionStorage.removeItem(key);
       return;
     } catch {
       try {
-        sessionStorage.setItem(key, JSON.stringify(photos));
+        sessionStorage.setItem(key, payload);
         toast('Photos are saved for this browser session. Browser storage is full for permanent save.', { icon: 'Warning', duration: 5000 });
       } catch {
         toast('Photos loaded for this report, but browser storage is full.', { icon: 'Warning', duration: 5000 });
@@ -416,6 +425,10 @@ export default function ReportCenter() {
       reject(new Error(`${file.name} is HEIC/HEIF. Please export it as JPG or PNG first.`));
       return;
     }
+    if (file.size > PHOTO_MAX_SOURCE_BYTES) {
+      reject(new Error(`${file.name} is too large. Please use an image under 18MB or export a smaller JPG.`));
+      return;
+    }
     const reader = new FileReader();
     reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
     reader.onload = () => {
@@ -423,15 +436,34 @@ export default function ReportCenter() {
       const img = new Image();
       img.onerror = () => reject(new Error(`${file.name} could not be rendered by the browser. Try a JPG, PNG, or WEBP.`));
       img.onload = () => {
-        const maxSide = 1200;
-        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
         const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
         const ctx = canvas.getContext('2d');
         if (!ctx) return resolve(raw);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.78));
+        const sourceMaxSide = Math.max(img.width, img.height);
+        let bestDataUrl = '';
+
+        for (let maxSide = Math.min(PHOTO_INITIAL_MAX_SIDE, sourceMaxSide); maxSide >= PHOTO_MIN_MAX_SIDE; maxSide = Math.floor(maxSide * 0.82)) {
+          const scale = Math.min(1, maxSide / sourceMaxSide);
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          for (const quality of PHOTO_QUALITY_STEPS) {
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            bestDataUrl = dataUrl;
+            if (dataUrl.length <= PHOTO_MAX_STORED_CHARS) {
+              resolve(dataUrl);
+              return;
+            }
+          }
+        }
+
+        if (bestDataUrl) {
+          resolve(bestDataUrl);
+          return;
+        }
+        reject(new Error(`${file.name} could not be compressed for report use.`));
       };
       img.src = raw;
     };
@@ -448,25 +480,33 @@ export default function ReportCenter() {
       return;
     }
 
+    let loadingToast: string | undefined;
     try {
-      const dataUrls = await Promise.all(imageFiles.map(readPhotoAsDataUrl));
       const remainingSlots = Math.max(0, PHOTO_UPLOAD_LIMIT - uploadedPhotos.length);
       if (remainingSlots === 0) {
         toast.error(`Jackie can include up to ${PHOTO_UPLOAD_LIMIT} uploaded photos per report. Remove one before adding more.`);
         return;
       }
-      const acceptedUrls = dataUrls.slice(0, remainingSlots);
+      const filesToProcess = imageFiles.slice(0, remainingSlots);
+      loadingToast = toast.loading(`Preparing ${filesToProcess.length} photo(s) for Jackie...`);
+      const acceptedUrls: string[] = [];
+      for (const file of filesToProcess) {
+        acceptedUrls.push(await readPhotoAsDataUrl(file));
+      }
+      toast.dismiss(loadingToast);
+      loadingToast = undefined;
       const next = [...uploadedPhotos, ...acceptedUrls];
       setUploadedPhotos(next);
       persistUploadedPhotos(next);
       toast.success(`${acceptedUrls.length} photo(s) uploaded`);
-      if (dataUrls.length > remainingSlots) {
+      if (imageFiles.length > remainingSlots) {
         toast(`Only the first ${remainingSlots} photo(s) were added. Limit is ${PHOTO_UPLOAD_LIMIT}.`, { icon: 'Warning', duration: 4500 });
       }
     } catch (err) {
       console.error('Photo upload failed:', err);
       toast.error(err instanceof Error ? err.message : 'Photo upload failed. Try a smaller JPG or PNG.');
     } finally {
+      if (loadingToast) toast.dismiss(loadingToast);
       e.target.value = '';
     }
   };
