@@ -26,6 +26,84 @@ type ReportCenterSavedInputs = {
   selectedPackage: JackieReportPackage;
 };
 
+type SavedJackieReport = {
+  id: string;
+  reportNumber: string;
+  address: string;
+  buildingName: string;
+  borough?: string;
+  packageType: JackieReportPackage | 'appendix_full';
+  packageLabel: string;
+  filename: string;
+  html: string;
+  inquiryContact?: string;
+  inquiryEmail?: string;
+  inquiryPhone?: string;
+  focus: ReportFocusKey[];
+  generatedAt: string;
+};
+
+const JACKIE_REPORT_LIBRARY_KEY = 'camelot_generated_jackie_report_library_v1';
+
+const packageLabelFor = (packageType: SavedJackieReport['packageType']) => (
+  packageType === 'appendix_full'
+    ? 'Appendix: Full Jackie'
+    : JACKIE_REPORT_PACKAGES.find(pkg => pkg.key === packageType)?.label || 'Jackie Report'
+);
+
+const formatLibraryDate = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleString([], {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+};
+
+const loadLocalJackieReportLibrary = (): SavedJackieReport[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(JACKIE_REPORT_LIBRARY_KEY) || sessionStorage.getItem(JACKIE_REPORT_LIBRARY_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    localStorage.removeItem(JACKIE_REPORT_LIBRARY_KEY);
+    return [];
+  }
+};
+
+const writeLocalJackieReportLibrary = (records: SavedJackieReport[]) => {
+  const trimmed = records.slice(0, 80);
+  try {
+    localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(trimmed));
+    return trimmed;
+  } catch {
+    const tighter = records.slice(0, 20);
+    try {
+      localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(tighter));
+      return tighter;
+    } catch {
+      try {
+        sessionStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(tighter));
+        return tighter;
+      } catch {
+        const metadataOnly = records.slice(0, 20).map(record => ({
+          ...record,
+          html: `<html><body><h1>${record.packageLabel}</h1><p>${record.address}</p><p>This report reference was saved, but browser storage was too full to retain the full HTML package. Re-run Jackie and download the report to preserve a file copy.</p></body></html>`,
+        }));
+        try {
+          localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(metadataOnly));
+        } catch {
+          // Keep the in-memory record list available for the current session even if browser storage is full.
+        }
+        return metadataOnly;
+      }
+    }
+  }
+};
+
 function ReleaseWorkflowPanel({
   qa,
   onPreview,
@@ -139,6 +217,7 @@ export default function ReportCenter() {
   const [inquiryRole, setInquiryRole] = useState('');
   const [inquiryNotes, setInquiryNotes] = useState('');
   const [selectedPackage, setSelectedPackage] = useState<JackieReportPackage>('board_meeting_deck');
+  const [savedReports, setSavedReports] = useState<SavedJackieReport[]>(() => loadLocalJackieReportLibrary());
   const photoInputRef = useRef<HTMLInputElement | null>(null);
 
   const buildReportFocus = useCallback((): ReportFocusInput => ({
@@ -213,11 +292,71 @@ export default function ReportCenter() {
     }
   }, [address, borough, buildReportFocus, buildSavedInputs]);
 
+  const archiveJackieReport = useCallback((
+    reportData: MasterReportData,
+    packageType: JackieReportPackage,
+    html: string,
+    filename: string,
+  ) => {
+    const generatedAt = new Date().toISOString();
+    const reportNumber = `JACKIE-${generatedAt.slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-6)}`;
+    const record: SavedJackieReport = {
+      id: `${reportNumber}-${packageType}`,
+      reportNumber,
+      address: reportData.address,
+      buildingName: reportData.buildingName || reportData.address,
+      borough: reportData.borough,
+      packageType,
+      packageLabel: packageLabelFor(packageType),
+      filename,
+      html,
+      inquiryContact: inquiryContact.trim() || undefined,
+      inquiryEmail: inquiryEmail.trim() || undefined,
+      inquiryPhone: inquiryPhone.trim() || undefined,
+      focus: selectedFocus,
+      generatedAt,
+    };
+    const next = writeLocalJackieReportLibrary([record, ...loadLocalJackieReportLibrary()]);
+    setSavedReports(next);
+    toast.success(`Saved to Generated Jackie Report Library: ${record.reportNumber}`);
+    return record;
+  }, [inquiryContact, inquiryEmail, inquiryPhone, selectedFocus]);
+
+  const openSavedReport = (record: SavedJackieReport) => {
+    openBrochureForPrint(record.html, record.filename.replace(/\.html$/i, '.pdf'));
+  };
+
+  const downloadSavedReport = (record: SavedJackieReport) => {
+    downloadAsHTML(record.html, record.filename);
+  };
+
+  const copySavedReportReference = async (record: SavedJackieReport) => {
+    const lines = [
+      `Report #: ${record.reportNumber}`,
+      `Address: ${record.address}`,
+      `Package: ${record.packageLabel}`,
+      `Generated: ${formatLibraryDate(record.generatedAt)}`,
+      record.inquiryContact ? `Contact: ${record.inquiryContact}` : '',
+      record.inquiryEmail ? `Email: ${record.inquiryEmail}` : '',
+      record.inquiryPhone ? `Phone: ${record.inquiryPhone}` : '',
+      `File: ${record.filename}`,
+    ].filter(Boolean).join('\n');
+    const ok = await copyToClipboard(lines);
+    if (ok) toast.success('Jackie report reference copied');
+  };
+
+  const deleteSavedReport = (id: string) => {
+    const next = writeLocalJackieReportLibrary(loadLocalJackieReportLibrary().filter(record => record.id !== id));
+    setSavedReports(next);
+    toast.success('Removed saved Jackie report');
+  };
+
   const handlePreviewBrochure = () => {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateBrochureHTML(d);
     if (!verifyJackieRelease(d, html, 'internal')) return;
+    archiveJackieReport(d, 'appendix_full', html, buildJackieIntelReportFilename(d, 'html'));
     openBrochureForPrint(html, buildJackieIntelReportFilename(d, 'pdf'));
   };
 
@@ -233,6 +372,8 @@ export default function ReportCenter() {
     if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateSelectedPackageHTML(d);
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'pdf') : buildJackiePackageFilename(d, selectedPackage, 'pdf');
+    const htmlFilename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
+    archiveJackieReport(d, selectedPackage, html, htmlFilename);
     openBrochureForPrint(html, filename);
   };
 
@@ -242,6 +383,7 @@ export default function ReportCenter() {
     const releaseHtml = generateBrochureHTML(d);
     if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateFirstEmailIntroReport(d);
+    archiveJackieReport(d, 'first_email_intro', html, buildJackiePackageFilename(d, 'first_email_intro', 'html'));
     openBrochureForPrint(html, buildJackiePackageFilename(d, 'first_email_intro', 'pdf'));
   };
 
@@ -251,6 +393,7 @@ export default function ReportCenter() {
     const releaseHtml = generateBrochureHTML(d);
     if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateBoardMeetingDeck(d);
+    archiveJackieReport(d, 'board_meeting_deck', html, buildJackiePackageFilename(d, 'board_meeting_deck', 'html'));
     openBrochureForPrint(html, buildJackiePackageFilename(d, 'board_meeting_deck', 'pdf'));
   };
 
@@ -261,6 +404,7 @@ export default function ReportCenter() {
     if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateSelectedPackageHTML(d);
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
+    archiveJackieReport(d, selectedPackage, html, filename);
     downloadAsHTML(html, filename);
   };
 
@@ -270,6 +414,7 @@ export default function ReportCenter() {
     const email = generatePitchEmail(d);
     const html = generateSelectedPackageHTML(d);
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
+    archiveJackieReport(d, selectedPackage, html, filename);
     downloadAsHTML(html, filename);
     const subject = encodeURIComponent(`Introduction to Camelot Property Management regarding ${d.buildingName || d.address}`);
     const body = encodeURIComponent(
@@ -304,6 +449,7 @@ export default function ReportCenter() {
     if (!d) return;
     const html = generateBrochureHTML(d);
     if (!verifyJackieRelease(d, html)) return;
+    archiveJackieReport(d, 'appendix_full', html, buildJackieIntelReportFilename(d, 'html'));
     downloadAsHTML(html, buildJackieIntelReportFilename(d, 'html'));
   };
 
@@ -907,6 +1053,79 @@ export default function ReportCenter() {
                 <Link2 className="w-5 h-5" /> Push to HubSpot
               </button>
             </div>
+          </div>
+
+          {/* Generated Jackie Report Library */}
+          <div className="bg-white rounded-xl border p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Generated Jackie Report Library</h2>
+                <p className="text-xs text-gray-500 mt-1">
+                  Every Jackie preview, email intro, meeting agenda deck, appendix, or selected download is saved here with a report number, timestamp, contact, and reopen/download actions.
+                </p>
+              </div>
+              <div className="text-xs text-[#A89035] font-bold uppercase tracking-[0.16em]">
+                {savedReports.length} saved
+              </div>
+            </div>
+            {savedReports.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 p-5 text-sm text-gray-500 bg-gray-50">
+                No saved Jackie reports yet. Run a preview or download a package and Camelot OS will archive it here automatically.
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                {savedReports.map(record => (
+                  <div key={record.id} className="rounded-xl border border-gray-200 p-4">
+                    <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-[0.16em] text-[#A89035] font-bold">{record.reportNumber}</span>
+                          <span className="text-[10px] px-2 py-1 rounded-full bg-[#F8F3E3] text-[#5B4A1F] font-bold">{record.packageLabel}</span>
+                        </div>
+                        <h3 className="text-sm font-bold text-gray-900 mt-2">{record.buildingName}</h3>
+                        <p className="text-xs text-gray-500">{record.address}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Generated {formatLibraryDate(record.generatedAt)}
+                          {record.inquiryContact ? ` · For ${record.inquiryContact}` : ''}
+                          {record.inquiryEmail ? ` · ${record.inquiryEmail}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openSavedReport(record)}
+                          className="px-3 py-2 rounded-lg bg-[#3A4B5B] text-white text-xs font-semibold hover:bg-[#2d3d4d] flex items-center gap-2"
+                        >
+                          <Eye size={14} /> Open / Print
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => downloadSavedReport(record)}
+                          className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Download size={14} /> HTML
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => copySavedReportReference(record)}
+                          className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Copy size={14} /> Copy Ref
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteSavedReport(record.id)}
+                          className="px-3 py-2 rounded-lg border border-red-100 text-red-600 text-xs font-semibold hover:bg-red-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-[11px] text-gray-400 truncate">Stored file: {record.filename}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Building Details */}
