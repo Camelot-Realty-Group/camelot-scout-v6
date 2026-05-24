@@ -7432,15 +7432,17 @@ function generateProposal() {
   /* ══════════════════════════════════════════════════════════════ */
   /* DEDICATED MANAGEMENT TEAM */
   '<h2>Dedicated Management Team</h2>' +
-  '<p class="section-intro">Camelot assigns a named team so the board understands who is accountable for management, accounting, compliance, facilities, and transition follow-through. The objective is simple: give residents and board members real people behind the email address.</p>' +
+  '<p class="section-intro">Camelot assigns a role-based management bench so the board understands who is accountable for management, accounting, compliance, facilities, resident communication, technology, and transition follow-through without locking the proposal to individual staff names before final onboarding.</p>' +
   '<ul>' +
-  '<li><strong>On-Site Oversight</strong> \u2014 A Property Manager and Facilities Manager will visit the property regularly, with more frequent visits during the initial stabilization period to work closely with on-site staff, residents, and vendors.</li>' +
-  '<li><strong>Board Support</strong> \u2014 Valerie Fiume, Director of Condos &amp; Co-ops, will lead ' + (isBoard ? 'monthly board meetings' : 'ownership meetings') + ', assisted by your Property Manager and Camelot\u2019s administrative team.</li>' +
-  '<li><strong>Accounting</strong> \u2014 A dedicated account representative will handle financial reporting, budgeting, and cash management.</li>' +
-  '<li><strong>Project Management</strong> \u2014 Phil Paganelli, licensed CM, will oversee capital and construction projects.</li>' +
-  '<li><strong>Engineering Support</strong> \u2014 Provided through PVE Engineering, ensuring compliance and technical oversight.</li>' +
-  '<li><strong>CPA Coordination</strong> \u2014 Through Anthony Abruzzo, CPA, for audits and annual filings.</li>' +
-  '<li><strong>Insurance &amp; Mortgage Services</strong> \u2014 Via trusted insurance brokerages &amp; Meridian Capital Group for refinancing opportunities.</li>' +
+  '<li><strong>On-Site Oversight</strong> \u2014 Property managers and facility managers provide site visits, field follow-up, photo documentation, vendor coordination, and practical oversight of staff, residents, contractors, and recurring maintenance issues.</li>' +
+  '<li><strong>Board Support</strong> \u2014 A senior co-op / condo leadership role will lead ' + (isBoard ? 'board meetings' : 'ownership meetings') + ', support assistant managers when needed, coordinate action items, and enable AI-assisted meeting minutes, summaries, and follow-up tracking.</li>' +
+  '<li><strong>Dedicated AI Agent &amp; Administrative Layer</strong> \u2014 Camelot supports the management team with an AI administrative agent, third-party software, automation, and resident-portal workflows that help answer routine questions, route requests, track tickets, organize documents, and reduce avoidable back-and-forth.</li>' +
+  '<li><strong>Resident Management Services</strong> \u2014 Resident-facing tools may include a payment portal, work orders, administrative tickets, resident notices, board and staff file access, and a cloud depository for building documents available on demand to authorized residents, board members, and staff.</li>' +
+  '<li><strong>Accounting &amp; Licensed CPA Advisory</strong> \u2014 Accounting support covers financial reporting, bookkeeping workflows, cash management, budget preparation, tax-return coordination, audit support, and advisory review through licensed CPA resources where separately scoped.</li>' +
+  '<li><strong>Legal Advisory Role</strong> \u2014 Camelot can help issue-spot governance, contract, collection, notice, compliance, and closing matters and coordinate with counsel; formal legal work is separately engaged and approved.</li>' +
+  '<li><strong>Engineering Advisory Role</strong> \u2014 Engineering advisory support helps with local-law applicability, compliance planning, physical-condition review, and soft budgeting for repairs or capital work; formal engineering services are separately scoped.</li>' +
+  '<li><strong>Insurance &amp; Mortgage Services</strong> \u2014 Camelot works with licensed insurance and mortgage providers as strategic partners for coverage reviews, refinancing, credit lines, capital-improvement financing, and lender or carrier coordination where requested.</li>' +
+  '<li><strong>Project Management</strong> \u2014 Licensed, bonded project-management resources can help manage, direct, and lead capital improvements, bid leveling, vendor coordination, schedules, punch lists, change orders, closeout, and board reporting under a separate approved scope.</li>' +
   '</ul>' +
 
   '<div class="hr"></div>' +
