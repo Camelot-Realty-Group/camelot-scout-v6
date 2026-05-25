@@ -131,11 +131,13 @@ export default function Layout({ children, onStartTour }: LayoutProps) {
         className="flex items-center gap-3 px-4 py-5 border-b border-slate-200 hover:bg-[#F8F6EF] transition-colors cursor-pointer flex-shrink-0"
       >
         <img
-          src="/images/camelot-logo.png"
+          src="/images/camelot-gold-logo.png"
           alt="Camelot"
           className={cn(
             'flex-shrink-0 transition-all',
-            sidebarCollapsed && !mobileMenuOpen ? 'w-6 h-6 object-contain' : 'h-6 object-contain'
+            sidebarCollapsed && !mobileMenuOpen
+              ? 'w-9 h-9 rounded-lg object-cover shadow-sm'
+              : 'w-16 h-16 rounded-xl object-cover shadow-sm'
           )}
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
@@ -243,9 +245,9 @@ export default function Layout({ children, onStartTour }: LayoutProps) {
 
         <div className="flex items-center gap-2">
           <img
-            src="/images/camelot-logo.png"
+            src="/images/camelot-gold-logo.png"
             alt="Camelot"
-            className="h-5 object-contain"
+            className="h-9 w-9 rounded-lg object-cover shadow-sm"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
