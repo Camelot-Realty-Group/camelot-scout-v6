@@ -4,6 +4,8 @@ import PropertyCard from '@/components/PropertyCard';
 import PropertyDetail from '@/components/PropertyDetail';
 import type { Building, BuildingGrade } from '@/types';
 import { cn } from '@/lib/utils';
+import { openEmailDraft } from '@/lib/pdf-generator';
+import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import {
   LayoutGrid, List, Search, SlidersHorizontal, Download, GitBranch,
   Users, CheckSquare, Square, X,
@@ -60,6 +62,35 @@ export default function Results() {
 
   const handleBulkExport = () => {
     toast.success(`Exporting ${selectedBuildings.size} buildings...`);
+  };
+
+  const handlePropertyIntroEmail = (building: Building) => {
+    const contacts = building.contacts || [];
+    const recipients = Array.from(new Set(contacts.map((c) => c.email?.trim().toLowerCase()).filter(Boolean) as string[]));
+    const primaryContact = contacts.find((c) => c.email) || contacts[0];
+    const salutation = primaryContact?.name ? `Hi ${primaryContact.name.split(/\s+/)[0]},` : 'Dear Board Members,';
+    const propertyLabel = building.name && building.name !== building.address
+      ? `${building.name} at ${building.address}`
+      : building.address;
+    const unitPhrase = building.units ? `${building.units}-unit ` : '';
+    const signalPhrase = building.open_violations_count
+      ? ` Our initial public-record scan shows ${building.open_violations_count} open violation${building.open_violations_count === 1 ? '' : 's'}, which may be worth reviewing as part of a broader management and compliance conversation.`
+      : '';
+
+    openEmailDraft({
+      to: recipients.join(','),
+      cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
+      subject: `Complimentary Property Management Review - ${propertyLabel}`,
+      body:
+        `${salutation}\n\n` +
+        `My name is David Goldoff, President of Camelot Property Management Services Corp. We are a New York-based property management and brokerage platform that works with co-ops, condos, rental buildings, owners, and boards that want more organized financial reporting, better vendor oversight, stronger compliance tracking, and a more responsive management experience.\n\n` +
+        `I am reaching out regarding ${propertyLabel}. Camelot uses a combination of senior property-management experience, public-record research, building operations review, accounting controls, resident-facing technology, and automation tools to evaluate how a property is being managed and where a board or owner may have opportunities to reduce risk, improve communication, tighten reporting, and better plan capital needs.${signalPhrase}\n\n` +
+        `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${building.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
+        `If you are open to it, I would welcome the chance to speak for 15 to 20 minutes about your current property management needs and whether Camelot could be a fit.\n\n` +
+        `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+    });
+
+    toast.success(recipients.length ? 'Intro email draft opened with available contacts' : 'Intro email draft opened; add recipient before sending');
   };
 
   return (
@@ -180,7 +211,7 @@ export default function Results() {
                 selected={selectedBuildings.has(building.id)}
                 onSelect={() => toggleSelected(building.id)}
                 onViewDetails={() => setDetailBuilding(building)}
-                onEmail={() => toast.success('Opening email composer...')}
+                onEmail={() => handlePropertyIntroEmail(building)}
                 onEnrich={() => toast.success('Enrichment started...')}
                 onGutCheck={() => {
                   toast.success(`Running Gut Check for ${building.name || building.address}...`);

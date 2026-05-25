@@ -507,16 +507,31 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   };
 
   const handleSendEmail = () => {
-    const subject = encodeURIComponent(`Introduction — Camelot Property Management | ${building.address}`);
-    const body = encodeURIComponent(
-      `Dear Board,\n\nMy name is David Goldoff, and I'm the principal of Camelot Realty Group, a boutique property management firm headquartered at 57 West 57th Street, Suite 410 in New York City.\n\nI'm reaching out because we specialize in managing ${building.type || 'residential'} buildings like ${building.address}, and I believe we could bring meaningful value to your ${building.units || ''}-unit property.\n\n` +
-      (building.enriched_data?.violations?.open ? `I noticed that ${building.address} currently has ${building.enriched_data.violations.open} open HPD violations on record. Our compliance team has extensive experience resolving these efficiently.\n\n` : '') +
-      `I'd welcome the opportunity to introduce Camelot to your board. Would you have 15 minutes for a brief call this week?\n\nWarm regards,\n\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
-    );
     const contacts = building.contacts || [];
-    const emailTo = contacts.find((c: any) => c.email)?.email || '';
-    window.open(`mailto:${emailTo}?subject=${subject}&body=${body}`, '_self');
-    toast.success('Email draft opened');
+    const recipients = uniqueContactEmails(contacts);
+    const primaryContact = contacts.find((c: any) => c.email) || contacts[0];
+    const salutation = primaryContact?.name ? `Hi ${primaryContact.name.split(/\s+/)[0]},` : 'Dear Board Members,';
+    const propertyLabel = building.name && building.name !== building.address
+      ? `${building.name} at ${building.address}`
+      : building.address;
+    const unitPhrase = building.units ? `${building.units}-unit ` : '';
+    const signalPhrase = building.open_violations_count
+      ? ` Our initial public-record scan shows ${building.open_violations_count} open violation${building.open_violations_count === 1 ? '' : 's'}, which may be worth reviewing as part of a broader management and compliance conversation.`
+      : '';
+
+    openEmailDraft({
+      to: recipients.join(','),
+      cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
+      subject: `Complimentary Property Management Review - ${propertyLabel}`,
+      body:
+        `${salutation}\n\n` +
+        `My name is David Goldoff, President of Camelot Property Management Services Corp. We are a New York-based property management and brokerage platform that works with co-ops, condos, rental buildings, owners, and boards that want more organized financial reporting, better vendor oversight, stronger compliance tracking, and a more responsive management experience.\n\n` +
+        `I am reaching out regarding ${propertyLabel}. Camelot uses a combination of senior property-management experience, public-record research, building operations review, accounting controls, resident-facing technology, and automation tools to evaluate how a property is being managed and where a board or owner may have opportunities to reduce risk, improve communication, tighten reporting, and better plan capital needs.${signalPhrase}\n\n` +
+        `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${building.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
+        `If you are open to it, I would welcome the chance to speak for 15 to 20 minutes about your current property management needs and whether Camelot could be a fit.\n\n` +
+        `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+    });
+    toast.success(recipients.length ? 'Intro email draft opened with available contacts' : 'Intro email draft opened; add recipient before sending');
   };
 
   const saveNotes = () => {
