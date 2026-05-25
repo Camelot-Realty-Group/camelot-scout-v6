@@ -7338,10 +7338,15 @@ function generateProposal() {
       .replace(/^-+|-+$/g, '')
       .slice(0, 90);
   }
-  var proposalDateStamp = new Date().toISOString().slice(0, 10);
+  var proposalNow = new Date();
+  var proposalDateStamp = proposalNow.toISOString().slice(0, 10);
+  var proposalVersion = 'Proposal-Version-v' + proposalNow.getFullYear() + '.' + ('0' + (proposalNow.getMonth() + 1)).slice(-2) + '.1';
   var addressPart = addressClean || buildingNameClean || 'Property';
   var namePart = buildingNameClean && buildingNameClean !== addressClean ? buildingNameClean : '';
-  var proposalFileBase = ['Proposal-of-Services', filePart(addressPart), filePart(namePart), proposalDateStamp].filter(Boolean).join('__');
+  var proposalSubjectParts = [];
+  if (namePart) proposalSubjectParts.push(filePart(namePart));
+  proposalSubjectParts.push(filePart(addressPart));
+  var proposalFileBase = ['Proposal-of-Property-Management-Services'].concat(proposalSubjectParts).concat([filePart(proposalVersion), proposalDateStamp]).filter(Boolean).join('__');
   var proposalHtmlFile = proposalFileBase + '.html';
   var proposalPdfFile = proposalFileBase + '.pdf';
   var contactEmail = '';
@@ -7366,7 +7371,7 @@ function generateProposal() {
     ? '<ul>' + painPoints.map(function(p){ return '<li>' + p + '</li>'; }).join('') + '</ul>'
     : '<p>While the building is in reasonable standing, there are always opportunities to improve operations, reduce costs, and enhance the experience for ' + ownerLabel + '.</p>';
 
-  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Services \u2014 ' + addressPart + ' \u2014 ' + proposalDateStamp + '</title>' +
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Proposal of Property Management Services \u2014 ' + addressPart + ' \u2014 ' + proposalVersion + ' \u2014 ' + proposalDateStamp + '</title>' +
   '<style>' +
   '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }' +
   'body { counter-reset: proposal-page; font-family: Georgia, "Times New Roman", serif; color: #2C3240; line-height: 1.58; font-size: 11px; max-width: 8.5in; margin: 0 auto; padding: 1.55in .72in .68in; }' +
@@ -7411,7 +7416,7 @@ function generateProposal() {
   '.signature-page { min-height: 8.2in; display:flex; flex-direction:column; justify-content:center; }' +
   '@media print { @page { size: letter; margin: .72in .62in .58in; } body { padding: 1.05in 0 .55in; max-width: none; font-size: 11px; } .proposal-action-bar{display:none!important}.proposal-header,.proposal-footer{position:fixed} .proposal-header{top:0;height:.78in;padding:.08in 0 .08in}.proposal-footer{height:.34in;padding:.06in 0}.page-break{break-before:page;page-break-before:always} }' +
   '</style></head><body>' +
-  '<div class="proposal-action-bar no-print"><div class="proposal-action-title"><strong>Proposal of Services</strong> &middot; ' + addressPart + ' &middot; ' + proposalDateStamp + '</div><div class="proposal-actions">' +
+  '<div class="proposal-action-bar no-print"><div class="proposal-action-title"><strong>Proposal of Property Management Services</strong> &middot; ' + addressPart + ' &middot; ' + proposalVersion + ' &middot; ' + proposalDateStamp + '</div><div class="proposal-actions">' +
   '<button class="proposal-action-btn gold" onclick="window.print()">Print / Save PDF</button>' +
   '<button class="proposal-action-btn light" onclick="window.print()">Save as PDF</button>' +
   '<button class="proposal-action-btn" onclick="(function(){var blob=new Blob([document.documentElement.outerHTML],{type:&quot;text/html;charset=utf-8&quot;});var url=URL.createObjectURL(blob);var a=document.createElement(&quot;a&quot;);a.href=url;a.download=&quot;' + proposalHtmlFile + '&quot;;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},3000);})()">Download HTML</button>' +

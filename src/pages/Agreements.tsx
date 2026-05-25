@@ -49,10 +49,31 @@ const inferAssetClass = (d: MasterReportData): AssetClass => {
   return 'rental';
 };
 
+const cleanFilenamePart = (value: string) =>
+  String(value || '')
+    .replace(/&amp;/g, 'and')
+    .replace(/&/g, 'and')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 90);
+
 const agreementFilename = (input: AgreementInput, extension = 'html') => {
-  const subject = input.propertyAddress || input.clientName || 'Draft';
-  const date = new Date().toISOString().slice(0, 10);
-  return `Camelot-Property-Management-Agreement-${subject.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '')}-${date}.${extension}`;
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const proposalVersion = `Proposal-Version-v${now.getFullYear()}.${month}.1`;
+  const propertyName = cleanFilenamePart(input.jackieData?.buildingName || '');
+  const propertyAddress = cleanFilenamePart(
+    [input.propertyAddress, input.propertyCity, input.propertyState, input.propertyZip]
+      .filter(Boolean)
+      .join(' ') ||
+      input.propertyAddress ||
+      input.clientName ||
+      'Draft',
+  );
+  const subjectParts = propertyName && propertyName !== propertyAddress ? [propertyName, propertyAddress] : [propertyAddress || propertyName || 'Draft'];
+
+  return `Proposal-of-Property-Management-Services__${[...subjectParts, proposalVersion, date].filter(Boolean).join('__')}.${extension}`;
 };
 
 export default function Agreements() {
