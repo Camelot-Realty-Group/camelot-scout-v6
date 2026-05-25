@@ -121,6 +121,11 @@ export default function Results() {
             >
               <List size={18} />
             </button>
+            <img
+              src="/images/camelot-gold-logo.png"
+              alt="Camelot Realty Group"
+              className="ml-3 hidden h-14 w-14 rounded-xl border border-camelot-gold/30 object-cover shadow-sm sm:block"
+            />
           </div>
         </div>
 
