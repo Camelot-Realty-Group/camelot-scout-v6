@@ -15,7 +15,7 @@ import { calculateScore } from '@/lib/scoring';
 import { detectBuildingOperations, getDoormanLabel, getFrontDeskLabel } from '@/lib/building-ops';
 import { searchNYDOSCorporation, generateExternalLinks, type NYDOSCorporation, type ExternalRecordLink } from '@/lib/gov-apis';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
-import { downloadAsPDF, openEmailDraft } from '@/lib/pdf-generator';
+import { downloadAsPDF, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
 import { pushBuildingToIntegrations } from '@/lib/integrations';
 import toast from 'react-hot-toast';
 import {
@@ -23,6 +23,7 @@ import {
   Clock, StickyNote, Download, Mail, Phone, Linkedin, Plus,
   ExternalLink, Sparkles, RefreshCw, User, Shield, GitBranch, Loader2,
   Facebook, Instagram, ChevronDown, ChevronRight, Landmark, Scale, Bookmark, Link, Send,
+  Printer,
 } from 'lucide-react';
 
 interface PropertyDetailProps {
@@ -48,8 +49,15 @@ const TABS: { key: Tab; label: string; icon: any }[] = [
 
 const DETAIL_REPORT_LABELS: Record<DetailReportPackage, string> = {
   first_email_intro: 'First Email Intro',
-  board_meeting_deck: 'Meeting Agenda Deck',
+  board_meeting_deck: '1st Meeting Handout',
   appendix_full: 'Full Jackie Appendix',
+};
+
+type DetailReportPreview = {
+  reportPackage: DetailReportPackage;
+  label: string;
+  html: string;
+  filename: string;
 };
 
 function uniqueContactEmails(contacts: Contact[]) {
@@ -276,6 +284,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const [nycData, setNycData] = useState<any>(null);
   const [notes, setNotes] = useState(building.notes || '');
   const [packageLoading, setPackageLoading] = useState<string | null>(null);
+  const [reportPreview, setReportPreview] = useState<DetailReportPreview | null>(null);
 
   const fetchNYCData = useCallback(async () => {
     setIsFetchingNYC(true);
@@ -356,19 +365,66 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     };
   };
 
-  const handleDownloadPackagePDF = async (reportPackage: DetailReportPackage) => {
-    setPackageLoading(`download:${reportPackage}`);
+  const handlePreviewPackage = async (reportPackage: DetailReportPackage) => {
+    setPackageLoading(`preview:${reportPackage}`);
     try {
-      toast.loading(`Generating ${DETAIL_REPORT_LABELS[reportPackage]} PDF...`, { id: 'detail-report-pdf' });
+      toast.loading(`Preparing ${DETAIL_REPORT_LABELS[reportPackage]} preview...`, { id: 'detail-report-preview' });
       const { html, filename } = await buildDetailPackage(reportPackage);
-      await downloadAsPDF(html, filename);
-      toast.success(`${DETAIL_REPORT_LABELS[reportPackage]} PDF downloaded`, { id: 'detail-report-pdf' });
+      setReportPreview({
+        reportPackage,
+        label: DETAIL_REPORT_LABELS[reportPackage],
+        html,
+        filename,
+      });
+      toast.success(`${DETAIL_REPORT_LABELS[reportPackage]} preview ready`, { id: 'detail-report-preview' });
     } catch (err) {
-      console.error('Detail report PDF failed:', err);
-      toast.error('PDF generation failed. Open the report and use Print / Save PDF as a fallback.', { id: 'detail-report-pdf' });
+      console.error('Detail report preview failed:', err);
+      toast.error('Report preview failed. Try Full Jackie or refresh this property card.', { id: 'detail-report-preview' });
     } finally {
       setPackageLoading(null);
     }
+  };
+
+  const handleDownloadPreviewPDF = async () => {
+    if (!reportPreview) return;
+    setPackageLoading(`download:${reportPreview.reportPackage}`);
+    try {
+      toast.loading(`Creating compressed ${reportPreview.label} PDF...`, { id: 'detail-report-pdf' });
+      await downloadAsPDF(reportPreview.html, reportPreview.filename);
+      toast.success(`${reportPreview.label} PDF downloaded`, { id: 'detail-report-pdf' });
+    } catch (err) {
+      console.error('Preview PDF download failed:', err);
+      toast.error('PDF download failed. Use Print / Save PDF for the most reliable copy.', { id: 'detail-report-pdf' });
+    } finally {
+      setPackageLoading(null);
+    }
+  };
+
+  const handlePrintPreview = () => {
+    if (!reportPreview) return;
+    openBrochureForPrint(reportPreview.html, reportPreview.filename);
+    toast.success('Preview opened in a printable tab. Use browser Print / Save as PDF.');
+  };
+
+  const handleEmailPreviewDraft = () => {
+    if (!reportPreview) return;
+    const contacts = building.contacts || [];
+    const recipients = uniqueContactEmails(contacts);
+    const contactList = contactDirectory(contacts);
+    const propertyLabel = building.name || building.address;
+    openEmailDraft({
+      to: recipients.join(','),
+      cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
+      subject: `${reportPreview.label} - ${propertyLabel}`,
+      body:
+        `To the decision makers of ${propertyLabel},\n\n` +
+        `Thank you for taking the time to review Camelot Property Management. I am sending the ${reportPreview.label} for ${propertyLabel} for your review.\n\n` +
+        `Please attach the reviewed PDF before sending. Suggested file name: ${reportPreview.filename}\n\n` +
+        `Contacts currently saved for this outreach:\n${contactList}\n\n` +
+        `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
+        `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+    });
+    toast.success(recipients.length ? 'Email draft opened with available contacts' : 'Email draft opened; add recipient before sending');
   };
 
   const handleEmailPackagePDF = async (reportPackage: DetailReportPackage) => {
@@ -376,7 +432,6 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     try {
       toast.loading(`Preparing ${DETAIL_REPORT_LABELS[reportPackage]} email draft...`, { id: 'detail-report-email' });
       const { data, html, filename } = await buildDetailPackage(reportPackage);
-      await downloadAsPDF(html, filename);
       const contacts = building.contacts || [];
       const recipients = uniqueContactEmails(contacts);
       const contactList = contactDirectory(contacts);
@@ -387,12 +442,13 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
         body:
           `To the decision makers of ${data.buildingName || building.name || building.address},\n\n` +
           `Thank you for taking the time to review Camelot Property Management. Attached is the ${DETAIL_REPORT_LABELS[reportPackage]} for ${data.buildingName || building.name || building.address}.\n\n` +
-          `Please attach the downloaded PDF before sending: ${filename}\n\n` +
+          `Please attach the reviewed PDF before sending: ${filename}\n\n` +
           `Contacts currently saved for this outreach:\n${contactList}\n\n` +
           `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
           `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
       });
-      toast.success(recipients.length ? 'PDF downloaded and addressed email draft opened' : 'PDF downloaded and email draft opened; add recipient before sending', { id: 'detail-report-email' });
+      setReportPreview({ reportPackage, label: DETAIL_REPORT_LABELS[reportPackage], html, filename });
+      toast.success(recipients.length ? 'Preview prepared and addressed email draft opened' : 'Preview prepared and email draft opened; add recipient before sending', { id: 'detail-report-email' });
     } catch (err) {
       console.error('Detail report email failed:', err);
       toast.error('Email package failed. Try downloading the PDF first.', { id: 'detail-report-email' });
@@ -584,12 +640,12 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
           {/* Action bar */}
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <button
-              onClick={() => handleDownloadPackagePDF('first_email_intro')}
+              onClick={() => handlePreviewPackage('first_email_intro')}
               disabled={!!packageLoading}
               className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50"
             >
-              {packageLoading === 'download:first_email_intro' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-              Intro PDF
+              {packageLoading === 'preview:first_email_intro' ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+              Preview Intro
             </button>
             <button
               onClick={() => handleEmailPackagePDF('first_email_intro')}
@@ -600,12 +656,12 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
               Email Intro
             </button>
             <button
-              onClick={() => handleDownloadPackagePDF('board_meeting_deck')}
+              onClick={() => handlePreviewPackage('board_meeting_deck')}
               disabled={!!packageLoading}
               className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50"
             >
-              {packageLoading === 'download:board_meeting_deck' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-              Agenda PDF
+              {packageLoading === 'preview:board_meeting_deck' ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+              1st Meeting Handout
             </button>
             <button
               onClick={() => handleEmailPackagePDF('board_meeting_deck')}
@@ -615,8 +671,8 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
               {packageLoading === 'email:board_meeting_deck' ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
               Email Agenda
             </button>
-            <button onClick={handleReportPDF} disabled={reportLoading} className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50">
-              {reportLoading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Full Jackie</>}
+            <button onClick={() => handlePreviewPackage('appendix_full')} disabled={!!packageLoading} className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50">
+              {packageLoading === 'preview:appendix_full' ? <><Loader2 size={13} className="animate-spin" /> Preparing...</> : <><FileText size={13} /> Full Jackie</>}
             </button>
             <button onClick={handleSendEmail} className="flex items-center gap-1.5 text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors">
               <Mail size={13} /> Quick Email
@@ -1092,6 +1148,62 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
           )}
         </div>
       </div>
+      {reportPreview && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/65 p-4 flex items-center justify-center"
+          onClick={(e) => {
+            e.stopPropagation();
+            setReportPreview(null);
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[92vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-3 bg-white">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-camelot-gold font-bold">Review Before Sending</p>
+                <h3 className="font-semibold text-gray-900">{reportPreview.label}</h3>
+                <p className="text-xs text-gray-500">{reportPreview.filename}</p>
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button
+                  onClick={handlePrintPreview}
+                  className="flex items-center gap-1.5 text-xs bg-camelot-navy text-white px-3 py-2 rounded-lg hover:bg-camelot-navy/90"
+                >
+                  <Printer size={14} /> Print / Save PDF
+                </button>
+                <button
+                  onClick={handleDownloadPreviewPDF}
+                  disabled={!!packageLoading}
+                  className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-2 rounded-lg font-medium hover:bg-camelot-gold-light disabled:opacity-50"
+                >
+                  {packageLoading?.startsWith('download:') ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                  Download PDF
+                </button>
+                <button
+                  onClick={handleEmailPreviewDraft}
+                  className="flex items-center gap-1.5 text-xs bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50"
+                >
+                  <Mail size={14} /> Email Draft
+                </button>
+                <button
+                  onClick={() => setReportPreview(null)}
+                  className="p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+                  aria-label="Close report preview"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <iframe
+              title={`${reportPreview.label} preview`}
+              srcDoc={reportPreview.html}
+              className="flex-1 w-full bg-gray-100"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

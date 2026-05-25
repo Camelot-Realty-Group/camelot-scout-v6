@@ -161,9 +161,10 @@ export default function PropertyCard({
       <div className="border-t border-gray-100 px-4 py-2.5 flex items-center gap-1 bg-gray-50/50">
         <button
           onClick={onViewDetails}
-          className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md hover:bg-camelot-gold/10 text-camelot-gold font-medium transition-colors"
+          title="Click Details to open the property card, contacts, reports, and report previews"
+          className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-camelot-gold/10 hover:bg-camelot-gold/20 text-camelot-gold font-bold transition-colors ring-1 ring-camelot-gold/20"
         >
-          <Eye size={13} /> Details
+          <Eye size={13} /> Click Details
         </button>
         <button
           onClick={onEmail}

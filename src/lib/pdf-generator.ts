@@ -135,8 +135,15 @@ export async function downloadAsPDF(html: string, filename: string): Promise<voi
       .set(({
         margin: 0,
         filename: filename.endsWith('.pdf') ? filename : `${filename.replace(/\.(html|pdf)$/i, '')}.pdf`,
-        image: { type: 'jpeg', quality: 0.92 },
-        html2canvas: { scale: 1.45, useCORS: true, allowTaint: true, logging: false },
+        image: { type: 'jpeg', quality: 0.72 },
+        html2canvas: {
+          scale: 1.05,
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          imageTimeout: 12000,
+          removeContainer: true,
+        },
         jsPDF: { unit: 'in', format: 'letter', orientation: isSlideDeck ? 'landscape' : 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] },
       }) as any)

@@ -98,10 +98,10 @@ export default function Results() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-5 sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">Results</h1>
-            <p className="text-sm text-gray-500">{filteredBuildings.length} properties found</p>
-          </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Results</h1>
+                  <p className="text-sm text-gray-500">{filteredBuildings.length} properties found. Click Details to review contacts, report previews, and outreach actions.</p>
+                </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('grid')}
@@ -277,9 +277,10 @@ export default function Results() {
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => setDetailBuilding(b)}
-                        className="text-xs text-camelot-gold hover:underline"
+                        className="text-xs text-camelot-gold font-bold hover:underline"
+                        title="Click Details to open report previews and outreach actions"
                       >
-                        View
+                        Details
                       </button>
                     </td>
                   </tr>
