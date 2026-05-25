@@ -5,6 +5,7 @@ import { cn, formatDate } from '@/lib/utils';
 import { SCOUT_AGENT_DOCTRINES } from '@/lib/scout-ai-doctrines';
 import { NY_OWNERSHIP_HUNT_SOURCE_NAMES, NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES } from '@/lib/ny-research-sources';
 import { CAMELOT_ACQUISITION_PIPELINE, JACKIE_ACQUISITION_FIT_SECTIONS, SENTINEL_HANDOFF_RULES } from '@/lib/acquisition-pipeline';
+import { TWIN_KNOWLEDGE_IMPORTED_AT, TWIN_KNOWLEDGE_PROJECTS, TWIN_KNOWLEDGE_STATS } from '@/lib/twin-knowledge';
 import {
   AlertCircle,
   Archive,
@@ -31,7 +32,7 @@ import toast from 'react-hot-toast';
 
 type BotSource = {
   name: string;
-  kind: 'Drive' | 'Repo' | 'Generated';
+  kind: 'Drive' | 'Repo' | 'Generated' | 'Twin';
   status: 'synced' | 'reference' | 'pending';
 };
 
@@ -73,8 +74,44 @@ const NY_OWNERSHIP_HUNT_SOURCE_CARDS: BotSource[] = NY_OWNERSHIP_HUNT_SOURCE_NAM
   kind: 'Generated',
   status: 'reference',
 }));
+const TWIN_KNOWLEDGE_SOURCE_CARDS: BotSource[] = TWIN_KNOWLEDGE_PROJECTS.map((project) => ({
+  name: `Twin AI: ${project.name}`,
+  kind: 'Twin',
+  status: project.instructionChars > 0 ? 'synced' : 'pending',
+}));
 
 const DEMO_BOTS: DashboardBot[] = [
+  {
+    id: 'twin-knowledge',
+    name: 'Twin AI Knowledge Vault',
+    type: 'integrations',
+    description:
+      'Imported Twin AI projects and instruction builds are now available inside Camelot OS as a searchable bot knowledge layer for future Scout, Jackie, Sentinel, Merlin, Excalibur, and operations workflows.',
+    status: 'active',
+    owner: 'Camelot OS',
+    tasks_completed: TWIN_KNOWLEDGE_STATS.instructionBackedProjects,
+    tasks_queued: TWIN_KNOWLEDGE_STATS.totalProjects - TWIN_KNOWLEDGE_STATS.instructionBackedProjects,
+    last_run_at: TWIN_KNOWLEDGE_IMPORTED_AT,
+    outputs: [
+      `${TWIN_KNOWLEDGE_STATS.totalProjects} Twin projects inventoried`,
+      `${TWIN_KNOWLEDGE_STATS.instructionBackedProjects} instruction-backed projects cataloged`,
+      'Project purpose, workflow steps, headings, and metadata are available in Camelot OS',
+      'Ready for mapping into Scout, Jackie, Sentinel, Merlin, Excalibur, and content workflows',
+    ],
+    quality_gates: [
+      'Twin API token verified through read-only workspace and agent endpoints',
+      'Every available Twin instruction build exported before app integration',
+      'Projects without instruction content are marked pending instead of treated as complete',
+      'No public report output is changed automatically until each Twin skill is mapped to a Camelot OS bot',
+    ],
+    sources: TWIN_KNOWLEDGE_SOURCE_CARDS,
+    actions: [
+      { label: 'Merlin AI', href: '/chat', icon: Sparkles },
+      { label: 'Jackie Reports', href: '/report-center', icon: Crown },
+      { label: 'Content Engine', href: '/content-engine', icon: Megaphone },
+      { label: 'Integrations', href: '/integrations', icon: GitBranch },
+    ],
+  },
   {
     id: 'jackie',
     name: 'Jackie Pitch Engine',
@@ -531,6 +568,32 @@ export default function Bots() {
           </p>
         </div>
 
+        <div className="bg-[#263747] text-white border border-[#C9A227]/40 rounded-lg p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-[#DBBA2E] font-bold">Twin AI Knowledge Import</p>
+              <h2 className="text-xl font-bold mt-1">{TWIN_KNOWLEDGE_STATS.totalProjects} projects now inside Camelot OS</h2>
+              <p className="text-sm text-white/75 mt-2 max-w-3xl">
+                The Twin AI workspace has been pulled into the Camelot OS bot layer. Instruction-backed projects are marked synced; empty drafts stay pending so we do not pretend incomplete agents are production-ready.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-md bg-white/10 px-3 py-2">
+                <div className="text-lg font-bold text-[#DBBA2E]">{TWIN_KNOWLEDGE_STATS.totalProjects}</div>
+                <div className="text-[10px] uppercase tracking-wide text-white/60">Projects</div>
+              </div>
+              <div className="rounded-md bg-white/10 px-3 py-2">
+                <div className="text-lg font-bold text-[#DBBA2E]">{TWIN_KNOWLEDGE_STATS.instructionBackedProjects}</div>
+                <div className="text-[10px] uppercase tracking-wide text-white/60">Synced</div>
+              </div>
+              <div className="rounded-md bg-white/10 px-3 py-2">
+                <div className="text-lg font-bold text-[#DBBA2E]">{Math.round(TWIN_KNOWLEDGE_STATS.totalInstructionChars / 1000)}k</div>
+                <div className="text-[10px] uppercase tracking-wide text-white/60">Chars</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 xl:grid-cols-[360px_minmax(0,1fr)] gap-5">
           <div className="space-y-3">
             {bots.map((bot) => {
@@ -617,6 +680,48 @@ export default function Bots() {
             {selectedBot.error_message && (
               <div className="mx-5 mt-5 flex items-center gap-2 text-sm text-red-700 bg-red-50 px-3 py-2 rounded-md border border-red-100">
                 <AlertCircle size={16} /> {selectedBot.error_message}
+              </div>
+            )}
+
+            {selectedBot.id === 'twin-knowledge' && (
+              <div className="p-5 border-b border-gray-200 bg-[#F8F6EF]">
+                <Section title="Imported Twin Projects">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 max-h-[520px] overflow-y-auto pr-1">
+                    {TWIN_KNOWLEDGE_PROJECTS.map((project) => (
+                      <div key={project.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="font-bold text-sm">{project.name}</h3>
+                            <p className="text-[11px] text-gray-400 mt-0.5">{project.id}</p>
+                          </div>
+                          <span className={cn(
+                            'text-[10px] px-2 py-0.5 rounded-full border font-semibold',
+                            project.instructionChars > 0
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          )}>
+                            {project.instructionChars > 0 ? 'Synced' : 'Pending'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-3 line-clamp-4">{project.purpose}</p>
+                        {project.headings.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {project.headings.slice(0, 5).map((heading) => (
+                              <span key={heading} className="text-[10px] bg-gray-100 text-gray-600 rounded-full px-2 py-1">
+                                {heading}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {project.planSteps.length > 0 && (
+                          <div className="mt-3 text-[11px] text-gray-500">
+                            Workflow: {project.planSteps.slice(0, 3).map((step) => step.title).join(' -> ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Section>
               </div>
             )}
 
