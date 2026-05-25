@@ -147,6 +147,7 @@ export default function ReportCenter() {
   const [inquiryNotes, setInquiryNotes] = useState('');
   const [selectedPackage, setSelectedPackage] = useState<JackieReportPackage>('board_meeting_deck');
   const [savedReports, setSavedReports] = useState<SavedJackieReport[]>(() => loadLocalJackieReportLibrary());
+  const [releaseQA, setReleaseQA] = useState<QACheckResult | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
 
   const buildReportFocus = useCallback((): ReportFocusInput => ({
@@ -204,6 +205,7 @@ export default function ReportCenter() {
     saveReportInputs(REPORT_CENTER_INPUT_SCOPE, buildSavedInputs());
     setLoading(true);
     setData(null);
+    setReleaseQA(null);
     try {
       const regionalSearch = /connecticut|\bct\b|monroe|new jersey|\bnj\b|florida|\bfl\b|nys|new york state/i.test(`${borough} ${address}`);
       setLoadingMsg(regionalSearch ? 'Querying state and town records...' : 'Querying HPD violations...');
@@ -543,8 +545,13 @@ export default function ReportCenter() {
     loadSavedPhotos();
   }, [loadSavedPhotos]);
 
-  // Inject uploaded photos into report data before generating
-  const getDataWithPhotos = (): MasterReportData | null => {
+  useEffect(() => {
+    setReleaseQA(null);
+  }, [uploadedPhotos.length, selectedPackage, selectedFocus, inquiryContact, inquiryEmail, inquiryPhone, inquiryOrganization, inquiryRole, inquiryNotes]);
+
+  // Inject uploaded photos into report data before generating. Memoized so the page does not rebuild
+  // a fresh report object on every render.
+  const reportDataWithPhotos = useMemo((): MasterReportData | null => {
     if (!data) return null;
     const baseData = { ...data, reportFocus: buildReportFocus() };
     if (uploadedPhotos.length === 0) return baseData;
@@ -561,10 +568,13 @@ export default function ReportCenter() {
         source: `Uploaded by Camelot team (${uploadedStack.length} photo${uploadedStack.length === 1 ? '' : 's'})`,
       },
     };
-  };
+  }, [data, uploadedPhotos, buildReportFocus]);
+
+  const getDataWithPhotos = useCallback((): MasterReportData | null => reportDataWithPhotos, [reportDataWithPhotos]);
 
   const verifyJackieRelease = (d: MasterReportData, html: string, mode: 'internal' | 'release' = 'release') => {
     const qa = validateJackieReport(d, html);
+    setReleaseQA(qa);
     if (qa.failures > 0) {
       const detail = qa.checks.filter(c => c.status === 'fail').slice(0, 4).map(c => `${c.name}: ${c.detail}`).join('\n');
       if (mode === 'internal') {
@@ -635,13 +645,8 @@ export default function ReportCenter() {
   const emailDraft = data ? generateEmailDraft(data, emailType) : null;
   const callerSheet = data ? generateColdCallerSheet(data) : '';
   const fmtMoney = (n: number) => n >= 1e6 ? `$${(n/1e6).toFixed(1)}M` : `$${n.toLocaleString()}`;
-  const releaseData = getDataWithPhotos();
   const isRegionalMode = /connecticut|\bct\b|new jersey|\bnj\b|florida|\bfl\b|nys|new york state/i.test(`${borough} ${address} ${data?.borough || ''} ${data?.address || ''}`);
   const isConnecticutMode = /connecticut|\bct\b|monroe/i.test(`${borough} ${address} ${data?.borough || ''} ${data?.address || ''}`);
-  const releaseQA = useMemo(() => {
-    if (!releaseData) return null;
-    return validateJackieReport(releaseData, generateBrochureHTML(releaseData));
-  }, [releaseData]);
 
   return (
     <div className="p-6 space-y-6">
