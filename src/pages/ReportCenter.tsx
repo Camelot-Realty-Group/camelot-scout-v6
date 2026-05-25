@@ -239,7 +239,16 @@ export default function ReportCenter() {
       packageLabel: packageLabelFor(packageType),
       filename,
       html,
-      dataSnapshot: reportData,
+      dataSnapshot: {
+        ...reportData,
+        buildingPhotos: reportData.buildingPhotos ? {
+          exterior: (reportData.buildingPhotos.exterior || []).map((url, idx) => String(url).startsWith('data:') ? `Uploaded photo ${idx + 1} retained in saved HTML` : url),
+          interior: (reportData.buildingPhotos.interior || []).map((url, idx) => String(url).startsWith('data:') ? `Uploaded interior photo ${idx + 1} retained in saved HTML` : url),
+          streetView: reportData.buildingPhotos.streetView,
+          satellite: reportData.buildingPhotos.satellite,
+          source: reportData.buildingPhotos.source,
+        } : reportData.buildingPhotos,
+      },
       inquiryContact: inquiryContact.trim() || undefined,
       inquiryEmail: inquiryEmail.trim() || undefined,
       inquiryPhone: inquiryPhone.trim() || undefined,
@@ -251,6 +260,19 @@ export default function ReportCenter() {
     toast.success(`Saved to Generated Jackie Report Library: ${record.reportNumber}`);
     return record;
   }, [inquiryContact, inquiryEmail, inquiryPhone, selectedFocus]);
+
+  const openPackageAndArchive = useCallback((
+    reportData: MasterReportData,
+    packageType: JackieReportPackage,
+    html: string,
+    pdfFilename: string,
+    htmlFilename: string,
+  ) => {
+    openBrochureForPrint(html, pdfFilename);
+    window.setTimeout(() => {
+      archiveJackieReport(reportData, packageType, html, htmlFilename);
+    }, 100);
+  }, [archiveJackieReport]);
 
   const openSavedReport = (record: SavedJackieReport) => {
     openBrochureForPrint(record.html, record.filename.replace(/\.html$/i, '.pdf'));
@@ -286,8 +308,7 @@ export default function ReportCenter() {
     if (!d) return;
     const html = generateBrochureHTML(d);
     if (!verifyJackieRelease(d, html, 'internal')) return;
-    archiveJackieReport(d, 'appendix_full', html, buildJackieIntelReportFilename(d, 'html'));
-    openBrochureForPrint(html, buildJackieIntelReportFilename(d, 'pdf'));
+    openPackageAndArchive(d, 'appendix_full', html, buildJackieIntelReportFilename(d, 'pdf'), buildJackieIntelReportFilename(d, 'html'));
   };
 
   const generateSelectedPackageHTML = (d: MasterReportData): string => {
@@ -298,41 +319,34 @@ export default function ReportCenter() {
   const handlePreviewSelectedPackage = () => {
     const d = getDataWithPhotos();
     if (!d) return;
-    const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateSelectedPackageHTML(d);
+    if (!verifyJackieRelease(d, html, 'internal')) return;
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'pdf') : buildJackiePackageFilename(d, selectedPackage, 'pdf');
     const htmlFilename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
-    archiveJackieReport(d, selectedPackage, html, htmlFilename);
-    openBrochureForPrint(html, filename);
+    openPackageAndArchive(d, selectedPackage, html, filename, htmlFilename);
   };
 
   const handlePreviewPitch = () => {
     const d = getDataWithPhotos();
     if (!d) return;
-    const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateFirstEmailIntroReport(d);
-    archiveJackieReport(d, 'first_email_intro', html, buildJackiePackageFilename(d, 'first_email_intro', 'html'));
-    openBrochureForPrint(html, buildJackiePackageFilename(d, 'first_email_intro', 'pdf'));
+    if (!verifyJackieRelease(d, html, 'internal')) return;
+    openPackageAndArchive(d, 'first_email_intro', html, buildJackiePackageFilename(d, 'first_email_intro', 'pdf'), buildJackiePackageFilename(d, 'first_email_intro', 'html'));
   };
 
   const handlePreviewBoardDeck = () => {
     const d = getDataWithPhotos();
     if (!d) return;
-    const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateBoardMeetingDeck(d);
-    archiveJackieReport(d, 'board_meeting_deck', html, buildJackiePackageFilename(d, 'board_meeting_deck', 'html'));
-    openBrochureForPrint(html, buildJackiePackageFilename(d, 'board_meeting_deck', 'pdf'));
+    if (!verifyJackieRelease(d, html, 'internal')) return;
+    openPackageAndArchive(d, 'board_meeting_deck', html, buildJackiePackageFilename(d, 'board_meeting_deck', 'pdf'), buildJackiePackageFilename(d, 'board_meeting_deck', 'html'));
   };
 
   const handleDownloadPitchHTML = () => {
     const d = getDataWithPhotos();
     if (!d) return;
-    const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
     const html = generateSelectedPackageHTML(d);
+    if (!verifyJackieRelease(d, html, 'internal')) return;
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
     archiveJackieReport(d, selectedPackage, html, filename);
     downloadAsHTML(html, filename);
