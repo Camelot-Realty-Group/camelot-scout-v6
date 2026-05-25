@@ -15,12 +15,14 @@ import { calculateScore } from '@/lib/scoring';
 import { detectBuildingOperations, getDoormanLabel, getFrontDeskLabel } from '@/lib/building-ops';
 import { searchNYDOSCorporation, generateExternalLinks, type NYDOSCorporation, type ExternalRecordLink } from '@/lib/gov-apis';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import { downloadAsPDF, openEmailDraft } from '@/lib/pdf-generator';
+import { pushBuildingToIntegrations } from '@/lib/integrations';
 import toast from 'react-hot-toast';
 import {
   X, MapPin, Building2, AlertTriangle, DollarSign, Zap, FileText,
   Clock, StickyNote, Download, Mail, Phone, Linkedin, Plus,
   ExternalLink, Sparkles, RefreshCw, User, Shield, GitBranch, Loader2,
-  Facebook, Instagram, ChevronDown, ChevronRight, Landmark, Scale, Bookmark, Link,
+  Facebook, Instagram, ChevronDown, ChevronRight, Landmark, Scale, Bookmark, Link, Send,
 } from 'lucide-react';
 
 interface PropertyDetailProps {
@@ -30,6 +32,7 @@ interface PropertyDetailProps {
 }
 
 type Tab = 'overview' | 'contacts' | 'violations' | 'financials' | 'ownership' | 'energy' | 'permits' | 'activity' | 'notes';
+type DetailReportPackage = 'first_email_intro' | 'board_meeting_deck' | 'appendix_full';
 
 const TABS: { key: Tab; label: string; icon: any }[] = [
   { key: 'overview', label: 'Overview', icon: Building2 },
@@ -42,6 +45,30 @@ const TABS: { key: Tab; label: string; icon: any }[] = [
   { key: 'activity', label: 'Activity', icon: Clock },
   { key: 'notes', label: 'Notes', icon: StickyNote },
 ];
+
+const DETAIL_REPORT_LABELS: Record<DetailReportPackage, string> = {
+  first_email_intro: 'First Email Intro',
+  board_meeting_deck: 'Meeting Agenda Deck',
+  appendix_full: 'Full Jackie Appendix',
+};
+
+function uniqueContactEmails(contacts: Contact[]) {
+  return Array.from(new Set(contacts.map((c) => c.email?.trim().toLowerCase()).filter(Boolean) as string[]));
+}
+
+function contactDirectory(contacts: Contact[]) {
+  const rows = contacts
+    .filter((contact) => contact.name || contact.email || contact.phone)
+    .slice(0, 12)
+    .map((contact) => {
+      const role = contact.role ? `, ${resolveRoleLabel(contact.role)}` : '';
+      const email = contact.email ? ` | ${contact.email}` : '';
+      const phone = contact.phone ? ` | ${contact.phone}` : '';
+      const company = contact.company ? ` | ${contact.company}` : '';
+      return `- ${contact.name || 'Contact'}${role}${company}${email}${phone}`;
+    });
+  return rows.length ? rows.join('\n') : '- No contact email or phone is currently saved on this property card.';
+}
 
 // ---- Contact helpers ----
 
@@ -248,6 +275,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const [isFetchingNYC, setIsFetchingNYC] = useState(false);
   const [nycData, setNycData] = useState<any>(null);
   const [notes, setNotes] = useState(building.notes || '');
+  const [packageLoading, setPackageLoading] = useState<string | null>(null);
 
   const fetchNYCData = useCallback(async () => {
     setIsFetchingNYC(true);
@@ -271,6 +299,122 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   }, [building.address, fetchNYCData, nycData]);
 
   const [reportLoading, setReportLoading] = useState(false);
+
+  const buildJackieDataForDetail = async () => {
+    const { buildMasterReport } = await import('@/lib/camelot-report');
+    const data: any = await buildMasterReport(building.address, building.borough || undefined);
+
+    const cardContacts = building.contacts || [];
+    if (cardContacts.length > 0) {
+      const boardFromCard = cardContacts
+        .filter((c: any) => ['board_president','board_treasurer','board_secretary','board_member','owner','landlord','developer','investor'].includes(c.role))
+        .map((c: any) => ({
+          name: c.name || 'N/A',
+          title: ROLE_LABELS[c.role as keyof typeof ROLE_LABELS] || c.role || 'Contact',
+          email: c.email,
+          phone: c.phone,
+        }));
+      const staffFromCard = cardContacts
+        .filter((c: any) => ['resident_manager','super','front_desk','doorman','managing_agent'].includes(c.role))
+        .map((c: any) => ({
+          role: ROLE_LABELS[c.role as keyof typeof ROLE_LABELS] || c.role || 'Staff',
+          name: c.name || 'N/A',
+          email: c.email,
+          phone: c.phone,
+        }));
+      if (boardFromCard.length > 0) data.boardMembers = boardFromCard;
+      if (staffFromCard.length > 0) data.buildingStaff = staffFromCard;
+
+      const lawyer = cardContacts.find((c: any) => c.role === 'attorney' || c.company?.toLowerCase().includes('law'));
+      const accountant = cardContacts.find((c: any) => c.role === 'accountant' || c.company?.toLowerCase().includes('cpa') || c.company?.toLowerCase().includes('accounting'));
+      const engineer = cardContacts.find((c: any) => c.role === 'engineer' || c.company?.toLowerCase().includes('engineer'));
+      if (lawyer) data.professionals.lawFirm = lawyer.company || lawyer.name || null;
+      if (accountant) data.professionals.accountingFirm = accountant.company || accountant.name || null;
+      if (engineer) data.professionals.engineer = engineer.company || engineer.name || null;
+    }
+
+    if (building.current_management) data.managementCompany = building.current_management;
+    if (building.enriched_data?.dof?.owner) data.dofOwner = building.enriched_data.dof.owner;
+    return data;
+  };
+
+  const buildDetailPackage = async (reportPackage: DetailReportPackage) => {
+    const data = await buildJackieDataForDetail();
+    if (reportPackage === 'appendix_full') {
+      const { generateBrochureHTML, buildJackieIntelReportFilename } = await import('@/lib/camelot-report');
+      return {
+        data,
+        html: generateBrochureHTML(data),
+        filename: buildJackieIntelReportFilename(data, 'pdf'),
+      };
+    }
+    const { generateJackieReportPackage, buildJackiePackageFilename } = await import('@/lib/pitch-report');
+    return {
+      data,
+      html: generateJackieReportPackage(data, reportPackage),
+      filename: buildJackiePackageFilename(data, reportPackage, 'pdf'),
+    };
+  };
+
+  const handleDownloadPackagePDF = async (reportPackage: DetailReportPackage) => {
+    setPackageLoading(`download:${reportPackage}`);
+    try {
+      toast.loading(`Generating ${DETAIL_REPORT_LABELS[reportPackage]} PDF...`, { id: 'detail-report-pdf' });
+      const { html, filename } = await buildDetailPackage(reportPackage);
+      await downloadAsPDF(html, filename);
+      toast.success(`${DETAIL_REPORT_LABELS[reportPackage]} PDF downloaded`, { id: 'detail-report-pdf' });
+    } catch (err) {
+      console.error('Detail report PDF failed:', err);
+      toast.error('PDF generation failed. Open the report and use Print / Save PDF as a fallback.', { id: 'detail-report-pdf' });
+    } finally {
+      setPackageLoading(null);
+    }
+  };
+
+  const handleEmailPackagePDF = async (reportPackage: DetailReportPackage) => {
+    setPackageLoading(`email:${reportPackage}`);
+    try {
+      toast.loading(`Preparing ${DETAIL_REPORT_LABELS[reportPackage]} email draft...`, { id: 'detail-report-email' });
+      const { data, html, filename } = await buildDetailPackage(reportPackage);
+      await downloadAsPDF(html, filename);
+      const contacts = building.contacts || [];
+      const recipients = uniqueContactEmails(contacts);
+      const contactList = contactDirectory(contacts);
+      openEmailDraft({
+        to: recipients.join(','),
+        cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
+        subject: `${DETAIL_REPORT_LABELS[reportPackage]} - ${data.buildingName || building.name || building.address}`,
+        body:
+          `To the decision makers of ${data.buildingName || building.name || building.address},\n\n` +
+          `Thank you for taking the time to review Camelot Property Management. Attached is the ${DETAIL_REPORT_LABELS[reportPackage]} for ${data.buildingName || building.name || building.address}.\n\n` +
+          `Please attach the downloaded PDF before sending: ${filename}\n\n` +
+          `Contacts currently saved for this outreach:\n${contactList}\n\n` +
+          `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
+          `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+      });
+      toast.success(recipients.length ? 'PDF downloaded and addressed email draft opened' : 'PDF downloaded and email draft opened; add recipient before sending', { id: 'detail-report-email' });
+    } catch (err) {
+      console.error('Detail report email failed:', err);
+      toast.error('Email package failed. Try downloading the PDF first.', { id: 'detail-report-email' });
+    } finally {
+      setPackageLoading(null);
+    }
+  };
+
+  const handlePushHubSpot = async () => {
+    setPackageLoading('hubspot');
+    try {
+      toast.loading('Pushing property and contacts to HubSpot...', { id: 'detail-hubspot' });
+      const result = await pushBuildingToIntegrations(building);
+      const hubspotText = result.hubspot?.status === 'ok' ? 'HubSpot synced' : result.hubspot?.message || 'HubSpot queued/skipped';
+      toast.success(`Scout workflow complete. ${hubspotText}`, { id: 'detail-hubspot' });
+    } catch (err: any) {
+      console.error('HubSpot push failed:', err);
+      toast.error(`HubSpot error: ${err.message || 'Unknown error'}`, { id: 'detail-hubspot' });
+    } finally {
+      setPackageLoading(null);
+    }
+  };
 
   const handleReportPDF = async () => {
     setReportLoading(true);
@@ -423,12 +567,48 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
           </div>
 
           {/* Action bar */}
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <button
+              onClick={() => handleDownloadPackagePDF('first_email_intro')}
+              disabled={!!packageLoading}
+              className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50"
+            >
+              {packageLoading === 'download:first_email_intro' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              Intro PDF
+            </button>
+            <button
+              onClick={() => handleEmailPackagePDF('first_email_intro')}
+              disabled={!!packageLoading}
+              className="flex items-center gap-1.5 text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50"
+            >
+              {packageLoading === 'email:first_email_intro' ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}
+              Email Intro
+            </button>
+            <button
+              onClick={() => handleDownloadPackagePDF('board_meeting_deck')}
+              disabled={!!packageLoading}
+              className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50"
+            >
+              {packageLoading === 'download:board_meeting_deck' ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              Agenda PDF
+            </button>
+            <button
+              onClick={() => handleEmailPackagePDF('board_meeting_deck')}
+              disabled={!!packageLoading}
+              className="flex items-center gap-1.5 text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50"
+            >
+              {packageLoading === 'email:board_meeting_deck' ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+              Email Agenda
+            </button>
             <button onClick={handleReportPDF} disabled={reportLoading} className="flex items-center gap-1.5 text-xs bg-camelot-gold text-camelot-navy px-3 py-1.5 rounded-lg font-medium hover:bg-camelot-gold-light transition-colors disabled:opacity-50">
-              {reportLoading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Jackie Report</>}
+              {reportLoading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Full Jackie</>}
             </button>
             <button onClick={handleSendEmail} className="flex items-center gap-1.5 text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors">
-              <Mail size={13} /> Send Email
+              <Mail size={13} /> Quick Email
+            </button>
+            <button onClick={handlePushHubSpot} disabled={!!packageLoading} className="flex items-center gap-1.5 text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50">
+              {packageLoading === 'hubspot' ? <Loader2 size={13} className="animate-spin" /> : <Link size={13} />}
+              HubSpot
             </button>
             <button onClick={handleAddToPipeline} className="flex items-center gap-1.5 text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20 transition-colors">
               <GitBranch size={13} /> Add to Pipeline
