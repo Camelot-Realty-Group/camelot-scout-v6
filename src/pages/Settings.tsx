@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { isSupabaseConfigured } from '@/lib/supabase';
+import { getSupabaseStatusMessage, isSupabaseConfigured } from '@/lib/supabase';
 import { isAIConfigured, getAIConfig } from '@/lib/ai-client';
 import { isEnrichmentConfigured } from '@/lib/enrichment';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ interface ServiceStatus {
   name: string;
   configured: boolean;
   details?: string;
+  fallbackLabel?: string;
 }
 
 export default function Settings() {
@@ -25,7 +26,8 @@ export default function Settings() {
     {
       name: 'Supabase Database',
       configured: isSupabaseConfigured(),
-      details: isSupabaseConfigured() ? 'Connected' : 'Using demo mode — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY',
+      details: getSupabaseStatusMessage(),
+      fallbackLabel: 'Demo mode',
     },
     {
       name: 'NYC Open Data (HPD, DOF, DOB, LL97)',
@@ -148,9 +150,11 @@ export default function Settings() {
                       'text-xs px-2 py-1 rounded-full',
                       service.configured
                         ? 'bg-green-100 text-green-700'
-                        : 'bg-red-50 text-red-500'
+                        : service.fallbackLabel
+                          ? 'bg-amber-50 text-amber-700'
+                          : 'bg-red-50 text-red-500'
                     )}>
-                      {service.configured ? 'Connected' : 'Not configured'}
+                      {service.configured ? 'Connected' : service.fallbackLabel || 'Not configured'}
                     </span>
                   </div>
                 ))}
