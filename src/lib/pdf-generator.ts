@@ -112,6 +112,40 @@ export async function downloadAsHTML(html: string, filename: string): Promise<vo
   URL.revokeObjectURL(url);
 }
 
+/** Download an HTML report as a PDF using the browser-side renderer. */
+export async function downloadAsPDF(html: string, filename: string): Promise<void> {
+  const html2pdf = (await import('html2pdf.js')).default;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(ensureHtmlBase(html), 'text/html');
+  doc.querySelectorAll('.no-print, .deck-action-bar, .proposal-action-bar').forEach(el => el.remove());
+
+  const wrapper = document.createElement('div');
+  const isSlideDeck = Boolean(doc.querySelector('.slide'));
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-10000px';
+  wrapper.style.top = '0';
+  wrapper.style.width = isSlideDeck ? '11in' : '8.5in';
+  wrapper.style.background = '#fff';
+  wrapper.innerHTML = `${doc.head.innerHTML}${doc.body.innerHTML}`;
+  document.body.appendChild(wrapper);
+
+  try {
+    await html2pdf()
+      .from(wrapper)
+      .set(({
+        margin: 0,
+        filename: filename.endsWith('.pdf') ? filename : `${filename.replace(/\.(html|pdf)$/i, '')}.pdf`,
+        image: { type: 'jpeg', quality: 0.92 },
+        html2canvas: { scale: 1.45, useCORS: true, allowTaint: true, logging: false },
+        jsPDF: { unit: 'in', format: 'letter', orientation: isSlideDeck ? 'landscape' : 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] },
+      }) as any)
+      .save();
+  } finally {
+    wrapper.remove();
+  }
+}
+
 /** Open a mail client with a prepared client-facing draft. Attachments still require manual attachment by the user. */
 export function openEmailDraft(params: {
   to?: string;

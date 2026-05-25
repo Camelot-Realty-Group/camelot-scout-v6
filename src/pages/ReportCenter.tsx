@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Search, FileText, Download, Mail, Phone, Table2, Link2, Loader2, Eye, Copy, Check, X, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
+import { Search, FileText, Download, Mail, Phone, Table2, Link2, Loader2, Eye, Copy, Check, X, ShieldCheck, ShieldX, AlertTriangle, Printer } from 'lucide-react';
 import { REPORT_FOCUS_THEMES, buildJackieIntelReportFilename, buildMasterReport, generateBrochureHTML, generateColdCallerSheet, generateEmailDraft, generateCSVExport, validateJackieReport, type MasterReportData, type QACheckResult, type ReportFocusInput, type ReportFocusKey } from '@/lib/camelot-report';
 import { JACKIE_REPORT_PACKAGES, buildJackiePackageFilename, generateBoardMeetingDeck, generateFirstEmailIntroReport, generateJackieReportPackage, generatePitchEmail, type JackieReportPackage } from '@/lib/pitch-report';
 import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
-import { openBrochureForPrint, downloadAsHTML, triggerCSVDownload, copyToClipboard } from '@/lib/pdf-generator';
+import { openBrochureForPrint, downloadAsHTML, downloadAsPDF, triggerCSVDownload, copyToClipboard, openEmailDraft } from '@/lib/pdf-generator';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { formatLibraryDate, loadLocalJackieReportLibrary, packageLabelFor, removeJackieReportRecord, saveJackieReportRecord, type SavedJackieReport } from '@/lib/jackie-report-library';
+import { pushBuildingToIntegrations } from '@/lib/integrations';
+import type { Building, Contact } from '@/types';
 import toast from 'react-hot-toast';
 
 type EmailType = 'intro' | 'followup' | 'proposal' | 'compliance' | 'loyalty';
@@ -32,6 +34,106 @@ type ReportCenterSavedInputs = {
   inquiryNotes: string;
   selectedPackage: JackieReportPackage;
 };
+
+const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+
+function uniqueEmails(values: string[]) {
+  return Array.from(new Set(values.map(v => v.trim().toLowerCase()).filter(Boolean)));
+}
+
+function collectReportContactEmails(d: MasterReportData, fallbackEmail?: string) {
+  const emails: string[] = [];
+  if (fallbackEmail) emails.push(fallbackEmail);
+  if (d.reportFocus?.inquiryEmail) emails.push(d.reportFocus.inquiryEmail);
+  (d.boardMembers as Array<{ email?: string }> | undefined)?.forEach(member => {
+    if (member.email) emails.push(member.email);
+  });
+  (d.dobOwners || []).forEach(owner => {
+    const found = `${owner.name || ''} ${owner.businessName || ''} ${owner.phone || ''}`.match(EMAIL_RE);
+    if (found) emails.push(...found);
+  });
+  (d.contactResearchSources || []).forEach(source => {
+    const found = source.match(EMAIL_RE);
+    if (found) emails.push(...found);
+  });
+  return uniqueEmails(emails);
+}
+
+function reportPackageFilenames(d: MasterReportData, packageType: JackieReportPackage) {
+  return packageType === 'appendix_full'
+    ? {
+        pdf: buildJackieIntelReportFilename(d, 'pdf'),
+        html: buildJackieIntelReportFilename(d, 'html'),
+      }
+    : {
+        pdf: buildJackiePackageFilename(d, packageType, 'pdf'),
+        html: buildJackiePackageFilename(d, packageType, 'html'),
+      };
+}
+
+function reportDataToBuilding(d: MasterReportData, inquiry?: { name?: string; email?: string; phone?: string; role?: string; organization?: string }): Building {
+  const contacts: Contact[] = [];
+  if (inquiry?.name || inquiry?.email || inquiry?.phone) {
+    contacts.push({
+      name: inquiry.name || d.buildingName || d.address,
+      role: inquiry.role || 'board_member',
+      email: inquiry.email || undefined,
+      phone: inquiry.phone || undefined,
+      company: inquiry.organization || d.buildingName || d.dofOwner || undefined,
+      source: 'Jackie report inquiry contact',
+    });
+  }
+  (d.boardMembers || []).forEach(member => {
+    contacts.push({
+      name: member.name,
+      role: member.title || 'board_member',
+      email: (member as any).email,
+      phone: (member as any).phone,
+      company: d.buildingName || d.dofOwner || undefined,
+      source: 'Jackie report contact research',
+    });
+  });
+
+  return {
+    id: `jackie-${(d.bbl || d.address).replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`,
+    address: d.address,
+    name: d.buildingName || d.address,
+    borough: d.borough,
+    neighborhood: d.neighborhoodName,
+    zip_code: d.zipCode,
+    units: d.units,
+    type: /coop|co-op|cooperative|tenancy/i.test(d.propertyType) ? 'co-op' : /condo|hoa/i.test(d.propertyType) ? 'condo' : /mixed/i.test(d.propertyType) ? 'mixed-use' : /commercial|retail|office/i.test(d.propertyType) ? 'commercial' : 'rental',
+    year_built: d.yearBuilt,
+    lot_area: d.lotArea,
+    building_area: d.buildingArea,
+    stories: d.stories,
+    building_class: d.buildingClass,
+    grade: (['A', 'B', 'C'].includes(d.scoutGrade) ? d.scoutGrade : 'C') as Building['grade'],
+    score: d.scoutScore,
+    signals: (d.distressSignals || []).map(signal => signal.description),
+    contacts,
+    enriched_data: { source: 'Jackie Report Center', reportFocus: d.reportFocus, bbl: d.bbl },
+    current_management: d.managementCompany || undefined,
+    source: 'Jackie Report Center',
+    status: 'proposal',
+    tags: ['jackie-report', `package:${d.reportFocus?.selectedFocus || 'general'}`],
+    pipeline_stage: 'proposal',
+    bbl: d.bbl,
+    violations_count: d.violationsTotal,
+    open_violations_count: d.violationsOpen,
+    last_violation_date: d.lastViolationDate || undefined,
+    market_value: d.marketValue,
+    assessed_value: d.assessedValue,
+    land_value: d.landValue,
+    tax_class: d.taxClass,
+    dof_owner: d.dofOwner,
+    energy_star_score: d.energyStarScore || undefined,
+    site_eui: d.siteEUI || undefined,
+    ghg_emissions: d.ghgEmissions || undefined,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
 
 function ReleaseWorkflowPanel({
   qa,
@@ -349,30 +451,81 @@ export default function ReportCenter() {
     if (!d) return;
     const html = generateSelectedPackageHTML(d);
     if (!verifyJackieRelease(d, html, 'internal')) return;
-    const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
+    const filename = reportPackageFilenames(d, selectedPackage).html;
     archiveJackieReport(d, selectedPackage, html, filename);
     downloadAsHTML(html, filename);
   };
 
-  const handlePitchEmail = () => {
+  const handleDownloadSelectedPDF = async () => {
+    const d = getDataWithPhotos();
+    if (!d) return;
+    const html = generateSelectedPackageHTML(d);
+    if (!verifyJackieRelease(d, html, 'internal')) return;
+    const filenames = reportPackageFilenames(d, selectedPackage);
+    archiveJackieReport(d, selectedPackage, html, filenames.html);
+    toast.loading('Generating PDF...', { id: 'jackie-pdf' });
+    try {
+      await downloadAsPDF(html, filenames.pdf);
+      toast.success('PDF downloaded', { id: 'jackie-pdf' });
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      toast.error('PDF download failed. Use Print / Save PDF as a fallback.', { id: 'jackie-pdf' });
+    }
+  };
+
+  const handlePitchEmail = async () => {
     const d = getDataWithPhotos();
     if (!d) return;
     const email = generatePitchEmail(d);
     const html = generateSelectedPackageHTML(d);
-    const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
-    archiveJackieReport(d, selectedPackage, html, filename);
-    downloadAsHTML(html, filename);
-    const subject = encodeURIComponent(`Introduction to Camelot Property Management regarding ${d.buildingName || d.address}`);
-    const body = encodeURIComponent(
+    if (!verifyJackieRelease(d, html, 'internal')) return;
+    const filenames = reportPackageFilenames(d, selectedPackage);
+    archiveJackieReport(d, selectedPackage, html, filenames.html);
+    toast.loading('Preparing PDF and email draft...', { id: 'jackie-email' });
+    try {
+      await downloadAsPDF(html, filenames.pdf);
+    } catch (err) {
+      console.error('PDF generation before email failed:', err);
+      await downloadAsHTML(html, filenames.html);
+    }
+    const recipients = collectReportContactEmails(d, inquiryEmail);
+    openEmailDraft({
+      to: recipients.join(','),
+      cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
+      subject: `Introduction to Camelot Property Management regarding ${d.buildingName || d.address}`,
+      body:
       `To the decision makers of ${d.buildingName || d.address},\n\n` +
-      `Thank you for taking the time to review Camelot Property Management. Attached is a brief property-specific introduction prepared by Camelot OS for ${d.buildingName || d.address}.\n\n` +
+      `Thank you for taking the time to review Camelot Property Management. Attached is a property-specific Camelot report for ${d.buildingName || d.address}.\n\n` +
       `Camelot is a New York-based property management company serving co-ops, condos, and rental buildings with senior attention, in-house accounting, legal and compliance guidance, practical technology, and hands-on local management. We would welcome the opportunity to speak with you by phone, Zoom, Google Meet, or in person to discuss where Camelot may be useful to your building.\n\n` +
-      `Please attach the downloaded HTML report file: ${filename}\n\n` +
-      `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
-    );
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&cc=info@camelot.nyc,dgoldoff@camelot.nyc&su=${subject}&body=${body}`, '_blank', 'noopener,noreferrer');
+      `Please attach the downloaded PDF report file before sending: ${filenames.pdf}\n\n` +
+      `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+    });
     copyToClipboard(email);
-    toast.success('Gmail draft opened and the HTML report downloaded for attachment');
+    toast.success(recipients.length ? 'PDF downloaded and addressed Gmail draft opened' : 'PDF downloaded and Gmail draft opened; add recipient before sending', { id: 'jackie-email' });
+  };
+
+  const handlePushSelectedHubSpot = async () => {
+    const d = getDataWithPhotos();
+    if (!d) return;
+    const html = generateSelectedPackageHTML(d);
+    if (!verifyJackieRelease(d, html, 'internal')) return;
+    const filenames = reportPackageFilenames(d, selectedPackage);
+    archiveJackieReport(d, selectedPackage, html, filenames.html);
+    toast.loading('Pushing Jackie report lead to Scout / HubSpot...', { id: 'jackie-hubspot' });
+    try {
+      const result = await pushBuildingToIntegrations(reportDataToBuilding(d, {
+        name: inquiryContact,
+        email: inquiryEmail,
+        phone: inquiryPhone,
+        role: inquiryRole,
+        organization: inquiryOrganization,
+      }));
+      const hubspotText = result.hubspot?.status === 'ok' ? 'HubSpot synced' : result.hubspot?.message || 'HubSpot queued/skipped';
+      toast.success(`Scout workflow complete. ${hubspotText}`, { id: 'jackie-hubspot' });
+    } catch (err: any) {
+      console.error('HubSpot push failed:', err);
+      toast.error(`HubSpot error: ${err.message || 'Unknown error'}`, { id: 'jackie-hubspot' });
+    }
   };
 
   const handlePitchDeckPPTX = async () => {
@@ -882,8 +1035,17 @@ export default function ReportCenter() {
                 <button onClick={handleDownloadPitchHTML} className="px-4 py-2 bg-[#3A4B5B] text-white rounded-lg hover:bg-[#2d3d4d] text-sm font-medium flex items-center gap-2">
                   <Download className="w-4 h-4" /> Download Selected HTML
                 </button>
+                <button onClick={handleDownloadSelectedPDF} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium flex items-center gap-2">
+                  <Download className="w-4 h-4" /> PDF
+                </button>
+                <button onClick={handlePitchEmail} className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> Email PDF
+                </button>
+                <button onClick={handlePushSelectedHubSpot} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-medium flex items-center gap-2">
+                  <Link2 className="w-4 h-4" /> HubSpot
+                </button>
                 <button onClick={handlePitchDeckPPTX} className="px-4 py-2 bg-[#7C3AED] text-white rounded-lg hover:bg-[#6D28D9] text-sm font-medium flex items-center gap-2">
-                  <Download className="w-4 h-4" /> 📊 PowerPoint Deck
+                  <Download className="w-4 h-4" /> ðŸ“Š PowerPoint Deck
                 </button>
               </div>
             </div>
@@ -977,7 +1139,7 @@ export default function ReportCenter() {
           {/* Action Buttons */}
           <div className="bg-white rounded-xl border p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               <button onClick={handlePreviewPitch} className="px-4 py-3 bg-[#0D2240] text-white rounded-lg hover:bg-[#1a3a5c] font-medium flex flex-col items-center gap-1 text-sm">
                 <Eye className="w-5 h-5" /> First Email Intro
               </button>
@@ -985,10 +1147,16 @@ export default function ReportCenter() {
                 <Eye className="w-5 h-5" /> Appendix
               </button>
               <button onClick={handleDownloadPitchHTML} className="px-4 py-3 bg-[#3A4B5B] text-white rounded-lg hover:bg-[#2d3d4d] font-medium flex flex-col items-center gap-1 text-sm">
-                <Download className="w-5 h-5" /> Download Selected
+                <Download className="w-5 h-5" /> HTML
+              </button>
+              <button onClick={handleDownloadSelectedPDF} className="px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex flex-col items-center gap-1 text-sm">
+                <Download className="w-5 h-5" /> PDF
+              </button>
+              <button onClick={handlePreviewSelectedPackage} className="px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex flex-col items-center gap-1 text-sm">
+                <Printer className="w-5 h-5" /> Print
               </button>
               <button onClick={handlePitchEmail} className="px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex flex-col items-center gap-1 text-sm">
-                <Mail className="w-5 h-5" /> Email Draft
+                <Mail className="w-5 h-5" /> Email PDF Draft
               </button>
               <button onClick={() => setShowCallerModal(true)} className="px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex flex-col items-center gap-1 text-sm">
                 <Phone className="w-5 h-5" /> Send to Carl
@@ -996,43 +1164,7 @@ export default function ReportCenter() {
               <button onClick={handleCSV} className="px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex flex-col items-center gap-1 text-sm">
                 <Table2 className="w-5 h-5" /> CSV Export
               </button>
-              <button onClick={async () => {
-                try {
-                  toast.loading('Pushing to HubSpot...');
-                  // Use server-side proxy to avoid CORS issues
-                  const contactRes = await fetch('/api/hubspot/contacts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ properties: {
-                      company: data.buildingName || data.address,
-                      address: data.address,
-                      city: 'New York',
-                      state: data.borough || 'NY',
-                      hs_lead_status: 'NEW',
-                      notes_last_contacted: `Camelot OS Grade: ${data.scoutGrade} (${data.scoutScore}/100) | Units: ${data.units} | Violations: ${data.violationsTotal} (${data.violationsOpen} open) | Mgmt: ${data.managementCompany || 'Unknown'} | Market Value: $${data.marketValue.toLocaleString()} | Proposed Fee: $${data.monthlyFee}/mo`,
-                    }}),
-                  });
-                  if (!contactRes.ok) { const err = await contactRes.json(); throw new Error(err.message || err.error || contactRes.statusText); }
-                  const contact = await contactRes.json();
-                  const dealRes = await fetch('/api/hubspot/deals', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ properties: {
-                      dealname: `Camelot Management — ${data.buildingName || data.address}`,
-                      pipeline: 'default',
-                      dealstage: 'appointmentscheduled',
-                      amount: String(data.annualFee),
-                      description: `${data.units} units | ${data.propertyType} | ${data.address} | Grade: ${data.scoutGrade} | Violations: ${data.violationsOpen} open | Distress: ${data.distressLevel}`,
-                    }, associations: [{ to: { id: contact.id }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }] }] }),
-                  });
-                  if (!dealRes.ok) { const err = await dealRes.json(); throw new Error(err.message || err.error || dealRes.statusText); }
-                  toast.dismiss();
-                  toast.success(`Pushed to HubSpot — Contact #${contact.id} + Deal created`);
-                } catch (err: any) {
-                  toast.dismiss();
-                  toast.error(`HubSpot error: ${err.message || 'Unknown error'}`);
-                }
-              }} className="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium flex flex-col items-center gap-1 text-sm">
+              <button onClick={handlePushSelectedHubSpot} className="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium flex flex-col items-center gap-1 text-sm">
                 <Link2 className="w-5 h-5" /> Push to HubSpot
               </button>
             </div>
