@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "verify:jackie": "node scripts/verify-jackie-report.mjs",
+    "setup:merlin": "tsx scripts/setup_merlin_oauth.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "start": "node server.js"
@@ -66,6 +67,7 @@
     "globals": "^15.15.0",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
+    "tsx": "^4.22.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^5.4.0"
