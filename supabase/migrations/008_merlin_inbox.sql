@@ -1,16 +1,16 @@
-﻿-- supabase/migrations/008_merlin_inbox.sql
+-- supabase/migrations/008_merlin_inbox.sql
 --
 -- Adds the tables and cron schedule needed for the merlin@camelot.nyc mailbox
 -- workflow: outbound messages (logged when the daily-lead-hunt or any other
 -- bot sends mail) and inbound messages (logged when merlin-inbox-poll pulls
--- replies). Also extends `scout_buildings` with outreach status fields so the
+-- replies). Also extends `buildings` with outreach status fields so the
 -- Pipeline Kanban can reflect engagement state.
 
 -- 1. Outbound message log ----------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS merlin_outbound_messages (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  building_id       uuid REFERENCES scout_buildings(id) ON DELETE SET NULL,
+  building_id       uuid REFERENCES buildings(id) ON DELETE SET NULL,
   gmail_message_id  text NOT NULL,
   thread_id         text NOT NULL,
   to_addresses      text[] NOT NULL,
@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_merlin_outbound_building ON merlin_outbound_messa
 
 CREATE TABLE IF NOT EXISTS merlin_inbound_messages (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  building_id       uuid REFERENCES scout_buildings(id) ON DELETE SET NULL,
+  building_id       uuid REFERENCES buildings(id) ON DELETE SET NULL,
   gmail_message_id  text NOT NULL,
   thread_id         text NOT NULL,
   from_address      text NOT NULL,
@@ -51,17 +51,17 @@ CREATE INDEX IF NOT EXISTS idx_merlin_inbound_building ON merlin_inbound_message
 CREATE INDEX IF NOT EXISTS idx_merlin_inbound_intent   ON merlin_inbound_messages(intent);
 CREATE INDEX IF NOT EXISTS idx_merlin_inbound_received ON merlin_inbound_messages(received_at DESC);
 
--- 3. Extend scout_buildings with outreach status ----------------------------------
+-- 3. Extend buildings with outreach status ----------------------------------
 
-ALTER TABLE scout_buildings
+ALTER TABLE buildings
   ADD COLUMN IF NOT EXISTS outreach_status     text,        -- 'positive' | 'objection' | 'meeting_request' | 'unsubscribe' | etc.
   ADD COLUMN IF NOT EXISTS outreach_last_reply timestamptz,
   ADD COLUMN IF NOT EXISTS outreach_last_sent  timestamptz,
   ADD COLUMN IF NOT EXISTS assigned_to         uuid,         -- the Camelot user owning the lead
   ADD COLUMN IF NOT EXISTS assigned_at         timestamptz;
 
-CREATE INDEX IF NOT EXISTS idx_buildings_outreach_status ON scout_buildings(outreach_status);
-CREATE INDEX IF NOT EXISTS idx_buildings_assigned_to     ON scout_buildings(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_buildings_outreach_status ON buildings(outreach_status);
+CREATE INDEX IF NOT EXISTS idx_buildings_assigned_to     ON buildings(assigned_to);
 
 -- 4. RLS ----------------------------------------------------------------------
 
@@ -96,4 +96,3 @@ SELECT cron.schedule(
 -- After deploying the merlin-inbox-poll Edge Function, set the URL + token:
 --   ALTER DATABASE postgres SET app.settings.merlin_inbox_function_url   = 'https://<project>.supabase.co/functions/v1/merlin-inbox-poll';
 --   ALTER DATABASE postgres SET app.settings.merlin_inbox_function_token = '<service-role-jwt>';
-
