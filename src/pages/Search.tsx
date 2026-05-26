@@ -510,6 +510,7 @@ export default function Search() {
   ];
   const botCards = [
     { name: 'Scout', route: '/results', icon: SearchIcon, text: 'Source, score, and organize new management targets.' },
+    { name: 'Daily Hunt', route: '/daily-hunt', icon: Activity, text: 'Upload or review lead lists, verify facts, and queue Pipeline-ready opportunities.' },
     { name: 'Jackie', route: '/report-center', icon: Award, text: 'Build client-ready introductions, decks, and full property intelligence reports.' },
     { name: 'Sentinel', route: '/sentinel', icon: BarChart3, text: 'Track market movement, distress, timing, and benchmark signals.' },
     { name: 'Arthur', route: '/arthur', icon: BriefcaseBusiness, text: 'Underwrite investments, produce models, and queue broker follow-up.' },

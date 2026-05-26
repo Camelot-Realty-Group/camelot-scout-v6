@@ -113,6 +113,47 @@ const DEMO_BOTS: DashboardBot[] = [
     ],
   },
   {
+    id: 'dailyhunt',
+    name: 'Daily Hunt Lead Verifier',
+    type: 'dailyhunt',
+    description:
+      'Imports property lists, Kimi/Twin/Claude handoffs, saved-search leads, and Merlin inbox signals into a verified Scout lead queue before Pipeline, HubSpot, outreach, or reports.',
+    status: 'active',
+    owner: 'Scout / Merlin',
+    tasks_completed: 84,
+    tasks_queued: 0,
+    last_run_at: '2026-05-25T18:00:00.000Z',
+    outputs: [
+      'Daily verified lead queue',
+      'Corrected / rejected / unverified lead stats',
+      'Source trail and verification panel',
+      'Pipeline-ready next actions',
+      'Merlin inbox and outbound audit path',
+    ],
+    quality_gates: [
+      ...(doctrineById.dailyhunt?.releaseGates || []),
+      'CSV/XLSX imports are candidate lists only until verifier checks unit count, owner, status, and contact path',
+      'Kimi, Twin, Claude, and other AI research outputs are not accepted as final verification',
+      'Demo fallback rows cannot mutate Supabase records',
+      'No outreach or HubSpot push without verification status and contact-source trail',
+    ],
+    sources: [
+      { name: 'reference/claude-daily-hunt/VERIFICATION_GATE.md', kind: 'Repo', status: 'synced' },
+      { name: 'reference/claude-daily-hunt/lead-verifier_SKILL.md', kind: 'Repo', status: 'synced' },
+      { name: 'reference/claude-daily-hunt/leads_2026-05-25.csv', kind: 'Repo', status: 'synced' },
+      { name: 'supabase/migrations/007_lead_hunt.sql', kind: 'Repo', status: 'synced' },
+      { name: 'supabase/migrations/008_merlin_inbox.sql', kind: 'Repo', status: 'synced' },
+      ...NY_WEB_SOURCE_CARDS,
+      ...NY_OWNERSHIP_HUNT_SOURCE_CARDS,
+    ],
+    actions: [
+      { label: 'Daily Hunt', href: '/daily-hunt', icon: RefreshCw },
+      { label: 'Results', href: '/results', icon: Database },
+      { label: 'Pipeline', href: '/pipeline', icon: RefreshCw },
+      { label: 'Outreach', href: '/outreach', icon: Mail },
+    ],
+  },
+  {
     id: 'jackie',
     name: 'Jackie Pitch Engine',
     type: 'jackie',
@@ -437,6 +478,13 @@ const DEMO_BOTS: DashboardBot[] = [
 
 const DEMO_RUNS: BotRun[] = [
   {
+    id: 'run-dailyhunt-1',
+    bot_id: 'dailyhunt',
+    status: 'completed',
+    summary: 'Imported Claude/Twin 2026-05-25 lead export into Daily Hunt with verification-gate references and demo fallback queue.',
+    started_at: '2026-05-25T18:00:00.000Z',
+  },
+  {
     id: 'run-1',
     bot_id: 'jackie',
     status: 'completed',
@@ -463,6 +511,7 @@ const BOT_ICONS: Record<string, typeof BotIcon> = {
   jackie: Crown,
   arthur: Landmark,
   merlin: Sparkles,
+  dailyhunt: RefreshCw,
   scout: Database,
   sentinel: Sparkles,
   integrations: GitBranch,

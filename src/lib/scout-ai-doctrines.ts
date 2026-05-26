@@ -11,6 +11,7 @@ export type ScoutAgentId =
   | 'jackie'
   | 'merlin'
   | 'scout'
+  | 'dailyhunt'
   | 'guardian'
   | 'sentinel'
   | 'outreach'
@@ -35,6 +36,7 @@ Scout competitive operating standard:
 - Client-facing exports must support print, PDF, HTML, and email workflows with clean filenames, concise cover notes, page numbers where applicable, and no broken images or placeholder data.
 - New York people, comps, contacts, litigation, commercial occupants, ownership, lender, note, and entity scans must include the NY people/entity/comp stack: ${nyPeopleEntityCompSourceSummary()}.
 - New York ownership and decision-maker hunts must additionally use the additive NY ownership-hunt stack: ${nyOwnershipHuntSummary()}. This supplements, and never replaces, official records and property-specific sources. Preferred sequence: ${NY_OWNERSHIP_HUNT_SEQUENCE.join(' -> ')}. ${NY_OWNERSHIP_HUNT_SIGNATORY_RULE}
+- Daily Hunt lead lists must pass verification before Pipeline, outreach, HubSpot, email, or report output. Imported CSV rows are allowed as candidates only; unit count, owner/developer, status, contact path, and source trail must be verified or labeled unverified.
 `;
 
 export const LEAD_GENERATOR_DEPLOYMENT_PROMPT = `
@@ -197,6 +199,43 @@ export const SCOUT_AGENT_DOCTRINES: ScoutAgentDoctrine[] = [
     ],
     deliverables: ['Lead score', 'Owner / manager intel', 'Source gap list', 'Pipeline next action', 'Neighborhood opportunity brief', 'Lead generator deployment prompt'],
     releaseGates: ['Address and unit-count sanity check', 'Owner/manager confidence label', 'Commercial and amenity scan when applicable', 'Hybrid batch/webhook workflow has environment variables and webhook secret configured'],
+  },
+  {
+    id: 'dailyhunt',
+    name: 'Daily Hunt Lead Verifier',
+    mission:
+      'Turn imported lead lists, Kimi/Twin/Claude research, public source scans, and Merlin inbox signals into a verified daily lead queue that Scout can safely review, route, and convert into Pipeline opportunities.',
+    operatingRules: [
+      'Treat every uploaded CSV, Excel list, saved-search email, Kimi result, Twin output, and Claude handoff as a candidate queue, not verified fact.',
+      'Run the lead-verifier gate before showing a lead list to decision makers, pushing to Pipeline, creating a HubSpot record, sending an email, or generating a lead report.',
+      'Unit count, project status, owner/developer, management company, source URL, and contact path must be verified, corrected, rejected, or labeled unverified.',
+      'Prefer primary-source checks first, then market and media sources; never rely on a second AI answer as verification.',
+      'Keep rejected and corrected rows visible in the run log so the team knows what changed and why.',
+      'Use Merlin inbox/outbound records as the feedback loop: replies, meeting requests, bounces, and do-not-contact signals must update the lead record.',
+    ],
+    requiredSources: [
+      'Uploaded CSV/XLSX source list or saved-search email',
+      'Developer offering plan, official project page, CityRealty, StreetEasy, PropertyShark, HPD/DOF/DOB/ACRIS where applicable',
+      'Kimi/Twin/Claude handoff references as candidate sources only',
+      'Merlin outbound and inbound message tables for outreach status',
+      ...NY_PEOPLE_ENTITY_COMP_SOURCE_STACK,
+      ...NY_OWNERSHIP_HUNT_SOURCE_STACK.map(({ source, bestUseCase }) => `${source}: ${bestUseCase}`),
+    ],
+    deliverables: [
+      'Daily lead queue',
+      'Verified/corrected/rejected stats',
+      'Verification trail',
+      'Pipeline-ready next action',
+      'Merlin outreach status',
+      'HubSpot/Scout sync readiness',
+    ],
+    releaseGates: [
+      'No Pipeline push without verification status',
+      'No outreach without contact path and source trail',
+      'No unit count without primary or credible market source',
+      'Rejected and corrected candidates logged',
+      'Demo/imported fallback rows cannot mutate Supabase records',
+    ],
   },
   {
     id: 'guardian',
