@@ -6,6 +6,7 @@ import GuidedTour from '@/components/GuidedTour';
 import { useTour } from '@/hooks/useTour';
 import Search from '@/pages/Search';
 import Results from '@/pages/Results';
+import DailyHunt from '@/pages/DailyHunt';
 import Saved from '@/pages/Saved';
 import Import from '@/pages/Import';
 import Pipeline from '@/pages/Pipeline';
@@ -57,6 +58,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Search />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/daily-hunt" element={<DailyHunt />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/import" element={<Import />} />
           <Route path="/pipeline" element={<Pipeline />} />

@@ -29,6 +29,7 @@ import {
   Menu,
   X,
   Megaphone,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/store';
@@ -52,6 +53,7 @@ const navigation: NavSection[] = [
     items: [
       { label: 'Search', href: '/', icon: <Search size={18} />, tourId: 'search' },
       { label: 'Results & Scoring', href: '/results', icon: <LayoutGrid size={18} />, tourId: 'results' },
+      { label: 'Daily Hunt', href: '/daily-hunt', icon: <Sparkles size={18} /> },
       { label: 'Pipeline', href: '/pipeline', icon: <GitBranch size={18} />, tourId: 'pipeline' },
       { label: 'Outreach', href: '/outreach', icon: <Mail size={18} />, tourId: 'outreach' },
       { label: 'Saved', href: '/saved', icon: <Bookmark size={18} /> },

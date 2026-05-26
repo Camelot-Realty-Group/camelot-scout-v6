@@ -414,13 +414,14 @@ export function useBuildings() {
   const store = useBuildingsStore();
 
   const loadBuildings = useCallback(async () => {
-    store.setLoading(true);
-    store.setError(null);
+    const actions = useBuildingsStore.getState();
+    actions.setLoading(true);
+    actions.setError(null);
 
     if (!isSupabaseConfigured()) {
       // Use demo data
-      store.setBuildings(DEMO_BUILDINGS);
-      store.setLoading(false);
+      actions.setBuildings(DEMO_BUILDINGS);
+      actions.setLoading(false);
       return;
     }
 
@@ -432,22 +433,23 @@ export function useBuildings() {
         .order('score', { ascending: false });
 
       if (error) throw error;
-      store.setBuildings(data || []);
+      actions.setBuildings(data || []);
     } catch (err: any) {
       console.warn('Supabase building table unavailable; using Scout demo data instead.', err?.message || err);
-      store.setError(null);
+      actions.setError(null);
       // Fall back to demo data
-      store.setBuildings(DEMO_BUILDINGS);
+      actions.setBuildings(DEMO_BUILDINGS);
     } finally {
-      store.setLoading(false);
+      actions.setLoading(false);
     }
-  }, [store]);
+  }, []);
 
   const saveBuildingToSupabase = useCallback(async (building: Partial<Building>) => {
+    const actions = useBuildingsStore.getState();
     if (!isSupabaseConfigured()) {
       // In demo mode, just update local state
       if (building.id) {
-        store.updateBuilding(building.id, building);
+        actions.updateBuilding(building.id, building);
       }
       return building;
     }
@@ -461,7 +463,7 @@ export function useBuildings() {
           .select()
           .single();
         if (error) throw error;
-        store.updateBuilding(building.id, data);
+        actions.updateBuilding(building.id, data);
         return data;
       } else {
         const { data, error } = await supabase
@@ -470,17 +472,18 @@ export function useBuildings() {
           .select()
           .single();
         if (error) throw error;
-        store.addBuildings([data]);
+        actions.addBuildings([data]);
         return data;
       }
     } catch (err: any) {
       console.error('Failed to save building:', err);
       throw err;
     }
-  }, [store]);
+  }, []);
 
   const moveToPipeline = useCallback(async (id: string, stage: PipelineStage) => {
-    store.updateBuilding(id, {
+    const actions = useBuildingsStore.getState();
+    actions.updateBuilding(id, {
       pipeline_stage: stage,
       pipeline_moved_at: new Date().toISOString(),
     });
@@ -491,10 +494,11 @@ export function useBuildings() {
         .update({ pipeline_stage: stage, pipeline_moved_at: new Date().toISOString() })
         .eq('id', id);
     }
-  }, [store]);
+  }, []);
 
   const archiveBuilding = useCallback(async (id: string, reason?: string) => {
-    store.updateBuilding(id, {
+    const actions = useBuildingsStore.getState();
+    actions.updateBuilding(id, {
       status: 'archived',
       archive_reason: reason,
       archived_at: new Date().toISOString(),
@@ -510,10 +514,11 @@ export function useBuildings() {
         })
         .eq('id', id);
     }
-  }, [store]);
+  }, []);
 
   const restoreBuilding = useCallback(async (id: string) => {
-    store.updateBuilding(id, {
+    const actions = useBuildingsStore.getState();
+    actions.updateBuilding(id, {
       status: 'active',
       archive_reason: undefined,
       archived_at: undefined,
@@ -525,13 +530,13 @@ export function useBuildings() {
         .update({ status: 'active', archive_reason: null, archived_at: null })
         .eq('id', id);
     }
-  }, [store]);
+  }, []);
 
   // Get filtered and sorted buildings
   const getFilteredBuildings = useCallback(() => {
-    let result = [...store.buildings].filter((b) => b.status === 'active');
+    const { buildings, filters } = useBuildingsStore.getState();
+    let result = [...buildings].filter((b) => b.status === 'active');
 
-    const { filters } = store;
 
     if (filters.query) {
       const q = filters.query.toLowerCase();
@@ -586,7 +591,7 @@ export function useBuildings() {
     });
 
     return result;
-  }, [store]);
+  }, []);
 
   return {
     buildings: store.buildings,

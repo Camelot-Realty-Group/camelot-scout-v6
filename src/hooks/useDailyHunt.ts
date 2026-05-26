@@ -1,0 +1,272 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { DAILY_HUNT_SEED_LEADS } from '@/lib/daily-hunt-seed';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { useBuildings } from '@/hooks/useBuildings';
+import type { PipelineStage } from '@/types';
+
+export type LeadPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface DailyHuntLead {
+  id: string;
+  name: string;
+  address: string;
+  city?: string | null;
+  state?: string | null;
+  unit_count?: number | null;
+  lead_source?: string | null;
+  lead_category?: string | null;
+  lead_priority?: LeadPriority | null;
+  lead_pitch_angle?: string | null;
+  lead_contact_path?: string | null;
+  lead_source_url?: string | null;
+  lead_found_at?: string | null;
+  developer_or_owner?: string | null;
+  status?: string | null;
+  verification_status?: 'VERIFIED' | 'CORRECTED' | 'UNVERIFIED' | null;
+  verified_sources?: Array<{ label?: string; url?: string; checked_at?: string }>;
+  corrections?: Array<{ field: string; from?: string | number | null; to?: string | number | null; reason?: string }>;
+  source_mode: 'demo' | 'supabase';
+}
+
+export interface LeadHuntRun {
+  id: string;
+  started_at: string;
+  finished_at: string | null;
+  triggered_by: string;
+  sources_queried: string[];
+  candidates_found: number;
+  new_leads_inserted: number;
+  duplicates_skipped: number;
+  rejected_count?: number;
+  corrected_count?: number;
+  errors?: Array<{ source: string; message: string }>;
+}
+
+type FilterState = {
+  priority: LeadPriority | 'ALL';
+  category: string;
+  geo: string;
+  daysBack: number;
+};
+
+const stateFromAddress = (address: string) => {
+  if (/\bFL\b|Florida|Miami|Palm Beach|Broward/i.test(address)) return 'FL';
+  if (/\bNJ\b|New Jersey/i.test(address)) return 'NJ';
+  if (/\bCT\b|Connecticut|Fairfield|Stamford|Greenwich/i.test(address)) return 'CT';
+  return 'NY';
+};
+
+const demoLeads: DailyHuntLead[] = DAILY_HUNT_SEED_LEADS.map((lead) => ({
+  id: lead.id,
+  name: lead.target,
+  address: lead.address,
+  city: null,
+  state: stateFromAddress(lead.address),
+  unit_count: lead.units,
+  lead_source: lead.source,
+  lead_category: lead.category,
+  lead_priority: lead.priority,
+  lead_pitch_angle: lead.pitch_angle,
+  lead_contact_path: lead.best_contact_path,
+  lead_source_url: null,
+  lead_found_at: lead.imported_at,
+  developer_or_owner: lead.developer_or_owner,
+  status: lead.status,
+  verification_status: 'UNVERIFIED',
+  verified_sources: [{ label: 'Claude/Twin export CSV', checked_at: lead.imported_at }],
+  corrections: [],
+  source_mode: 'demo',
+}));
+
+export function useDailyHunt() {
+  const [leads, setLeads] = useState<DailyHuntLead[]>([]);
+  const [runs, setRuns] = useState<LeadHuntRun[]>([]);
+  const [latestRun, setLatestRun] = useState<LeadHuntRun | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<DailyHuntLead | null>(null);
+  const [filter, setFilter] = useState<FilterState>({
+    priority: 'ALL',
+    category: 'ALL',
+    geo: 'ALL',
+    daysBack: 7,
+  });
+  const { moveToPipeline, archiveBuilding } = useBuildings();
+
+  const applyFilters = useCallback((items: DailyHuntLead[]) => {
+    const since = Date.now() - filter.daysBack * 86_400_000;
+    return items.filter((lead) => {
+      if (filter.priority !== 'ALL' && lead.lead_priority !== filter.priority) return false;
+      if (filter.category !== 'ALL' && lead.lead_category !== filter.category) return false;
+      if (filter.geo !== 'ALL' && lead.state !== filter.geo) return false;
+      if (lead.lead_found_at && new Date(lead.lead_found_at).getTime() < since) return false;
+      return true;
+    });
+  }, [filter]);
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (!isSupabaseConfigured()) {
+        const filtered = applyFilters(demoLeads);
+        setLeads(filtered);
+        const run = {
+          id: 'demo-2026-05-25',
+          started_at: '2026-05-25T18:00:00.000Z',
+          finished_at: '2026-05-25T18:03:00.000Z',
+          triggered_by: 'claude_export',
+          sources_queried: ['Kimi research', 'Claude handoff CSV'],
+          candidates_found: demoLeads.length,
+          new_leads_inserted: filtered.length,
+          duplicates_skipped: 0,
+          rejected_count: 0,
+          corrected_count: 0,
+          errors: [],
+        };
+        setRuns([run]);
+        setLatestRun(run);
+        return;
+      }
+
+      const sinceIso = new Date(Date.now() - filter.daysBack * 86_400_000).toISOString();
+      let query = supabase
+        .from('scout_buildings')
+        .select('*')
+        .not('lead_source', 'is', null)
+        .gte('lead_found_at', sinceIso)
+        .order('lead_found_at', { ascending: false });
+
+      if (filter.priority !== 'ALL') query = query.eq('lead_priority', filter.priority);
+      if (filter.category !== 'ALL') query = query.eq('lead_category', filter.category);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      const mapped: DailyHuntLead[] = (data ?? []).map((row: any) => ({
+        id: row.id,
+        name: row.name ?? row.address ?? 'Untitled lead',
+        address: row.address ?? '',
+        city: row.city ?? null,
+        state: row.state ?? stateFromAddress(row.address ?? ''),
+        unit_count: row.units ?? row.unit_count ?? null,
+        lead_source: row.lead_source,
+        lead_category: row.lead_category,
+        lead_priority: row.lead_priority,
+        lead_pitch_angle: row.lead_pitch_angle,
+        lead_contact_path: row.lead_contact_path,
+        lead_source_url: row.lead_source_url,
+        lead_found_at: row.lead_found_at,
+        developer_or_owner: row.current_management ?? row.dof_owner ?? null,
+        status: row.status,
+        verification_status: row.verification_status,
+        verified_sources: row.verified_sources ?? [],
+        corrections: row.corrections ?? [],
+        source_mode: 'supabase',
+      }));
+      setLeads(filter.geo === 'ALL' ? mapped : mapped.filter((lead) => lead.state === filter.geo));
+
+      const { data: runRows } = await supabase
+        .from('lead_hunt_runs')
+        .select('*')
+        .order('started_at', { ascending: false })
+        .limit(14);
+      setRuns((runRows ?? []) as LeadHuntRun[]);
+      setLatestRun(((runRows ?? [])[0] ?? null) as LeadHuntRun | null);
+    } catch (error: any) {
+      console.warn('Daily Hunt Supabase load failed; falling back to exported leads.', error?.message || error);
+      setLeads(applyFilters(demoLeads));
+      setRuns([]);
+      setLatestRun(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [applyFilters, filter]);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  const pushToPipeline = useCallback(async (lead: DailyHuntLead, stage: PipelineStage = 'contacted') => {
+    if (isSupabaseConfigured() && lead.source_mode === 'supabase') {
+      await moveToPipeline(lead.id, stage);
+    }
+    setLeads((prev) => prev.filter((item) => item.id !== lead.id));
+    toast.success(`${lead.name} pushed to Pipeline`);
+  }, [moveToPipeline]);
+
+  const dismiss = useCallback(async (lead: DailyHuntLead) => {
+    if (isSupabaseConfigured() && lead.source_mode === 'supabase') {
+      await archiveBuilding(lead.id, 'Dismissed from Daily Hunt');
+    }
+    setLeads((prev) => prev.filter((item) => item.id !== lead.id));
+    toast.success(`${lead.name} dismissed`);
+  }, [archiveBuilding]);
+
+  const runNow = useCallback(async () => {
+    setRunning(true);
+    try {
+      if (!isSupabaseConfigured()) {
+        toast('Daily Hunt is showing the Claude export until Supabase functions are deployed.');
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/daily-lead-hunt`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ triggered_by: 'manual_ui' }),
+      });
+      if (!response.ok) throw new Error(`Daily Hunt failed: ${response.status}`);
+      await reload();
+      toast.success('Daily Hunt run started');
+    } catch (error: any) {
+      toast.error(error?.message || 'Daily Hunt run failed');
+    } finally {
+      setRunning(false);
+    }
+  }, [reload]);
+
+  const stats = useMemo(() => {
+    const out = {
+      total: leads.length,
+      high: 0,
+      medium: 0,
+      low: 0,
+      verified: 0,
+      corrected: 0,
+      rejected: latestRun?.rejected_count ?? 0,
+      byCategory: {} as Record<string, number>,
+      byGeo: {} as Record<string, number>,
+    };
+    for (const lead of leads) {
+      if (lead.lead_priority === 'HIGH') out.high += 1;
+      if (lead.lead_priority === 'MEDIUM') out.medium += 1;
+      if (lead.lead_priority === 'LOW') out.low += 1;
+      if (lead.verification_status === 'VERIFIED') out.verified += 1;
+      if (lead.verification_status === 'CORRECTED') out.corrected += 1;
+      if (lead.lead_category) out.byCategory[lead.lead_category] = (out.byCategory[lead.lead_category] ?? 0) + 1;
+      if (lead.state) out.byGeo[lead.state] = (out.byGeo[lead.state] ?? 0) + 1;
+    }
+    return out;
+  }, [latestRun?.rejected_count, leads]);
+
+  return {
+    leads,
+    runs,
+    latestRun,
+    loading,
+    running,
+    filter,
+    setFilter,
+    selectedLead,
+    setSelectedLead,
+    reload,
+    runNow,
+    pushToPipeline,
+    dismiss,
+    stats,
+  };
+}
