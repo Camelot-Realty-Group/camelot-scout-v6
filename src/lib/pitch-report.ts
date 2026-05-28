@@ -139,6 +139,22 @@ function isJacksonHeights85th(d: MasterReportData): boolean {
   return /37[-\s]?40\s+85th|37[-\s]?34\s+85th|85th\s+st.*jackson\s+heights|85th\s+street.*11372/i.test(`${d.buildingName || ''} ${d.address || ''}`);
 }
 
+function is279CentralParkWestReport(d: Pick<MasterReportData, 'address' | 'buildingName' | 'managementCompany'>): boolean {
+  const key = `${d.address || ''} ${d.buildingName || ''} ${d.managementCompany || ''}`.toLowerCase();
+  return /(^|[^0-9])279\b/.test(key) && (/\bcpw\b/.test(key) || /\bcentral\s+park\s+w(?:est)?\.?\b/.test(key));
+}
+
+function normalizePitchReportData(d: MasterReportData): MasterReportData {
+  if (!is279CentralParkWestReport(d)) return d;
+  return {
+    ...d,
+    buildingName: '279 Central Park West',
+    address: '279 Central Park West, New York, NY 10024',
+    neighborhoodName: 'Upper West Side / Central Park West',
+    managementCompany: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
+  };
+}
+
 const JACKSON_85TH_SCOPE_INCLUDED = [
   'Bill for and collect maintenance, assessments, shareholder charges, and approved building fees',
   'Review, code, and pay mortgage obligations, co-op bills, recurring expenses, and vendor invoices',
@@ -802,6 +818,7 @@ ${hoaClosingSlide(d)}`;
 }
 
 export function generateFirstEmailIntroReport(d: MasterReportData): string {
+  d = normalizePitchReportData(d);
   if (isHoaExecutiveOpportunity(d)) return generateHoaFirstEmailIntroReport(d);
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const subjectImage = bestExteriorImage(d);
@@ -820,6 +837,7 @@ ${onboardingChecklistSlide(d)}
 }
 
 export function generateBoardMeetingDeck(d: MasterReportData): string {
+  d = normalizePitchReportData(d);
   if (isHoaExecutiveOpportunity(d)) return generateHoaBoardMeetingDeck(d);
   if (isJacksonHeights85th(d)) return generateJackson85thBoardDeck(d);
   const base = generatePitchReport(d);
@@ -885,6 +903,7 @@ export function generateJackieReportPackage(d: MasterReportData, reportPackage: 
 }
 
 export function buildJackiePackageFilename(d: MasterReportData, reportPackage: JackieReportPackage, extension = 'html'): string {
+  d = normalizePitchReportData(d);
   const client = cleanFileNamePart(d.buildingName || d.address || 'Client');
   const dateStamp = new Date().toISOString().slice(0, 10);
   const suffix = reportPackage === 'first_email_intro'
@@ -900,6 +919,7 @@ export function buildJackiePackageFilename(d: MasterReportData, reportPackage: J
  * Opens in browser as printable slides (Ctrl+P - Save as PDF).
  */
 export function generatePitchReport(d: MasterReportData): string {
+  d = normalizePitchReportData(d);
   const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const hood = neighborhoodName(d);
   const boroDisplay = d.borough ? d.borough.charAt(0).toUpperCase() + d.borough.slice(1) : 'New York';

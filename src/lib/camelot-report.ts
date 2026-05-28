@@ -385,6 +385,7 @@ function verifiedManagementLabel(value?: string | null): string {
 function cleanBuildingName(value: string, address: string, managementCompany?: string | null): string {
   let cleaned = String(value || '').trim();
   const mgmt = String(managementCompany || '').trim();
+  if (is279CentralParkWestSubject(address, cleaned)) return '279 Central Park West';
   if (mgmt) {
     const escaped = mgmt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     cleaned = cleaned.replace(new RegExp(`\\b${escaped}\\b`, 'ig'), '').trim();
@@ -413,7 +414,11 @@ function hasExact22East22Subject(...values: Array<string | null | undefined>): b
 }
 
 function is279CentralParkWestSubject(...values: Array<string | null | undefined>): boolean {
-  return values.some(value => /279\s+(central\s+park\s+w(?:est)?|cpw)\b/i.test(String(value || '')));
+  return values.some(value => {
+    const key = String(value || '').toLowerCase();
+    if (!/(^|[^0-9])279\b/.test(key)) return false;
+    return /\bcpw\b/.test(key) || /\bcentral\s+park\s+w(?:est)?\.?\b/.test(key);
+  });
 }
 
 function removeStale279ManagementReferences(items: string[]): string[] {
@@ -1565,7 +1570,7 @@ function inferCommercialAmenityIntel(input: {
 
 function getKnownPropertyFacts(address: string, candidateName = ''): KnownPropertyFacts | null {
   const key = `${address} ${candidateName}`.toLowerCase();
-  if (/279\s+(central\s+park\s+w(?:est)?|cpw)\b/i.test(key)) {
+  if (is279CentralParkWestSubject(key)) {
     return {
       canonicalAddress: '279 Central Park West, New York, NY 10024',
       buildingName: '279 Central Park West',
@@ -3217,7 +3222,9 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   }
 
   const derivedBuildingName = knownFacts?.buildingName || deriveBuildingName(reportAddress, raw);
-  const buildingName = cleanBuildingName(derivedBuildingName, reportAddress, knownFacts?.managementCompany || raw.registration?.managementCompany);
+  const buildingName = is279CentralParkWestSubject(reportAddress, derivedBuildingName, raw.energy?.propertyName, raw.registration?.managementCompany)
+    ? '279 Central Park West'
+    : cleanBuildingName(derivedBuildingName, reportAddress, knownFacts?.managementCompany || raw.registration?.managementCompany);
   const propertyType = knownFacts?.propertyType || streetEasy?.buildingType || classifyBuildingType(dof?.buildingClass || '');
   const brandingResearch = await fetchOfficialBuildingBranding(reportAddress, buildingName).catch(() => null);
   let commercialIntel = inferCommercialAmenityIntel({
