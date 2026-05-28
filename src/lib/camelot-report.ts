@@ -412,6 +412,14 @@ function hasExact22East22Subject(...values: Array<string | null | undefined>): b
   });
 }
 
+function is279CentralParkWestSubject(...values: Array<string | null | undefined>): boolean {
+  return values.some(value => /279\s+(central\s+park\s+w(?:est)?|cpw)\b/i.test(String(value || '')));
+}
+
+function removeStale279ManagementReferences(items: string[]): string[] {
+  return items.filter(item => !/halstead/i.test(String(item || '')));
+}
+
 function dedupeText(items: Array<string | null | undefined>): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
@@ -1557,6 +1565,89 @@ function inferCommercialAmenityIntel(input: {
 
 function getKnownPropertyFacts(address: string, candidateName = ''): KnownPropertyFacts | null {
   const key = `${address} ${candidateName}`.toLowerCase();
+  if (/279\s+(central\s+park\s+w(?:est)?|cpw)\b/i.test(key)) {
+    return {
+      canonicalAddress: '279 Central Park West, New York, NY 10024',
+      buildingName: '279 Central Park West',
+      borough: 'Manhattan',
+      buildingClass: 'R4',
+      units: 36,
+      stories: 23,
+      yearBuilt: 1988,
+      propertyType: 'Condominium',
+      neighborhoodName: 'Upper West Side / Central Park West',
+      managementCompany: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
+      imageUrls: [
+        '/images/279-central-park-west/279-cpw-corner-shot.jpg',
+        '/images/279-central-park-west/279-cpw-awning.jpg',
+        '/images/279-central-park-west/279-cpw-top-of-building.jpg',
+        '/images/279-central-park-west/279-central-park-west.jpg',
+      ],
+      description: '279 Central Park West is a boutique Central Park West condominium with a high-visibility Upper West Side / Central Park edge position. Jackie treats management as a source-verification item until current board materials or primary public records confirm the managing agent.',
+      amenities: [
+        'Central Park West frontage / park-edge positioning',
+        'Condominium operating profile',
+        'Elevator / service access to verify',
+        'Doorman / concierge coverage to verify',
+        'Superintendent / resident manager coverage to verify',
+        'Storage, bike room, alteration, move-in/move-out, insurance, and resident-fee policies to verify',
+      ],
+      commercialSignals: [
+        'No current managing-agent name should be published until verified through HPD MDR, board materials, PropertyShark, ACRIS, or management agreement.',
+        'Current management must be verified through board materials or primary public records before publication.',
+        'Boutique high-value condominium operations require careful insurance, staff, capital planning, vendor, and resident-service review.',
+      ],
+      revenueOpportunities: [
+        'Move-in/move-out, alteration, resale, refinance, insurance-review, storage, bike, sublet / lease package, and document-fee schedule review.',
+        'Insurance renewal, deductible, and carrier requirement review for a Central Park West condominium.',
+        'Vendor contract, staffing, lobby/door coverage, cleaning, and preventative maintenance review.',
+        'Capital plan, reserve, facade, roof, Local Law, and life-safety compliance calendar review.',
+      ],
+      landmarks: [
+        'Central Park: immediate frontage',
+        'West 86th Street subway corridor: nearby',
+        'American Museum of Natural History / Theodore Roosevelt Park: nearby',
+        'Upper West Side retail and residential corridor: nearby',
+        'Central Park West landmark / architectural corridor: nearby',
+      ],
+      locationTitle: 'Central Park West / Upper West Side Positioning',
+      locationCopy: 'The property sits along Central Park West, where park frontage, transit access, architectural visibility, and resident expectations create a premium condominium operating profile.',
+      lifestyleTitle: 'Boutique Condominium With High-Service Expectations',
+      lifestyleCopy: 'A smaller Central Park West condominium needs polished resident communication, careful vendor oversight, transparent financial reporting, strong insurance coordination, and disciplined compliance management.',
+      brandingTitle: '279 Central Park West Condominium Profile',
+      brandingDescription: 'Known-property guard: Jackie uses the supplied 279 Central Park West building photographs and verifies management before publication.',
+      researchSources: [
+        'User-supplied 279 Central Park West building photographs',
+        'StreetEasy / Compass / Corcoran / CityRealty-style market profiles for public building identity, units, stories, year, and condominium context',
+        'NYC DOF / ACRIS ownership, mortgage, and tax-lot records must be checked before final release',
+        'HPD MDR / HPD Online registration, complaints, contacts, and violations',
+        'DOB BIS / DOB NOW permits, boiler, facade, OATH/ECB, and complaint records',
+        'Board materials, current management agreement, offering plan, insurance schedule, budget, and prior management report requested for final proposal',
+      ],
+      currentManagement: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
+      boardMembers: [
+        { name: '279 Central Park West condominium board / ownership authority', title: 'Condominium Board / Ownership Authority' },
+      ],
+      buildingStaff: [
+        { role: 'Managing Agent', name: 'To verify through HPD MDR / board records' },
+        { role: 'Doorman / Concierge', name: 'Building service staff to verify' },
+        { role: 'Superintendent / Resident Manager', name: 'On-site staff to verify' },
+      ],
+      professionalSources: [
+        'HPD MDR',
+        'ACRIS',
+        'DOB BIS / DOB NOW',
+        'NYC DOF / PROS',
+        'PropertyShark',
+        'StreetEasy / Compass / Corcoran / CityRealty market-source cross-checks',
+      ],
+      professionalNotes: [
+        'Do not publish a current management company for 279 Central Park West until HPD MDR, board materials, PropertyShark, ACRIS, or the management agreement confirms it.',
+        'Use the supplied 279 CPW photo set before Street View, StreetEasy, or placeholder imagery.',
+        'Confirm current unit count, BBL, board contact, managing agent, compliance status, and open violations from primary records before board-facing delivery.',
+      ],
+    };
+  }
   if (/201\s+e(ast)?\s+79/i.test(key) || /201\s+east\s+79th/i.test(key)) {
     return {
       canonicalAddress: '201 East 79th Street, New York, NY 10075',
@@ -3091,7 +3182,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   // ---------------------------------------------------------------------------
   // Derive a sensible building name.
   // The LL84 energy benchmarking `property_name` often contains the management
-  // company name (e.g. "Halstead") rather than the actual building name, so we
+  // company name rather than the actual building name, so we
   // can't blindly trust it. We only use it when it looks like a real building
   // name — i.e. it contains a number (street address) or known building-name
   // keywords, and does NOT match the management company already on file.
@@ -3153,6 +3244,17 @@ export async function buildMasterReport(address: string, borough?: string): Prom
       brandingImages: knownFacts.imageUrls?.length ? knownFacts.imageUrls : commercialIntel.brandingImages,
       researchSources: unique([...(knownFacts.researchSources || []), ...commercialIntel.researchSources]),
       researchStatus: 'verified',
+    };
+  }
+  if (is279CentralParkWestSubject(reportAddress, buildingName, knownFacts?.canonicalAddress)) {
+    commercialIntel = {
+      ...commercialIntel,
+      commercialSignals: removeStale279ManagementReferences(commercialIntel.commercialSignals),
+      likelyCommercialUses: removeStale279ManagementReferences(commercialIntel.likelyCommercialUses),
+      amenities: removeStale279ManagementReferences(commercialIntel.amenities),
+      revenueOpportunities: removeStale279ManagementReferences(commercialIntel.revenueOpportunities),
+      brandingDescription: commercialIntel.brandingDescription && /halstead/i.test(commercialIntel.brandingDescription) ? null : commercialIntel.brandingDescription,
+      researchSources: removeStale279ManagementReferences(commercialIntel.researchSources),
     };
   }
 
