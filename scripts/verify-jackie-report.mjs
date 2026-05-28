@@ -426,7 +426,7 @@ const workflowTokens = [
   ['report center focus notes', 'Optional notes from Get-a-Quote'],
   ['report center package controls', 'Jackie Output Package'],
   ['report center selected package preview', 'Preview Selected Package'],
-  ['report center board meeting deck preview', 'Board Meeting Deck (15)'],
+  ['report center first meeting handout preview', '1st Meeting Handout (15)'],
   ['report center first email intro preview', 'First Email Intro (6-8)'],
 ];
 
@@ -437,6 +437,18 @@ const workflowFailures = workflowTokens
 
 if (instantProposal.includes("Mgmt: {d?.managementCompany || 'Self-Managed'}")) {
   workflowFailures.push('instant proposal self-managed fallback: forbidden token still present');
+}
+
+if (!propertyDetail.includes('normalize36East22ndStreetReportData')) {
+  workflowFailures.push('property detail 36 East 22nd normalizer: missing known-property report cleanup');
+}
+
+if (!propertyDetail.includes('isKnown36East22')) {
+  workflowFailures.push('property detail 36 East 22nd guard: missing known-property card guard');
+}
+
+if (!propertyDetail.includes('!isKnown279Cpw && !isKnown36East22')) {
+  workflowFailures.push('property detail stale management merge guard: missing multi-property management override protection');
 }
 
 if (workflowFailures.length) {

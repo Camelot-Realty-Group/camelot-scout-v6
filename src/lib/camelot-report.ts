@@ -461,11 +461,13 @@ export function normalize36East22ndStreetReportData<T extends Partial<MasterRepo
     yearBuilt: data.yearBuilt || 1901,
     propertyType: 'Pre-war Elevator Condominium',
     managementCompany: CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY,
-    buildingPhotos: data.buildingPhotos?.exterior?.length ? data.buildingPhotos : {
-      exterior: [
+    buildingPhotos: {
+      ...(data.buildingPhotos || {}),
+      exterior: dedupeText([
         '/images/36-east-22nd/story-house-exterior.jpg',
-      ],
-      interior: [],
+        ...(data.buildingPhotos?.exterior || []),
+      ]),
+      interior: data.buildingPhotos?.interior || [],
       streetView: data.buildingPhotos?.streetView || '',
       satellite: data.buildingPhotos?.satellite || '',
       source: 'Compass public building profile for The Story House / 36 East 22nd Street',
@@ -499,14 +501,16 @@ export function normalize279CentralParkWestReportData<T extends Partial<MasterRe
     yearBuilt: data.yearBuilt || 1988,
     propertyType: 'Condominium',
     managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
-    buildingPhotos: data.buildingPhotos?.exterior?.length ? data.buildingPhotos : {
-      exterior: [
+    buildingPhotos: {
+      ...(data.buildingPhotos || {}),
+      exterior: dedupeText([
         '/images/279-central-park-west/279-cpw-corner-shot.jpg',
         '/images/279-central-park-west/279-cpw-awning.jpg',
         '/images/279-central-park-west/279-cpw-top-of-building.jpg',
         '/images/279-central-park-west/279-central-park-west.jpg',
-      ],
-      interior: [],
+        ...(data.buildingPhotos?.exterior || []),
+      ]),
+      interior: data.buildingPhotos?.interior || [],
       streetView: data.buildingPhotos?.streetView || '',
       satellite: data.buildingPhotos?.satellite || '',
       source: 'User-supplied 279 Central Park West building photographs',

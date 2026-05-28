@@ -17,11 +17,11 @@ const REPORT_FOCUS_OPTIONS = Object.values(REPORT_FOCUS_THEMES);
 const REPORT_CENTER_INPUT_SCOPE = 'jackie-report-center';
 const PHOTO_UPLOAD_LIMIT = 12;
 const PHOTO_MAX_SOURCE_BYTES = 18 * 1024 * 1024;
-const PHOTO_MAX_STORED_CHARS = 260_000;
-const PHOTO_INITIAL_MAX_SIDE = 1180;
+const PHOTO_MAX_STORED_CHARS = 170_000;
+const PHOTO_INITIAL_MAX_SIDE = 980;
 const PHOTO_MIN_MAX_SIDE = 520;
 const PHOTO_QUALITY_STEPS = [0.76, 0.68, 0.6, 0.52, 0.46];
-const PHOTO_PERSIST_CHAR_LIMIT = 3_200_000;
+const PHOTO_PERSIST_CHAR_LIMIT = 2_200_000;
 
 type ReportCenterSavedInputs = {
   address: string;
@@ -723,13 +723,14 @@ export default function ReportCenter() {
       const acceptedUrls: string[] = [];
       for (const file of filesToProcess) {
         acceptedUrls.push(await readPhotoAsDataUrl(file));
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
       }
       toast.dismiss(loadingToast);
       loadingToast = undefined;
       const next = [...uploadedPhotos, ...acceptedUrls];
       setUploadedPhotos(next);
       persistUploadedPhotos(next);
-      toast.success(`${acceptedUrls.length} photo(s) uploaded`);
+      toast.success(`${acceptedUrls.length} photo(s) uploaded and optimized for report/PDF use`);
       if (imageFiles.length > remainingSlots) {
         toast(`Only the first ${remainingSlots} photo(s) were added. Limit is ${PHOTO_UPLOAD_LIMIT}.`, { icon: 'Warning', duration: 4500 });
       }
@@ -1089,7 +1090,7 @@ export default function ReportCenter() {
                   <Eye className="w-4 h-4" /> First Email Intro (6-8)
                 </button>
                 <button onClick={handlePreviewBoardDeck} className="px-4 py-2 bg-[#5B4A1F] text-white rounded-lg hover:bg-[#473916] text-sm font-medium flex items-center gap-2">
-                  <Eye className="w-4 h-4" /> Board Meeting Deck (15)
+                  <Eye className="w-4 h-4" /> 1st Meeting Handout (15)
                 </button>
                 <button onClick={handlePreviewBrochure} className="px-4 py-2 bg-[#A89035] text-white rounded-lg hover:bg-[#8A7A2C] text-sm font-medium flex items-center gap-2">
                   <Eye className="w-4 h-4" /> Appendix: Full Jackie

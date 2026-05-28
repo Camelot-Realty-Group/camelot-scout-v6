@@ -322,8 +322,14 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const [reportLoading, setReportLoading] = useState(false);
 
   const buildJackieDataForDetail = async () => {
-    const { buildMasterReport, normalize279CentralParkWestReportData } = await import('@/lib/camelot-report');
+    const {
+      buildMasterReport,
+      is36East22ndStreetSubject,
+      normalize36East22ndStreetReportData,
+      normalize279CentralParkWestReportData,
+    } = await import('@/lib/camelot-report');
     const isKnown279Cpw = is279CpwProperty(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
+    const isKnown36East22 = is36East22ndStreetSubject(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
     const data: MasterReportData = await buildMasterReport(guardedBuilding.address, guardedBuilding.borough || undefined);
 
     const cardContacts = guardedBuilding.contacts || [];
@@ -355,8 +361,9 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       if (engineer) data.professionals.engineer = engineer.company || engineer.name || null;
     }
 
-    if (guardedBuilding.current_management && !isKnown279Cpw) data.managementCompany = guardedBuilding.current_management;
+    if (guardedBuilding.current_management && !isKnown279Cpw && !isKnown36East22) data.managementCompany = guardedBuilding.current_management;
     if (guardedBuilding.enriched_data?.dof?.owner) data.dofOwner = guardedBuilding.enriched_data.dof.owner;
+    if (isKnown36East22) return normalize36East22ndStreetReportData(data);
     return isKnown279Cpw ? normalize279CentralParkWestReportData(data) : data;
   };
 
@@ -547,9 +554,17 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const handleReportPDF = async () => {
     setReportLoading(true);
     try {
-      const { buildMasterReport, generateBrochureHTML, validateJackieReport, normalize279CentralParkWestReportData } = await import('@/lib/camelot-report');
+      const {
+        buildMasterReport,
+        generateBrochureHTML,
+        is36East22ndStreetSubject,
+        normalize36East22ndStreetReportData,
+        normalize279CentralParkWestReportData,
+        validateJackieReport,
+      } = await import('@/lib/camelot-report');
       toast.success('Generating Jackie report...');
       const isKnown279Cpw = is279CpwProperty(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
+      const isKnown36East22 = is36East22ndStreetSubject(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
       let data = await buildMasterReport(guardedBuilding.address, guardedBuilding.borough || undefined);
 
       // Merge property card contacts into the report (these are richer than HPD data)
@@ -574,8 +589,9 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       }
 
       // Also merge enriched data fields the property card has
-      if (guardedBuilding.current_management && !isKnown279Cpw) data.managementCompany = guardedBuilding.current_management;
+      if (guardedBuilding.current_management && !isKnown279Cpw && !isKnown36East22) data.managementCompany = guardedBuilding.current_management;
       if (guardedBuilding.enriched_data?.dof?.owner) data.dofOwner = guardedBuilding.enriched_data.dof.owner;
+      if (isKnown36East22) data = normalize36East22ndStreetReportData(data);
       if (isKnown279Cpw) data = normalize279CentralParkWestReportData(data);
 
       const html = generateBrochureHTML(data);

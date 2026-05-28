@@ -19,7 +19,7 @@ export type JackieReportPackage = 'first_email_intro' | 'board_meeting_deck' | '
 
 export const JACKIE_REPORT_PACKAGES: Array<{ key: JackieReportPackage; label: string; pages: string; description: string }> = [
   { key: 'first_email_intro', label: 'First Email Intro', pages: '6-8 pages', description: 'Short board-safe teaser for first outreach.' },
-  { key: 'board_meeting_deck', label: 'Board Meeting Deck', pages: '15 pages', description: 'Main presentation for live board meetings.' },
+  { key: 'board_meeting_deck', label: '1st Meeting Handout', pages: '15 pages', description: 'Main presentation for first board/ownership meetings.' },
   { key: 'appendix_full', label: 'Appendix: Full Jackie Report', pages: 'Full appendix', description: 'Complete source-backed internal and diligence packet.' },
 ];
 
@@ -915,7 +915,7 @@ export function buildJackiePackageFilename(d: MasterReportData, reportPackage: J
   const suffix = reportPackage === 'first_email_intro'
     ? 'CamelotEmailIntro'
     : reportPackage === 'board_meeting_deck'
-      ? 'CamelotBoardDeck'
+      ? 'CamelotFirstMeetingHandout'
       : 'CamelotFullJackieAppendix';
   return `${client}_${suffix}__${dateStamp}.${extension}`;
 }
