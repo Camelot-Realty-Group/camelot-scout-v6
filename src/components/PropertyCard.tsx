@@ -1,5 +1,6 @@
 import { Building } from '@/types';
 import { cn, gradeBg, formatCurrency, formatNumber } from '@/lib/utils';
+import { normalizeBuildingForReportGuardrails } from '@/lib/property-guardrails';
 import {
   Eye, Mail, FileDown, Plus, Sparkles, MapPin, Building2,
   AlertTriangle, Users, CheckSquare, Square, BarChart3,
@@ -26,6 +27,8 @@ export default function PropertyCard({
   onAddToPipeline,
   onGutCheck,
 }: PropertyCardProps) {
+  const displayBuilding = normalizeBuildingForReportGuardrails(building);
+
   return (
     <div
       className={cn(
@@ -48,11 +51,11 @@ export default function PropertyCard({
             )}
             <div className="min-w-0">
               <h3 className="font-semibold text-gray-900 truncate text-sm">
-                {building.name || building.address}
+                {displayBuilding.name || displayBuilding.address}
               </h3>
               <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                 <MapPin size={12} />
-                <span className="truncate">{building.address}</span>
+                <span className="truncate">{displayBuilding.address}</span>
               </div>
             </div>
           </div>
@@ -69,14 +72,14 @@ export default function PropertyCard({
         </div>
 
         {/* Borough/Region tag */}
-        {(building.borough || building.region) && (
+        {(displayBuilding.borough || displayBuilding.region) && (
           <div className="flex items-center gap-1 mb-3">
             <span className="text-xs bg-camelot-navy/5 text-camelot-navy px-2 py-0.5 rounded-full">
-              {building.borough}
+              {displayBuilding.borough}
             </span>
-            {building.region && building.region !== building.borough && (
+            {displayBuilding.region && displayBuilding.region !== displayBuilding.borough && (
               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                {building.region}
+                {displayBuilding.region}
               </span>
             )}
           </div>
@@ -89,21 +92,21 @@ export default function PropertyCard({
               <Building2 size={12} />
               <span className="text-[10px] uppercase">Units</span>
             </div>
-            <p className="font-semibold text-sm">{building.units || '—'}</p>
+            <p className="font-semibold text-sm">{displayBuilding.units || '—'}</p>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-center gap-1 text-gray-500 mb-0.5">
               <AlertTriangle size={12} />
               <span className="text-[10px] uppercase">Violations</span>
             </div>
-            <p className="font-semibold text-sm text-orange-600">{building.violations_count}</p>
+            <p className="font-semibold text-sm text-orange-600">{displayBuilding.violations_count}</p>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-center gap-1 text-gray-500 mb-0.5">
               <Users size={12} />
               <span className="text-[10px] uppercase">Contacts</span>
             </div>
-            <p className="font-semibold text-sm">{building.contacts?.length || 0}</p>
+            <p className="font-semibold text-sm">{displayBuilding.contacts?.length || 0}</p>
           </div>
         </div>
 
@@ -111,19 +114,19 @@ export default function PropertyCard({
         <div className="mb-3">
           <div className="flex justify-between items-center mb-1">
             <span className="text-xs text-gray-500">Lead Score</span>
-            <span className="text-xs font-bold">{building.score}/100</span>
+            <span className="text-xs font-bold">{displayBuilding.score}/100</span>
           </div>
           <div className="score-bar">
             <div
               className={cn(
                 'score-bar-fill',
-                building.score >= 75
+                displayBuilding.score >= 75
                   ? 'bg-green-500'
-                  : building.score >= 50
+                  : displayBuilding.score >= 50
                   ? 'bg-yellow-500'
                   : 'bg-gray-400'
               )}
-              style={{ width: `${building.score}%` }}
+              style={{ width: `${displayBuilding.score}%` }}
             />
           </div>
         </div>
@@ -132,26 +135,26 @@ export default function PropertyCard({
         <div className="space-y-1 mb-3">
           <div className="flex justify-between text-xs">
             <span className="text-gray-500">Type</span>
-            <span className="font-medium capitalize">{building.type}</span>
+            <span className="font-medium capitalize">{displayBuilding.type}</span>
           </div>
-          {building.current_management && (
+          {displayBuilding.current_management && (
             <div className="flex justify-between text-xs">
               <span className="text-gray-500">Management</span>
-              <span className="font-medium truncate max-w-[140px]">{building.current_management}</span>
+              <span className="font-medium truncate max-w-[140px]">{displayBuilding.current_management}</span>
             </div>
           )}
         </div>
 
         {/* Signals */}
-        {building.signals?.length > 0 && (
+        {displayBuilding.signals?.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
-            {building.signals.slice(0, 2).map((signal, i) => (
+            {displayBuilding.signals.slice(0, 2).map((signal, i) => (
               <span key={i} className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">
                 {signal}
               </span>
             ))}
-            {building.signals.length > 2 && (
-              <span className="text-[10px] text-gray-400">+{building.signals.length - 2} more</span>
+            {displayBuilding.signals.length > 2 && (
+              <span className="text-[10px] text-gray-400">+{displayBuilding.signals.length - 2} more</span>
             )}
           </div>
         )}

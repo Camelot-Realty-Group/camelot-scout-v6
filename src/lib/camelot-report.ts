@@ -22,6 +22,13 @@ import {
   nyPeopleEntityCompSourceSummary,
 } from '@/lib/ny-research-sources';
 import { buildDavidGoldoffSignatureHtml, DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import {
+  CPW_279_ADDRESS,
+  CPW_279_MANAGEMENT_TO_VERIFY,
+  CPW_279_NAME,
+  CPW_279_UNIT_COUNT,
+  is279CentralParkWestValue,
+} from '@/lib/property-guardrails';
 
 // ============================================================
 // Types
@@ -413,15 +420,11 @@ function hasExact22East22Subject(...values: Array<string | null | undefined>): b
   });
 }
 
-export const CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY = 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records';
-export const CAMELOT_279_CPW_UNIT_COUNT = 38;
+export const CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY = CPW_279_MANAGEMENT_TO_VERIFY;
+export const CAMELOT_279_CPW_UNIT_COUNT = CPW_279_UNIT_COUNT;
 
 export function is279CentralParkWestSubject(...values: Array<string | null | undefined>): boolean {
-  return values.some(value => {
-    const key = String(value || '').toLowerCase();
-    if (!/(^|[^0-9])279\b/.test(key)) return false;
-    return /\bcpw\b/.test(key) || /\bcentral\s+park\s+w(?:est)?\.?\b/.test(key);
-  });
+  return is279CentralParkWestValue(...values);
 }
 
 export function normalize279CentralParkWestReportData<T extends Partial<MasterReportData>>(data: T): T {
@@ -437,8 +440,8 @@ export function normalize279CentralParkWestReportData<T extends Partial<MasterRe
 
   return {
     ...data,
-    address: '279 Central Park West, New York, NY 10024',
-    buildingName: '279 Central Park West',
+    address: CPW_279_ADDRESS,
+    buildingName: CPW_279_NAME,
     borough: 'Manhattan',
     neighborhoodName: 'Upper West Side / Central Park West',
     units: CAMELOT_279_CPW_UNIT_COUNT,

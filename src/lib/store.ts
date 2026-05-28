@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import type { Building, TeamMember, Folder, Bot, OutreachTemplate, SearchFilters, PipelineStage } from '@/types';
+import { normalizeBuildingForReportGuardrails, normalizeBuildingsForReportGuardrails } from '@/lib/property-guardrails';
 
 // ============================================================
 // Buildings Store
@@ -32,13 +33,18 @@ interface BuildingsState {
 // Persist buildings to localStorage
 function saveBuildingsToStorage(buildings: Building[]) {
   try {
-    localStorage.setItem('scout_buildings', JSON.stringify(buildings));
+    localStorage.setItem('scout_buildings', JSON.stringify(normalizeBuildingsForReportGuardrails(buildings)));
   } catch { /* quota exceeded — skip */ }
 }
 function loadBuildingsFromStorage(): Building[] {
   try {
     const raw = localStorage.getItem('scout_buildings');
-    return raw ? JSON.parse(raw) : [];
+    const buildings = (raw ? JSON.parse(raw) : []) as Building[];
+    const normalized = normalizeBuildingsForReportGuardrails(buildings);
+    if (raw && JSON.stringify(normalized) !== JSON.stringify(buildings)) {
+      localStorage.setItem('scout_buildings', JSON.stringify(normalized));
+    }
+    return normalized;
   } catch { return []; }
 }
 
@@ -56,29 +62,36 @@ export const useBuildingsStore = create<BuildingsState>((set, get) => ({
     sortOrder: 'desc',
   },
 
-  setBuildings: (buildings) => { saveBuildingsToStorage(buildings); set({ buildings }); },
+  setBuildings: (buildings) => {
+    const normalized = normalizeBuildingsForReportGuardrails(buildings);
+    saveBuildingsToStorage(normalized);
+    set({ buildings: normalized });
+  },
   addBuildings: (newBuildings) =>
     set((state) => {
       // Deduplicate by address (case-insensitive, trimmed) — new buildings win over old
       const normalize = (addr: string) => (addr || '').trim().toLowerCase().replace(/\s+/g, ' ');
-      const newAddrs = new Set(newBuildings.map((b) => normalize(b.address)));
+      const normalizedNewBuildings = normalizeBuildingsForReportGuardrails(newBuildings);
+      const newAddrs = new Set(normalizedNewBuildings.map((b) => normalize(b.address)));
       const deduped = state.buildings.filter((b) => !newAddrs.has(normalize(b.address)));
-      const merged = [...newBuildings, ...deduped];
+      const merged = normalizeBuildingsForReportGuardrails([...normalizedNewBuildings, ...deduped]);
       saveBuildingsToStorage(merged);
       return { buildings: merged };
     }),
   updateBuilding: (id, data) =>
-    set((state) => ({
-      buildings: state.buildings.map((b) => (b.id === id ? { ...b, ...data } : b)),
-      activeBuilding:
-        state.activeBuilding?.id === id ? { ...state.activeBuilding, ...data } : state.activeBuilding,
-    })),
+    set((state) => {
+      const buildings = state.buildings.map((b) => (b.id === id ? normalizeBuildingForReportGuardrails({ ...b, ...data }) : b));
+      const activeBuilding =
+        state.activeBuilding?.id === id ? normalizeBuildingForReportGuardrails({ ...state.activeBuilding, ...data }) : state.activeBuilding;
+      saveBuildingsToStorage(buildings);
+      return { buildings, activeBuilding };
+    }),
   removeBuilding: (id) =>
     set((state) => ({
       buildings: state.buildings.filter((b) => b.id !== id),
       selectedBuildings: new Set([...state.selectedBuildings].filter((s) => s !== id)),
     })),
-  setActiveBuilding: (building) => set({ activeBuilding: building }),
+  setActiveBuilding: (building) => set({ activeBuilding: building ? normalizeBuildingForReportGuardrails(building) : building }),
   toggleSelected: (id) =>
     set((state) => {
       const next = new Set(state.selectedBuildings);

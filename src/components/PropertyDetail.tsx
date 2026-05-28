@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type {
   Building, Contact, Activity, ContactRole, ContactCategory,
   CONTACT_ROLE_LABELS, CONTACT_ROLE_CATEGORY, CONTACT_CATEGORY_COLORS, BuildingOperations,
@@ -18,6 +18,7 @@ import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { downloadAsPDF, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
 import { pushBuildingToIntegrations } from '@/lib/integrations';
 import type { MasterReportData } from '@/lib/camelot-report';
+import { normalizeBuildingForReportGuardrails } from '@/lib/property-guardrails';
 import toast from 'react-hot-toast';
 import {
   X, MapPin, Building2, AlertTriangle, DollarSign, Zap, FileText,
@@ -287,6 +288,7 @@ function AddContactForm({ onAdd, onCancel }: { onAdd: (c: Contact) => void; onCa
 // ---- Main Component ----
 
 export default function PropertyDetail({ building, onClose, onUpdate }: PropertyDetailProps) {
+  const guardedBuilding = useMemo(() => normalizeBuildingForReportGuardrails(building), [building]);
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [isEnriching, setIsEnriching] = useState(false);
   const [isFetchingNYC, setIsFetchingNYC] = useState(false);
@@ -298,7 +300,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const fetchNYCData = useCallback(async () => {
     setIsFetchingNYC(true);
     try {
-      const data = await fetchFullBuildingReport(building.address, building.borough);
+      const data = await fetchFullBuildingReport(guardedBuilding.address, guardedBuilding.borough);
       setNycData(data);
       toast.success('NYC data loaded');
     } catch (err) {
@@ -307,23 +309,23 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     } finally {
       setIsFetchingNYC(false);
     }
-  }, [building.address, building.borough]);
+  }, [guardedBuilding.address, guardedBuilding.borough]);
 
   // Fetch NYC data on mount
   useEffect(() => {
-    if (building.address && !nycData) {
+    if (guardedBuilding.address && !nycData) {
       fetchNYCData();
     }
-  }, [building.address, fetchNYCData, nycData]);
+  }, [guardedBuilding.address, fetchNYCData, nycData]);
 
   const [reportLoading, setReportLoading] = useState(false);
 
   const buildJackieDataForDetail = async () => {
     const { buildMasterReport, normalize279CentralParkWestReportData } = await import('@/lib/camelot-report');
-    const isKnown279Cpw = is279CpwProperty(building.address, building.name, building.current_management);
-    const data: MasterReportData = await buildMasterReport(building.address, building.borough || undefined);
+    const isKnown279Cpw = is279CpwProperty(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
+    const data: MasterReportData = await buildMasterReport(guardedBuilding.address, guardedBuilding.borough || undefined);
 
-    const cardContacts = building.contacts || [];
+    const cardContacts = guardedBuilding.contacts || [];
     if (cardContacts.length > 0) {
       const boardFromCard = cardContacts
         .filter((c: any) => ['board_president','board_treasurer','board_secretary','board_member','owner','landlord','developer','investor'].includes(c.role))
@@ -352,8 +354,8 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       if (engineer) data.professionals.engineer = engineer.company || engineer.name || null;
     }
 
-    if (building.current_management && !isKnown279Cpw) data.managementCompany = building.current_management;
-    if (building.enriched_data?.dof?.owner) data.dofOwner = building.enriched_data.dof.owner;
+    if (guardedBuilding.current_management && !isKnown279Cpw) data.managementCompany = guardedBuilding.current_management;
+    if (guardedBuilding.enriched_data?.dof?.owner) data.dofOwner = guardedBuilding.enriched_data.dof.owner;
     return isKnown279Cpw ? normalize279CentralParkWestReportData(data) : data;
   };
 
@@ -418,10 +420,10 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
 
   const handleEmailPreviewDraft = () => {
     if (!reportPreview) return;
-    const contacts = building.contacts || [];
+    const contacts = guardedBuilding.contacts || [];
     const recipients = uniqueContactEmails(contacts);
     const contactList = contactDirectory(contacts);
-    const propertyLabel = building.name || building.address;
+    const propertyLabel = guardedBuilding.name || guardedBuilding.address;
     openEmailDraft({
       to: recipients.join(','),
       cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
@@ -442,16 +444,16 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     try {
       toast.loading(`Preparing ${DETAIL_REPORT_LABELS[reportPackage]} email draft...`, { id: 'detail-report-email' });
       const { data, html, filename } = await buildDetailPackage(reportPackage);
-      const contacts = building.contacts || [];
+      const contacts = guardedBuilding.contacts || [];
       const recipients = uniqueContactEmails(contacts);
       const contactList = contactDirectory(contacts);
       openEmailDraft({
         to: recipients.join(','),
         cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
-        subject: `${DETAIL_REPORT_LABELS[reportPackage]} - ${data.buildingName || building.name || building.address}`,
+        subject: `${DETAIL_REPORT_LABELS[reportPackage]} - ${data.buildingName || guardedBuilding.name || guardedBuilding.address}`,
         body:
-          `To the decision makers of ${data.buildingName || building.name || building.address},\n\n` +
-          `Thank you for taking the time to review Camelot Property Management. Attached is the ${DETAIL_REPORT_LABELS[reportPackage]} for ${data.buildingName || building.name || building.address}.\n\n` +
+          `To the decision makers of ${data.buildingName || guardedBuilding.name || guardedBuilding.address},\n\n` +
+          `Thank you for taking the time to review Camelot Property Management. Attached is the ${DETAIL_REPORT_LABELS[reportPackage]} for ${data.buildingName || guardedBuilding.name || guardedBuilding.address}.\n\n` +
           `Please attach the reviewed PDF before sending: ${filename}\n\n` +
           `Contacts currently saved for this outreach:\n${contactList}\n\n` +
           `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
@@ -471,7 +473,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     setPackageLoading('hubspot');
     try {
       toast.loading('Pushing property and contacts to HubSpot...', { id: 'detail-hubspot' });
-      const result = await pushBuildingToIntegrations(building);
+      const result = await pushBuildingToIntegrations(guardedBuilding);
       const hubspotText = result.hubspot?.status === 'ok' ? 'HubSpot synced' : result.hubspot?.message || 'HubSpot queued/skipped';
       toast.success(`Scout workflow complete. ${hubspotText}`, { id: 'detail-hubspot' });
     } catch (err: any) {
@@ -487,11 +489,11 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     try {
       const { buildMasterReport, generateBrochureHTML, validateJackieReport, normalize279CentralParkWestReportData } = await import('@/lib/camelot-report');
       toast.success('Generating Jackie report...');
-      const isKnown279Cpw = is279CpwProperty(building.address, building.name, building.current_management);
-      let data = await buildMasterReport(building.address, building.borough || undefined);
+      const isKnown279Cpw = is279CpwProperty(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
+      let data = await buildMasterReport(guardedBuilding.address, guardedBuilding.borough || undefined);
 
       // Merge property card contacts into the report (these are richer than HPD data)
-      const cardContacts = building.contacts || [];
+      const cardContacts = guardedBuilding.contacts || [];
       if (cardContacts.length > 0) {
         const boardFromCard = cardContacts
           .filter((c: any) => ['board_president','board_treasurer','board_secretary','board_member','owner','landlord','developer','investor'].includes(c.role))
@@ -512,8 +514,8 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       }
 
       // Also merge enriched data fields the property card has
-      if (building.current_management && !isKnown279Cpw) data.managementCompany = building.current_management;
-      if (building.enriched_data?.dof?.owner) data.dofOwner = building.enriched_data.dof.owner;
+      if (guardedBuilding.current_management && !isKnown279Cpw) data.managementCompany = guardedBuilding.current_management;
+      if (guardedBuilding.enriched_data?.dof?.owner) data.dofOwner = guardedBuilding.enriched_data.dof.owner;
       if (isKnown279Cpw) data = normalize279CentralParkWestReportData(data);
 
       const html = generateBrochureHTML(data);
@@ -551,12 +553,12 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     setIsEnriching(true);
     try {
       const contacts = await enrichBuildingContacts({
-        buildingName: building.name,
-        address: building.address,
-        currentManagement: building.current_management,
+        buildingName: guardedBuilding.name,
+        address: guardedBuilding.address,
+        currentManagement: guardedBuilding.current_management,
       });
       if (contacts.length > 0) {
-        const merged = [...(building.contacts || []), ...contacts];
+        const merged = [...(guardedBuilding.contacts || []), ...contacts];
         onUpdate?.(building.id, { contacts: merged });
         toast.success(`Found ${contacts.length} contacts`);
       } else {
@@ -571,20 +573,20 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
 
   const handleAddToPipeline = () => {
     onUpdate?.(building.id, { pipeline_stage: 'discovered' as any, pipeline_moved_at: new Date().toISOString() });
-    toast.success(`${building.name || building.address} added to Pipeline → Discovered`);
+    toast.success(`${guardedBuilding.name || guardedBuilding.address} added to Pipeline -> Discovered`);
   };
 
   const handleSendEmail = () => {
-    const contacts = building.contacts || [];
+    const contacts = guardedBuilding.contacts || [];
     const recipients = uniqueContactEmails(contacts);
     const primaryContact = contacts.find((c: any) => c.email) || contacts[0];
     const salutation = primaryContact?.name ? `Hi ${primaryContact.name.split(/\s+/)[0]},` : 'Dear Board Members,';
-    const propertyLabel = building.name && building.name !== building.address
-      ? `${building.name} at ${building.address}`
-      : building.address;
-    const unitPhrase = building.units ? `${building.units}-unit ` : '';
-    const signalPhrase = building.open_violations_count
-      ? ` Our initial public-record scan shows ${building.open_violations_count} open violation${building.open_violations_count === 1 ? '' : 's'}, which may be worth reviewing as part of a broader management and compliance conversation.`
+    const propertyLabel = guardedBuilding.name && guardedBuilding.name !== guardedBuilding.address
+      ? `${guardedBuilding.name} at ${guardedBuilding.address}`
+      : guardedBuilding.address;
+    const unitPhrase = guardedBuilding.units ? `${guardedBuilding.units}-unit ` : '';
+    const signalPhrase = guardedBuilding.open_violations_count
+      ? ` Our initial public-record scan shows ${guardedBuilding.open_violations_count} open violation${guardedBuilding.open_violations_count === 1 ? '' : 's'}, which may be worth reviewing as part of a broader management and compliance conversation.`
       : '';
 
     openEmailDraft({
@@ -595,7 +597,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
         `${salutation}\n\n` +
         `My name is David Goldoff, President of Camelot Property Management Services Corp. We are a New York-based property management and brokerage platform that works with co-ops, condos, rental buildings, owners, and boards that want more organized financial reporting, better vendor oversight, stronger compliance tracking, and a more responsive management experience.\n\n` +
         `I am reaching out regarding ${propertyLabel}. Camelot uses a combination of senior property-management experience, public-record research, building operations review, accounting controls, resident-facing technology, and automation tools to evaluate how a property is being managed and where a board or owner may have opportunities to reduce risk, improve communication, tighten reporting, and better plan capital needs.${signalPhrase}\n\n` +
-        `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${building.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
+        `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${guardedBuilding.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
         `If you are open to it, I would welcome the chance to speak for 15 to 20 minutes about your current property management needs and whether Camelot could be a fit.\n\n` +
         `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
     });
@@ -609,13 +611,13 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
 
   // Score breakdown
   const scoreBreakdown = calculateScore({
-    violations_count: building.violations_count,
-    open_violations_count: building.open_violations_count,
-    units: building.units,
-    current_management: building.current_management,
-    year_built: building.year_built,
-    energy_star_score: building.energy_star_score,
-    site_eui: building.site_eui,
+    violations_count: guardedBuilding.violations_count,
+    open_violations_count: guardedBuilding.open_violations_count,
+    units: guardedBuilding.units,
+    current_management: guardedBuilding.current_management,
+    year_built: guardedBuilding.year_built,
+    energy_star_score: guardedBuilding.energy_star_score,
+    site_eui: guardedBuilding.site_eui,
   });
 
   return (
@@ -629,7 +631,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h2 className="text-xl font-bold">{building.name || building.address}</h2>
+                <h2 className="text-xl font-bold">{guardedBuilding.name || guardedBuilding.address}</h2>
                 <span className={cn('grade-badge text-xs border', gradeBg(building.grade))}>
                   {building.grade}
                 </span>
@@ -638,10 +640,10 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
                 </span>
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-300">
-                <span className="flex items-center gap-1"><MapPin size={14} /> {building.address}</span>
-                {building.borough && <span>{building.borough}</span>}
-                {building.units && <span>{building.units} units</span>}
-                <span className="capitalize">{building.type}</span>
+                <span className="flex items-center gap-1"><MapPin size={14} /> {guardedBuilding.address}</span>
+                {guardedBuilding.borough && <span>{guardedBuilding.borough}</span>}
+                {guardedBuilding.units && <span>{guardedBuilding.units} units</span>}
+                <span className="capitalize">{guardedBuilding.type}</span>
               </div>
             </div>
             <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
@@ -740,12 +742,12 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
               {/* Google Maps Embed */}
               <div className="mb-6 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                 <iframe
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(building.address + (building.borough ? ', ' + building.borough + ', NY' : ', New York, NY'))}&output=embed&z=17`}
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(guardedBuilding.address + (guardedBuilding.borough ? ', ' + guardedBuilding.borough + ', NY' : ', New York, NY'))}&output=embed&z=17`}
                   className="w-full h-[200px]"
                   style={{ border: 0 }}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title={`Map of ${building.address}`}
+                  title={`Map of ${guardedBuilding.address}`}
                   allowFullScreen
                 />
               </div>
@@ -771,7 +773,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
               </div>
 
               {/* External Records Links */}
-              <ExternalRecordsSection building={building} nycData={nycData} />
+              <ExternalRecordsSection building={guardedBuilding} nycData={nycData} />
 
             <div className="grid grid-cols-2 gap-6">
               {/* Building Info */}
@@ -779,19 +781,19 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
                 <h3 className="font-semibold text-sm text-gray-500 uppercase tracking-wider mb-3">Building Details</h3>
                 <div className="space-y-2">
                   {[
-                    ['Address', building.address],
-                    ['Borough', building.borough || '—'],
-                    ['Neighborhood', building.region || '—'],
-                    ['Units', building.units?.toString() || '—'],
-                    ['Type', building.type],
-                    ['Year Built', building.year_built?.toString() || '—'],
-                    ['Stories', building.stories?.toString() || nycData?.dof?.stories?.toString() || '—'],
+                    ['Address', guardedBuilding.address],
+                    ['Borough', guardedBuilding.borough || '—'],
+                    ['Neighborhood', guardedBuilding.region || '—'],
+                    ['Units', guardedBuilding.units?.toString() || '—'],
+                    ['Type', guardedBuilding.type],
+                    ['Year Built', guardedBuilding.year_built?.toString() || '—'],
+                    ['Stories', guardedBuilding.stories?.toString() || nycData?.dof?.stories?.toString() || '—'],
                     ['Lot Area', nycData?.dof?.lotArea ? `${formatNumber(nycData.dof.lotArea)} sq ft` : '—'],
                     ['Building Area', nycData?.dof?.buildingArea ? `${formatNumber(nycData.dof.buildingArea)} sq ft` : '—'],
-                    ['Building Class', building.building_class || nycData?.dof?.buildingClass || '—'],
-                    ['BBL', building.bbl || nycData?.dof?.bbl || '—'],
-                    ['Management', building.current_management || nycData?.registration?.managementCompany || '—'],
-                    ['DOF Owner', building.dof_owner || nycData?.dof?.owner || '—'],
+                    ['Building Class', guardedBuilding.building_class || nycData?.dof?.buildingClass || '—'],
+                    ['BBL', guardedBuilding.bbl || nycData?.dof?.bbl || '—'],
+                    ['Management', guardedBuilding.current_management || nycData?.registration?.managementCompany || '—'],
+                    ['DOF Owner', guardedBuilding.dof_owner || nycData?.dof?.owner || '—'],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between py-1.5 border-b border-gray-100">
                       <span className="text-sm text-gray-500">{label}</span>
@@ -804,7 +806,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
               {/* Score Breakdown + Building Operations */}
               <div>
                 {/* Building Operations Card */}
-                <BuildingOperationsCard building={building} nycData={nycData} />
+                <BuildingOperationsCard building={guardedBuilding} nycData={nycData} />
 
                 <h3 className="font-semibold text-sm text-gray-500 uppercase tracking-wider mb-3 mt-6">Score Breakdown</h3>
                 <div className="bg-gray-50 rounded-xl p-4 space-y-3">
@@ -860,7 +862,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
 
           {activeTab === 'contacts' && (
             <ContactsTab
-              building={building}
+              building={guardedBuilding}
               isEnriching={isEnriching}
               onEnrich={handleEnrich}
               onUpdate={onUpdate}
@@ -1004,8 +1006,8 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
                   ['Assessed Value', formatCurrency(building.assessed_value || nycData?.dof?.assessedValue)],
                   ['Land Value', formatCurrency(building.land_value || nycData?.dof?.landValue)],
                   ['Tax Class', building.tax_class || nycData?.dof?.taxClass || '—'],
-                  ['DOF Owner', building.dof_owner || nycData?.dof?.owner || '—'],
-                  ['BBL', building.bbl || nycData?.dof?.bbl || '—'],
+                  ['DOF Owner', guardedBuilding.dof_owner || nycData?.dof?.owner || '—'],
+                  ['BBL', guardedBuilding.bbl || nycData?.dof?.bbl || '—'],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-gray-50 rounded-xl p-4">
                     <p className="text-xs text-gray-500 mb-1">{label}</p>
@@ -1017,7 +1019,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
           )}
 
           {activeTab === 'ownership' && (
-            <OwnershipACRISTab building={building} nycData={nycData} isFetchingNYC={isFetchingNYC} />
+            <OwnershipACRISTab building={guardedBuilding} nycData={nycData} isFetchingNYC={isFetchingNYC} />
           )}
 
           {activeTab === 'energy' && (
