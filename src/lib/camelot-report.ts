@@ -23,10 +23,15 @@ import {
 } from '@/lib/ny-research-sources';
 import { buildDavidGoldoffSignatureHtml, DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import {
+  EAST_36_22_ADDRESS,
+  EAST_36_22_MANAGEMENT_TO_VERIFY,
+  EAST_36_22_NAME,
+  EAST_36_22_UNIT_COUNT,
   CPW_279_ADDRESS,
   CPW_279_MANAGEMENT_TO_VERIFY,
   CPW_279_NAME,
   CPW_279_UNIT_COUNT,
+  is36East22ndStreetValue,
   is279CentralParkWestValue,
 } from '@/lib/property-guardrails';
 
@@ -427,6 +432,51 @@ export function is279CentralParkWestSubject(...values: Array<string | null | und
   return is279CentralParkWestValue(...values);
 }
 
+export const CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY = EAST_36_22_MANAGEMENT_TO_VERIFY;
+export const CAMELOT_36_EAST_22_UNIT_COUNT = EAST_36_22_UNIT_COUNT;
+
+export function is36East22ndStreetSubject(...values: Array<string | null | undefined>): boolean {
+  return is36East22ndStreetValue(...values);
+}
+
+export function normalize36East22ndStreetReportData<T extends Partial<MasterReportData>>(data: T): T {
+  if (!is36East22ndStreetSubject(
+    data.address,
+    data.buildingName,
+    data.managementCompany,
+    data.registrationOwner,
+    data.dofOwner,
+  )) {
+    return data;
+  }
+
+  return {
+    ...data,
+    address: EAST_36_22_ADDRESS,
+    buildingName: EAST_36_22_NAME,
+    borough: 'Manhattan',
+    neighborhoodName: 'Flatiron / Madison Square',
+    units: CAMELOT_36_EAST_22_UNIT_COUNT,
+    stories: data.stories && data.stories > 0 && data.stories < 20 ? data.stories : 9,
+    yearBuilt: data.yearBuilt || 1901,
+    propertyType: 'Pre-war Elevator Condominium',
+    managementCompany: CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY,
+    buildingPhotos: data.buildingPhotos?.exterior?.length ? data.buildingPhotos : {
+      exterior: [
+        'https://www.compass.com/m3/4a72647cb101f2e148fe52612f67ad1c7c94b20d.jpg',
+      ],
+      interior: [],
+      streetView: data.buildingPhotos?.streetView || '',
+      satellite: data.buildingPhotos?.satellite || '',
+      source: 'Compass public building profile for The Story House / 36 East 22nd Street',
+    },
+    professionalResearchSources: [
+      ...(data.professionalResearchSources || []),
+      'Known-property guard: 36 East 22nd Street is treated as The Story House, a Flatiron pre-war elevator condominium. Reconcile current management and board contacts against HPD MDR, ACRIS, PropertyShark, and board materials before final release.',
+    ],
+  } as T;
+}
+
 export function normalize279CentralParkWestReportData<T extends Partial<MasterReportData>>(data: T): T {
   if (!is279CentralParkWestSubject(
     data.address,
@@ -792,6 +842,7 @@ function getCamelotMinimumFeeRule(borough: string): { minimum: number; preferred
     preferred: OUTER_BOROUGH_PREFERRED_MINIMUM_FEE,
     label: '$1,200-$1,500/month minimum',
   };
+
 }
 
 function roundToNearestFive(value: number): number {
@@ -898,6 +949,7 @@ function calculateMarketFeeComparison(
       { service: 'Schedule A Ancillary Fees', marketRate: 'Varies by property type and scope', camelotRate: 'Issued with final agreement for co-op, condo, rental, HOA, or receiver-managed property' },
     ],
   };
+
 }
 
 // ============================================================
@@ -1619,6 +1671,85 @@ function inferCommercialAmenityIntel(input: {
 
 function getKnownPropertyFacts(address: string, candidateName = ''): KnownPropertyFacts | null {
   const key = `${address} ${candidateName}`.toLowerCase();
+  if (is36East22ndStreetSubject(key)) {
+    return {
+      canonicalAddress: EAST_36_22_ADDRESS,
+      buildingName: EAST_36_22_NAME,
+      borough: 'Manhattan',
+      buildingClass: 'R4',
+      units: CAMELOT_36_EAST_22_UNIT_COUNT,
+      stories: 9,
+      yearBuilt: 1901,
+      propertyType: 'Pre-war Elevator Condominium',
+      neighborhoodName: 'Flatiron / Madison Square',
+      managementCompany: CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY,
+      officialWebsite: 'https://www.compass.com/building/the-story-house-manhattan-ny/281903082961387829/',
+      imageUrls: [
+        'https://www.compass.com/m3/4a72647cb101f2e148fe52612f67ad1c7c94b20d.jpg',
+      ],
+      description: 'The Story House at 36 East 22nd Street is a small Flatiron / Madison Square pre-war elevator condominium. Jackie locks elevator status and small-building scale so missing public fields cannot turn the property into a walk-up.',
+      amenities: [
+        'Pre-war elevator building',
+        'Boutique condominium operating profile',
+        'Flatiron / Madison Square location',
+        'Small-building board and resident-service needs',
+        'Package, move, alteration, insurance, and building access policies to verify',
+      ],
+      commercialSignals: [
+        'Elevator status must remain locked as elevator-served unless primary source records prove otherwise.',
+        'Current management, board authority, and unit count should be confirmed through HPD MDR, ACRIS, PropertyShark, and board materials before publication.',
+        'Small elevator condominium operations require careful resident communication, insurance review, building access control, vendor oversight, and capital planning.',
+      ],
+      revenueOpportunities: [
+        'Move-in/move-out, alteration, resale/refinance package, insurance-review, storage, and document-fee schedule review.',
+        'Elevator maintenance, inspection, violation, and service contract review.',
+        'Insurance renewal, deductible, and carrier requirement review for a small Manhattan condominium.',
+        'Vendor contract, cleaning, preventative maintenance, and resident-service workflow review.',
+      ],
+      landmarks: [
+        'Madison Square Park: nearby',
+        'Flatiron Building / Ladies Mile Historic District context: nearby',
+        '23rd Street subway corridor: nearby',
+        'Broadway, Park Avenue South, and Fifth Avenue retail / office corridors: nearby',
+        'Union Square / Gramercy / NoMad access: nearby',
+      ],
+      locationTitle: 'Flatiron / Madison Square Positioning',
+      locationCopy: 'The property sits in a high-visibility Flatiron / Madison Square corridor where transit, office, retail, restaurant, and park access shape both resident experience and long-term value.',
+      lifestyleTitle: 'Small Pre-War Elevator Condominium',
+      lifestyleCopy: 'A boutique elevator condominium needs the attention of a small-building manager with larger-building discipline: financial reporting, insurance coordination, elevator compliance, vendor control, and responsive resident support.',
+      brandingTitle: 'The Story House / 36 East 22nd Street',
+      brandingDescription: 'Known-property guard: Jackie treats 36 East 22nd Street as a pre-war elevator condominium and uses a verified public building image before Street View fallback.',
+      researchSources: [
+        'Compass public building profile: The Story House / 36 East 22nd Street',
+        'NYC DOF / ACRIS ownership, mortgage, and tax-lot records must be checked before final release',
+        'HPD MDR / HPD Online registration, contacts, complaints, and violations',
+        'DOB BIS / DOB NOW elevator, permits, OATH/ECB, and complaint records',
+        'Board materials, current management agreement, budget, insurance schedule, and prior management report requested for final proposal',
+      ],
+      currentManagement: CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY,
+      boardMembers: [
+        { name: '36 East 22nd Street condominium board / ownership authority', title: 'Condominium Board / Ownership Authority' },
+      ],
+      buildingStaff: [
+        { role: 'Managing Agent', name: 'To verify through HPD MDR / board records' },
+        { role: 'Superintendent / Resident Manager', name: 'On-site staff to verify' },
+        { role: 'Elevator service vendor', name: 'Service contract to verify' },
+      ],
+      professionalSources: [
+        'HPD MDR',
+        'ACRIS',
+        'DOB BIS / DOB NOW',
+        'NYC DOF / PROS',
+        'PropertyShark',
+        'Compass public building profile',
+      ],
+      professionalNotes: [
+        'Do not label 36 East 22nd Street as walk-up. Known profile is pre-war elevator.',
+        'Confirm current management, BBL, elevator filings, unit count, and board contact from primary records before board-facing delivery.',
+        'Use verified public building image or uploaded property photos before map-only fallback imagery.',
+      ],
+    };
+  }
   if (is279CentralParkWestSubject(key)) {
     return {
       canonicalAddress: '279 Central Park West, New York, NY 10024',
@@ -3385,7 +3516,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     publicRecordsLoaded,
   });
 
-  return {
+  const reportData: MasterReportData = {
     address: reportAddress,
     borough: effectiveBorough,
     buildingName,
@@ -3591,6 +3722,8 @@ export async function buildMasterReport(address: string, borough?: string): Prom
       knownFacts: knownFacts || null,
     },
   };
+
+  return normalize36East22ndStreetReportData(normalize279CentralParkWestReportData(reportData));
 }
 
 // ============================================================
@@ -3745,6 +3878,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const isKnownStaffedProperty = /one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`);
   const is201East79 = /201\s+e(ast)?\s+79/i.test(`${d.buildingName} ${d.address}`);
   const is22East22 = hasExact22East22Subject(d.address, d.buildingName);
+  const is36East22 = is36East22ndStreetSubject(d.address, d.buildingName, d.managementCompany);
   const is279Cpw = is279CentralParkWestSubject(d.address, d.buildingName, d.managementCompany);
   const requiredSlides = isFloridaReceivership
     ? [
@@ -3947,6 +4081,26 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       detail: foundBad22Tokens.length
         ? `Rejected 220 East 22nd / 122-unit mismatch token(s): ${foundBad22Tokens.join(', ')}`
         : `Using locked small-building profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
+    });
+  }
+  if (is36East22) {
+    const bad36Checks = [
+      { label: 'Walk-up', pattern: /\bwalk[-\s]?up\b/i },
+      { label: 'No elevator', pattern: /\bno\s+elevator\b/i },
+      { label: 'Non-elevator', pattern: /\bnon[-\s]?elevator\b/i },
+      { label: 'Walk-Up Apartment', pattern: /\bwalk[-\s]?up\s+apartment\b/i },
+    ];
+    const foundBad36Tokens = bad36Checks.filter(check => check.pattern.test(html)).map(check => check.label);
+    checks.push({
+      name: 'Known Property Guard: 36 East 22nd',
+      status: d.address === EAST_36_22_ADDRESS
+        && d.units === CAMELOT_36_EAST_22_UNIT_COUNT
+        && /Elevator/i.test(d.propertyType)
+        && foundBad36Tokens.length === 0
+        && Boolean(d.buildingPhotos?.exterior?.length) ? 'pass' : 'fail',
+      detail: foundBad36Tokens.length
+        ? `Rejected walk-up/no-elevator mismatch token(s): ${foundBad36Tokens.join(', ')}`
+        : `Using locked Story House elevator profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
     });
   }
   if (is279Cpw) {
