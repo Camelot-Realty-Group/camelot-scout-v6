@@ -463,7 +463,7 @@ export function normalize36East22ndStreetReportData<T extends Partial<MasterRepo
     managementCompany: CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY,
     buildingPhotos: data.buildingPhotos?.exterior?.length ? data.buildingPhotos : {
       exterior: [
-        'https://www.compass.com/m3/4a72647cb101f2e148fe52612f67ad1c7c94b20d.jpg',
+        '/images/36-east-22nd/story-house-exterior.jpg',
       ],
       interior: [],
       streetView: data.buildingPhotos?.streetView || '',
@@ -1685,7 +1685,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       managementCompany: CAMELOT_36_EAST_22_MANAGEMENT_TO_VERIFY,
       officialWebsite: 'https://www.compass.com/building/the-story-house-manhattan-ny/281903082961387829/',
       imageUrls: [
-        'https://www.compass.com/m3/4a72647cb101f2e148fe52612f67ad1c7c94b20d.jpg',
+        '/images/36-east-22nd/story-house-exterior.jpg',
       ],
       description: 'The Story House at 36 East 22nd Street is a small Flatiron / Madison Square pre-war elevator condominium. Jackie locks elevator status and small-building scale so missing public fields cannot turn the property into a walk-up.',
       amenities: [

@@ -6,7 +6,13 @@
  * All data is 100% dynamic - pulled live from NYC APIs per address.
  */
 
-import { CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY, normalize279CentralParkWestReportData, type MasterReportData } from './camelot-report';
+import {
+  CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+  normalize279CentralParkWestReportData,
+  normalize36East22ndStreetReportData,
+  is36East22ndStreetSubject,
+  type MasterReportData,
+} from './camelot-report';
 import { DAVID_GOLDOFF_SIGNATURE_IMAGE, DAVID_GOLDOFF_SIGNATURE_TEXT } from './camelot-signature';
 
 export type JackieReportPackage = 'first_email_intro' | 'board_meeting_deck' | 'appendix_full';
@@ -145,6 +151,9 @@ function is279CentralParkWestReport(d: Pick<MasterReportData, 'address' | 'build
 }
 
 function normalizePitchReportData(d: MasterReportData): MasterReportData {
+  if (is36East22ndStreetSubject(d.address, d.buildingName, d.managementCompany)) {
+    return normalize36East22ndStreetReportData(d);
+  }
   if (!is279CentralParkWestReport(d)) return d;
   return normalize279CentralParkWestReportData({
     ...d,
