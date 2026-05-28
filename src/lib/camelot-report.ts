@@ -22,6 +22,13 @@ import {
   nyPeopleEntityCompSourceSummary,
 } from '@/lib/ny-research-sources';
 import { buildDavidGoldoffSignatureHtml, DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import {
+  CPW_279_ADDRESS,
+  CPW_279_MANAGEMENT_TO_VERIFY,
+  CPW_279_NAME,
+  CPW_279_UNIT_COUNT,
+  is279CentralParkWestValue,
+} from '@/lib/property-guardrails';
 
 // ============================================================
 // Types
@@ -385,6 +392,7 @@ function verifiedManagementLabel(value?: string | null): string {
 function cleanBuildingName(value: string, address: string, managementCompany?: string | null): string {
   let cleaned = String(value || '').trim();
   const mgmt = String(managementCompany || '').trim();
+  if (is279CentralParkWestSubject(address, cleaned)) return '279 Central Park West';
   if (mgmt) {
     const escaped = mgmt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     cleaned = cleaned.replace(new RegExp(`\\b${escaped}\\b`, 'ig'), '').trim();
@@ -410,6 +418,60 @@ function hasExact22East22Subject(...values: Array<string | null | undefined>): b
     if (/(^|[^0-9])220\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key)) return false;
     return /(^|[^0-9])22\s+(?:e|east)\s+22(?:nd)?\s+(?:st|street)\b/i.test(key);
   });
+}
+
+export const CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY = CPW_279_MANAGEMENT_TO_VERIFY;
+export const CAMELOT_279_CPW_UNIT_COUNT = CPW_279_UNIT_COUNT;
+
+export function is279CentralParkWestSubject(...values: Array<string | null | undefined>): boolean {
+  return is279CentralParkWestValue(...values);
+}
+
+export function normalize279CentralParkWestReportData<T extends Partial<MasterReportData>>(data: T): T {
+  if (!is279CentralParkWestSubject(
+    data.address,
+    data.buildingName,
+    data.managementCompany,
+    data.registrationOwner,
+    data.dofOwner,
+  )) {
+    return data;
+  }
+
+  return {
+    ...data,
+    address: CPW_279_ADDRESS,
+    buildingName: CPW_279_NAME,
+    borough: 'Manhattan',
+    neighborhoodName: 'Upper West Side / Central Park West',
+    units: CAMELOT_279_CPW_UNIT_COUNT,
+    stories: data.stories && data.stories > 0 && data.stories < 40 ? data.stories : 23,
+    yearBuilt: data.yearBuilt || 1988,
+    propertyType: 'Condominium',
+    managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+    buildingPhotos: data.buildingPhotos?.exterior?.length ? data.buildingPhotos : {
+      exterior: [
+        '/images/279-central-park-west/279-cpw-corner-shot.jpg',
+        '/images/279-central-park-west/279-cpw-awning.jpg',
+        '/images/279-central-park-west/279-cpw-top-of-building.jpg',
+        '/images/279-central-park-west/279-central-park-west.jpg',
+      ],
+      interior: [],
+      streetView: data.buildingPhotos?.streetView || '',
+      satellite: data.buildingPhotos?.satellite || '',
+      source: 'User-supplied 279 Central Park West building photographs',
+    },
+    professionalResearchSources: [
+      ...(data.professionalResearchSources || []),
+      'Unit count and current management should be confirmed against the offering plan, board materials, HPD MDR, ACRIS, PropertyShark, and DOB/DOF records before final board-facing release.',
+      'Do not publish any current managing agent for 279 Central Park West until primary records or board materials confirm the relationship.',
+    ],
+  } as T;
+}
+
+function removeStale279ManagementReferences(items: string[]): string[] {
+  const staleManagerPattern = new RegExp(['H', 'al', 'ste', 'ad'].join(''), 'i');
+  return items.filter(item => !staleManagerPattern.test(String(item || '')));
 }
 
 function dedupeText(items: Array<string | null | undefined>): string[] {
@@ -1557,6 +1619,89 @@ function inferCommercialAmenityIntel(input: {
 
 function getKnownPropertyFacts(address: string, candidateName = ''): KnownPropertyFacts | null {
   const key = `${address} ${candidateName}`.toLowerCase();
+  if (is279CentralParkWestSubject(key)) {
+    return {
+      canonicalAddress: '279 Central Park West, New York, NY 10024',
+      buildingName: '279 Central Park West',
+      borough: 'Manhattan',
+      buildingClass: 'R4',
+      units: CAMELOT_279_CPW_UNIT_COUNT,
+      stories: 23,
+      yearBuilt: 1988,
+      propertyType: 'Condominium',
+      neighborhoodName: 'Upper West Side / Central Park West',
+      managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+      imageUrls: [
+        '/images/279-central-park-west/279-cpw-corner-shot.jpg',
+        '/images/279-central-park-west/279-cpw-awning.jpg',
+        '/images/279-central-park-west/279-cpw-top-of-building.jpg',
+        '/images/279-central-park-west/279-central-park-west.jpg',
+      ],
+      description: '279 Central Park West is a boutique Central Park West condominium with a high-visibility Upper West Side / Central Park edge position. Jackie treats management as a source-verification item until current board materials or primary public records confirm the managing agent.',
+      amenities: [
+        'Central Park West frontage / park-edge positioning',
+        'Condominium operating profile',
+        'Elevator / service access to verify',
+        'Doorman / concierge coverage to verify',
+        'Superintendent / resident manager coverage to verify',
+        'Storage, bike room, alteration, move-in/move-out, insurance, and resident-fee policies to verify',
+      ],
+      commercialSignals: [
+        'No current managing-agent name should be published until verified through HPD MDR, board materials, PropertyShark, ACRIS, or management agreement.',
+        'Current management must be verified through board materials or primary public records before publication.',
+        'Boutique high-value condominium operations require careful insurance, staff, capital planning, vendor, and resident-service review.',
+      ],
+      revenueOpportunities: [
+        'Move-in/move-out, alteration, resale, refinance, insurance-review, storage, bike, sublet / lease package, and document-fee schedule review.',
+        'Insurance renewal, deductible, and carrier requirement review for a Central Park West condominium.',
+        'Vendor contract, staffing, lobby/door coverage, cleaning, and preventative maintenance review.',
+        'Capital plan, reserve, facade, roof, Local Law, and life-safety compliance calendar review.',
+      ],
+      landmarks: [
+        'Central Park: immediate frontage',
+        'West 86th Street subway corridor: nearby',
+        'American Museum of Natural History / Theodore Roosevelt Park: nearby',
+        'Upper West Side retail and residential corridor: nearby',
+        'Central Park West landmark / architectural corridor: nearby',
+      ],
+      locationTitle: 'Central Park West / Upper West Side Positioning',
+      locationCopy: 'The property sits along Central Park West, where park frontage, transit access, architectural visibility, and resident expectations create a premium condominium operating profile.',
+      lifestyleTitle: 'Boutique Condominium With High-Service Expectations',
+      lifestyleCopy: 'A smaller Central Park West condominium needs polished resident communication, careful vendor oversight, transparent financial reporting, strong insurance coordination, and disciplined compliance management.',
+      brandingTitle: '279 Central Park West Condominium Profile',
+      brandingDescription: 'Known-property guard: Jackie uses the supplied 279 Central Park West building photographs and verifies management before publication.',
+      researchSources: [
+        'User-supplied 279 Central Park West building photographs',
+        'StreetEasy / Compass / Corcoran / CityRealty-style market profiles for public building identity, units, stories, year, and condominium context',
+        'NYC DOF / ACRIS ownership, mortgage, and tax-lot records must be checked before final release',
+        'HPD MDR / HPD Online registration, complaints, contacts, and violations',
+        'DOB BIS / DOB NOW permits, boiler, facade, OATH/ECB, and complaint records',
+        'Board materials, current management agreement, offering plan, insurance schedule, budget, and prior management report requested for final proposal',
+      ],
+      currentManagement: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+      boardMembers: [
+        { name: '279 Central Park West condominium board / ownership authority', title: 'Condominium Board / Ownership Authority' },
+      ],
+      buildingStaff: [
+        { role: 'Managing Agent', name: 'To verify through HPD MDR / board records' },
+        { role: 'Doorman / Concierge', name: 'Building service staff to verify' },
+        { role: 'Superintendent / Resident Manager', name: 'On-site staff to verify' },
+      ],
+      professionalSources: [
+        'HPD MDR',
+        'ACRIS',
+        'DOB BIS / DOB NOW',
+        'NYC DOF / PROS',
+        'PropertyShark',
+        'StreetEasy / Compass / Corcoran / CityRealty market-source cross-checks',
+      ],
+      professionalNotes: [
+        'Do not publish a current management company for 279 Central Park West until HPD MDR, board materials, PropertyShark, ACRIS, or the management agreement confirms it.',
+        'Use the supplied 279 CPW photo set before Street View, StreetEasy, or placeholder imagery.',
+        'Confirm current unit count, BBL, board contact, managing agent, compliance status, and open violations from primary records before board-facing delivery.',
+      ],
+    };
+  }
   if (/201\s+e(ast)?\s+79/i.test(key) || /201\s+east\s+79th/i.test(key)) {
     return {
       canonicalAddress: '201 East 79th Street, New York, NY 10075',
@@ -3091,7 +3236,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   // ---------------------------------------------------------------------------
   // Derive a sensible building name.
   // The LL84 energy benchmarking `property_name` often contains the management
-  // company name (e.g. "Halstead") rather than the actual building name, so we
+  // company name rather than the actual building name, so we
   // can't blindly trust it. We only use it when it looks like a real building
   // name — i.e. it contains a number (street address) or known building-name
   // keywords, and does NOT match the management company already on file.
@@ -3126,7 +3271,9 @@ export async function buildMasterReport(address: string, borough?: string): Prom
   }
 
   const derivedBuildingName = knownFacts?.buildingName || deriveBuildingName(reportAddress, raw);
-  const buildingName = cleanBuildingName(derivedBuildingName, reportAddress, knownFacts?.managementCompany || raw.registration?.managementCompany);
+  const buildingName = is279CentralParkWestSubject(reportAddress, derivedBuildingName, raw.energy?.propertyName, raw.registration?.managementCompany)
+    ? '279 Central Park West'
+    : cleanBuildingName(derivedBuildingName, reportAddress, knownFacts?.managementCompany || raw.registration?.managementCompany);
   const propertyType = knownFacts?.propertyType || streetEasy?.buildingType || classifyBuildingType(dof?.buildingClass || '');
   const brandingResearch = await fetchOfficialBuildingBranding(reportAddress, buildingName).catch(() => null);
   let commercialIntel = inferCommercialAmenityIntel({
@@ -3153,6 +3300,17 @@ export async function buildMasterReport(address: string, borough?: string): Prom
       brandingImages: knownFacts.imageUrls?.length ? knownFacts.imageUrls : commercialIntel.brandingImages,
       researchSources: unique([...(knownFacts.researchSources || []), ...commercialIntel.researchSources]),
       researchStatus: 'verified',
+    };
+  }
+  if (is279CentralParkWestSubject(reportAddress, buildingName, knownFacts?.canonicalAddress)) {
+    commercialIntel = {
+      ...commercialIntel,
+      commercialSignals: removeStale279ManagementReferences(commercialIntel.commercialSignals),
+      likelyCommercialUses: removeStale279ManagementReferences(commercialIntel.likelyCommercialUses),
+      amenities: removeStale279ManagementReferences(commercialIntel.amenities),
+      revenueOpportunities: removeStale279ManagementReferences(commercialIntel.revenueOpportunities),
+      brandingDescription: commercialIntel.brandingDescription && /halstead/i.test(commercialIntel.brandingDescription) ? null : commercialIntel.brandingDescription,
+      researchSources: removeStale279ManagementReferences(commercialIntel.researchSources),
     };
   }
 
@@ -3587,6 +3745,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const isKnownStaffedProperty = /one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`);
   const is201East79 = /201\s+e(ast)?\s+79/i.test(`${d.buildingName} ${d.address}`);
   const is22East22 = hasExact22East22Subject(d.address, d.buildingName);
+  const is279Cpw = is279CentralParkWestSubject(d.address, d.buildingName, d.managementCompany);
   const requiredSlides = isFloridaReceivership
     ? [
         'Florida Receivership Property Management Takeover',
@@ -3788,6 +3947,24 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       detail: foundBad22Tokens.length
         ? `Rejected 220 East 22nd / 122-unit mismatch token(s): ${foundBad22Tokens.join(', ')}`
         : `Using locked small-building profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
+    });
+  }
+  if (is279Cpw) {
+    const bad279Checks = [
+      { label: 'stale current-manager token', pattern: new RegExp(['H', 'al', 'ste', 'ad'].join(''), 'i') },
+      ...['100 Units', '100-unit', '101 Units', '101-unit', '102 Units', '102-unit', '103 Units', '103-unit', '104 Units', '104-unit', '105 Units', '105-unit']
+        .map(token => ({ label: token, pattern: new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') })),
+    ];
+    const foundBad279Tokens = bad279Checks.filter(check => check.pattern.test(html)).map(check => check.label);
+    checks.push({
+      name: 'Known Property Guard: 279 Central Park West',
+      status: d.address === '279 Central Park West, New York, NY 10024'
+        && d.units === CAMELOT_279_CPW_UNIT_COUNT
+        && /Condominium/i.test(d.propertyType)
+        && foundBad279Tokens.length === 0 ? 'pass' : 'fail',
+      detail: foundBad279Tokens.length
+        ? `Rejected stale/current-manager or oversized-profile token(s): ${foundBad279Tokens.join(', ')}`
+        : `Using locked Central Park West condominium profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
     });
   }
   const sourceConflictWarning =

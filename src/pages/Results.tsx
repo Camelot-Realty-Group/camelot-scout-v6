@@ -6,6 +6,7 @@ import type { Building, BuildingGrade } from '@/types';
 import { cn } from '@/lib/utils';
 import { openEmailDraft } from '@/lib/pdf-generator';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import { normalizeBuildingForReportGuardrails } from '@/lib/property-guardrails';
 import {
   LayoutGrid, List, Search, SlidersHorizontal, Download, GitBranch,
   Users, CheckSquare, Square, X,
@@ -47,7 +48,7 @@ export default function Results() {
       results = results.filter((b) => b.grade === gradeFilter);
     }
 
-    return results;
+    return results.map((building) => normalizeBuildingForReportGuardrails(building));
   }, [getFilteredBuildings, searchText, gradeFilter]);
 
   const gradeStats = useMemo(() => {
@@ -210,16 +211,18 @@ export default function Results() {
                 building={building}
                 selected={selectedBuildings.has(building.id)}
                 onSelect={() => toggleSelected(building.id)}
-                onViewDetails={() => setDetailBuilding(building)}
-                onEmail={() => handlePropertyIntroEmail(building)}
+                onViewDetails={() => setDetailBuilding(normalizeBuildingForReportGuardrails(building))}
+                onEmail={() => handlePropertyIntroEmail(normalizeBuildingForReportGuardrails(building))}
                 onEnrich={() => toast.success('Enrichment started...')}
                 onGutCheck={() => {
-                  toast.success(`Running Gut Check for ${building.name || building.address}...`);
-                  window.open(`#/report-center?address=${encodeURIComponent(building.address)}&gutcheck=true`, '_blank');
+                  const guardedBuilding = normalizeBuildingForReportGuardrails(building);
+                  toast.success(`Running Gut Check for ${guardedBuilding.name || guardedBuilding.address}...`);
+                  window.open(`#/report-center?address=${encodeURIComponent(guardedBuilding.address)}&gutcheck=true`, '_blank');
                 }}
                 onAddToPipeline={() => {
                   updateBuilding(building.id, { pipeline_stage: 'scored' });
-                  toast.success(`${building.name || building.address} moved to Scored`);
+                  const guardedBuilding = normalizeBuildingForReportGuardrails(building);
+                  toast.success(`${guardedBuilding.name || guardedBuilding.address} moved to Scored`);
                 }}
               />
             ))}
@@ -254,7 +257,7 @@ export default function Results() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => setDetailBuilding(b)} className="text-left hover:text-camelot-gold transition-colors">
+                      <button onClick={() => setDetailBuilding(normalizeBuildingForReportGuardrails(b))} className="text-left hover:text-camelot-gold transition-colors">
                         <p className="text-sm font-medium">{b.name || b.address}</p>
                         <p className="text-xs text-gray-400">{b.address}</p>
                       </button>
@@ -276,7 +279,7 @@ export default function Results() {
                     <td className="px-4 py-3 text-xs text-center capitalize">{b.pipeline_stage}</td>
                     <td className="px-4 py-3 text-right">
                       <button
-                        onClick={() => setDetailBuilding(b)}
+                        onClick={() => setDetailBuilding(normalizeBuildingForReportGuardrails(b))}
                         className="text-xs text-camelot-gold font-bold hover:underline"
                         title="Click Details to open report previews and outreach actions"
                       >
