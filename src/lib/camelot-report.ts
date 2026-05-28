@@ -3376,6 +3376,26 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     const energyName = (data.energy?.propertyName || '').trim();
     if (!energyName) return addr;
 
+    const normalizeAddressKey = (value: string) => value
+      .toLowerCase()
+      .replace(/\b(east)\b/g, 'e')
+      .replace(/\b(west)\b/g, 'w')
+      .replace(/\b(north)\b/g, 'n')
+      .replace(/\b(south)\b/g, 's')
+      .replace(/\b(street)\b/g, 'st')
+      .replace(/\b(avenue)\b/g, 'ave')
+      .replace(/\b(road)\b/g, 'rd')
+      .replace(/\b(place)\b/g, 'pl')
+      .replace(/\b(boulevard)\b/g, 'blvd')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+    const extractAddressLikePhrases = (value: string) =>
+      [...value.matchAll(/\b\d{1,5}\s+(?:east|e|west|w|north|n|south|s)?\s*[a-z0-9]+(?:st|nd|rd|th)?\s+(?:street|st|avenue|ave|road|rd|place|pl|boulevard|blvd|drive|dr|lane|ln|parkway|pkwy)\b/gi)]
+        .map(match => normalizeAddressKey(match[0]));
+    const subjectAddressKey = normalizeAddressKey(addr);
+    const foreignAddressPhrases = extractAddressLikePhrases(energyName).filter(phrase => !subjectAddressKey.includes(phrase));
+    if (foreignAddressPhrases.length) return addr;
+
     const mgmtCo = (data.registration?.managementCompany || '').trim().toLowerCase();
     const ownerName = (data.registration?.owner || '').trim().toLowerCase();
     const dofOwnerName = (data.dof?.owner || '').trim().toLowerCase();
