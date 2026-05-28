@@ -6,7 +6,7 @@
  * All data is 100% dynamic - pulled live from NYC APIs per address.
  */
 
-import type { MasterReportData } from './camelot-report';
+import { CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY, normalize279CentralParkWestReportData, type MasterReportData } from './camelot-report';
 import { DAVID_GOLDOFF_SIGNATURE_IMAGE, DAVID_GOLDOFF_SIGNATURE_TEXT } from './camelot-signature';
 
 export type JackieReportPackage = 'first_email_intro' | 'board_meeting_deck' | 'appendix_full';
@@ -146,13 +146,10 @@ function is279CentralParkWestReport(d: Pick<MasterReportData, 'address' | 'build
 
 function normalizePitchReportData(d: MasterReportData): MasterReportData {
   if (!is279CentralParkWestReport(d)) return d;
-  return {
+  return normalize279CentralParkWestReportData({
     ...d,
-    buildingName: '279 Central Park West',
-    address: '279 Central Park West, New York, NY 10024',
-    neighborhoodName: 'Upper West Side / Central Park West',
-    managementCompany: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
-  };
+    managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+  });
 }
 
 const JACKSON_85TH_SCOPE_INCLUDED = [

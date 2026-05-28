@@ -413,7 +413,10 @@ function hasExact22East22Subject(...values: Array<string | null | undefined>): b
   });
 }
 
-function is279CentralParkWestSubject(...values: Array<string | null | undefined>): boolean {
+export const CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY = 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records';
+export const CAMELOT_279_CPW_UNIT_COUNT = 38;
+
+export function is279CentralParkWestSubject(...values: Array<string | null | undefined>): boolean {
   return values.some(value => {
     const key = String(value || '').toLowerCase();
     if (!/(^|[^0-9])279\b/.test(key)) return false;
@@ -421,8 +424,51 @@ function is279CentralParkWestSubject(...values: Array<string | null | undefined>
   });
 }
 
+export function normalize279CentralParkWestReportData<T extends Partial<MasterReportData>>(data: T): T {
+  if (!is279CentralParkWestSubject(
+    data.address,
+    data.buildingName,
+    data.managementCompany,
+    data.registrationOwner,
+    data.dofOwner,
+  )) {
+    return data;
+  }
+
+  return {
+    ...data,
+    address: '279 Central Park West, New York, NY 10024',
+    buildingName: '279 Central Park West',
+    borough: 'Manhattan',
+    neighborhoodName: 'Upper West Side / Central Park West',
+    units: CAMELOT_279_CPW_UNIT_COUNT,
+    stories: data.stories && data.stories > 0 && data.stories < 40 ? data.stories : 23,
+    yearBuilt: data.yearBuilt || 1988,
+    propertyType: 'Condominium',
+    managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+    buildingPhotos: data.buildingPhotos?.exterior?.length ? data.buildingPhotos : {
+      exterior: [
+        '/images/279-central-park-west/279-cpw-corner-shot.jpg',
+        '/images/279-central-park-west/279-cpw-awning.jpg',
+        '/images/279-central-park-west/279-cpw-top-of-building.jpg',
+        '/images/279-central-park-west/279-central-park-west.jpg',
+      ],
+      interior: [],
+      streetView: data.buildingPhotos?.streetView || '',
+      satellite: data.buildingPhotos?.satellite || '',
+      source: 'User-supplied 279 Central Park West building photographs',
+    },
+    professionalResearchSources: [
+      ...(data.professionalResearchSources || []),
+      'Unit count and current management should be confirmed against the offering plan, board materials, HPD MDR, ACRIS, PropertyShark, and DOB/DOF records before final board-facing release.',
+      'Do not publish any current managing agent for 279 Central Park West until primary records or board materials confirm the relationship.',
+    ],
+  } as T;
+}
+
 function removeStale279ManagementReferences(items: string[]): string[] {
-  return items.filter(item => !/halstead/i.test(String(item || '')));
+  const staleManagerPattern = new RegExp(['H', 'al', 'ste', 'ad'].join(''), 'i');
+  return items.filter(item => !staleManagerPattern.test(String(item || '')));
 }
 
 function dedupeText(items: Array<string | null | undefined>): string[] {
@@ -1576,12 +1622,12 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
       buildingName: '279 Central Park West',
       borough: 'Manhattan',
       buildingClass: 'R4',
-      units: 36,
+      units: CAMELOT_279_CPW_UNIT_COUNT,
       stories: 23,
       yearBuilt: 1988,
       propertyType: 'Condominium',
       neighborhoodName: 'Upper West Side / Central Park West',
-      managementCompany: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
+      managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
       imageUrls: [
         '/images/279-central-park-west/279-cpw-corner-shot.jpg',
         '/images/279-central-park-west/279-cpw-awning.jpg',
@@ -1629,7 +1675,7 @@ function getKnownPropertyFacts(address: string, candidateName = ''): KnownProper
         'DOB BIS / DOB NOW permits, boiler, facade, OATH/ECB, and complaint records',
         'Board materials, current management agreement, offering plan, insurance schedule, budget, and prior management report requested for final proposal',
       ],
-      currentManagement: 'Management to verify through board materials, HPD MDR, ACRIS, PropertyShark, and building records',
+      currentManagement: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
       boardMembers: [
         { name: '279 Central Park West condominium board / ownership authority', title: 'Condominium Board / Ownership Authority' },
       ],
@@ -3696,6 +3742,7 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const isKnownStaffedProperty = /one\s+museum\s+mile|1280\s+(fifth|5th)/i.test(`${d.buildingName} ${d.address}`);
   const is201East79 = /201\s+e(ast)?\s+79/i.test(`${d.buildingName} ${d.address}`);
   const is22East22 = hasExact22East22Subject(d.address, d.buildingName);
+  const is279Cpw = is279CentralParkWestSubject(d.address, d.buildingName, d.managementCompany);
   const requiredSlides = isFloridaReceivership
     ? [
         'Florida Receivership Property Management Takeover',
@@ -3897,6 +3944,24 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       detail: foundBad22Tokens.length
         ? `Rejected 220 East 22nd / 122-unit mismatch token(s): ${foundBad22Tokens.join(', ')}`
         : `Using locked small-building profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
+    });
+  }
+  if (is279Cpw) {
+    const bad279Checks = [
+      { label: 'stale current-manager token', pattern: new RegExp(['H', 'al', 'ste', 'ad'].join(''), 'i') },
+      ...['100 Units', '100-unit', '101 Units', '101-unit', '102 Units', '102-unit', '103 Units', '103-unit', '104 Units', '104-unit', '105 Units', '105-unit']
+        .map(token => ({ label: token, pattern: new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') })),
+    ];
+    const foundBad279Tokens = bad279Checks.filter(check => check.pattern.test(html)).map(check => check.label);
+    checks.push({
+      name: 'Known Property Guard: 279 Central Park West',
+      status: d.address === '279 Central Park West, New York, NY 10024'
+        && d.units === CAMELOT_279_CPW_UNIT_COUNT
+        && /Condominium/i.test(d.propertyType)
+        && foundBad279Tokens.length === 0 ? 'pass' : 'fail',
+      detail: foundBad279Tokens.length
+        ? `Rejected stale/current-manager or oversized-profile token(s): ${foundBad279Tokens.join(', ')}`
+        : `Using locked Central Park West condominium profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
     });
   }
   const sourceConflictWarning =

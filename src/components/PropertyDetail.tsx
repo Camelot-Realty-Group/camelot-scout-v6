@@ -17,6 +17,7 @@ import { searchNYDOSCorporation, generateExternalLinks, type NYDOSCorporation, t
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { downloadAsPDF, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
 import { pushBuildingToIntegrations } from '@/lib/integrations';
+import type { MasterReportData } from '@/lib/camelot-report';
 import toast from 'react-hot-toast';
 import {
   X, MapPin, Building2, AlertTriangle, DollarSign, Zap, FileText,
@@ -76,6 +77,14 @@ function contactDirectory(contacts: Contact[]) {
       return `- ${contact.name || 'Contact'}${role}${company}${email}${phone}`;
     });
   return rows.length ? rows.join('\n') : '- No contact email or phone is currently saved on this property card.';
+}
+
+function is279CpwProperty(...values: Array<string | null | undefined>): boolean {
+  return values.some((value) => {
+    const key = String(value || '').toLowerCase();
+    if (!/(^|[^0-9])279\b/.test(key)) return false;
+    return /\bcpw\b/.test(key) || /\bcentral\s+park\s+w(?:est)?\.?\b/.test(key);
+  });
 }
 
 // ---- Contact helpers ----
@@ -310,8 +319,9 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const [reportLoading, setReportLoading] = useState(false);
 
   const buildJackieDataForDetail = async () => {
-    const { buildMasterReport } = await import('@/lib/camelot-report');
-    const data: any = await buildMasterReport(building.address, building.borough || undefined);
+    const { buildMasterReport, normalize279CentralParkWestReportData } = await import('@/lib/camelot-report');
+    const isKnown279Cpw = is279CpwProperty(building.address, building.name, building.current_management);
+    const data: MasterReportData = await buildMasterReport(building.address, building.borough || undefined);
 
     const cardContacts = building.contacts || [];
     if (cardContacts.length > 0) {
@@ -342,9 +352,9 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       if (engineer) data.professionals.engineer = engineer.company || engineer.name || null;
     }
 
-    if (building.current_management) data.managementCompany = building.current_management;
+    if (building.current_management && !isKnown279Cpw) data.managementCompany = building.current_management;
     if (building.enriched_data?.dof?.owner) data.dofOwner = building.enriched_data.dof.owner;
-    return data;
+    return isKnown279Cpw ? normalize279CentralParkWestReportData(data) : data;
   };
 
   const buildDetailPackage = async (reportPackage: DetailReportPackage) => {
@@ -475,9 +485,10 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const handleReportPDF = async () => {
     setReportLoading(true);
     try {
-      const { buildMasterReport, generateBrochureHTML, validateJackieReport } = await import('@/lib/camelot-report');
+      const { buildMasterReport, generateBrochureHTML, validateJackieReport, normalize279CentralParkWestReportData } = await import('@/lib/camelot-report');
       toast.success('Generating Jackie report...');
-      const data = await buildMasterReport(building.address, building.borough || undefined);
+      const isKnown279Cpw = is279CpwProperty(building.address, building.name, building.current_management);
+      let data = await buildMasterReport(building.address, building.borough || undefined);
 
       // Merge property card contacts into the report (these are richer than HPD data)
       const cardContacts = building.contacts || [];
@@ -501,8 +512,9 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       }
 
       // Also merge enriched data fields the property card has
-      if (building.current_management) data.managementCompany = building.current_management;
+      if (building.current_management && !isKnown279Cpw) data.managementCompany = building.current_management;
       if (building.enriched_data?.dof?.owner) data.dofOwner = building.enriched_data.dof.owner;
+      if (isKnown279Cpw) data = normalize279CentralParkWestReportData(data);
 
       const html = generateBrochureHTML(data);
       const qa = validateJackieReport(data, html);
