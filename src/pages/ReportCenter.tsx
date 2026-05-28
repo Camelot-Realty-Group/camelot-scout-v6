@@ -8,6 +8,7 @@ import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { formatLibraryDate, loadLocalJackieReportLibrary, packageLabelFor, removeJackieReportRecord, saveJackieReportRecord, type SavedJackieReport } from '@/lib/jackie-report-library';
 import { pushBuildingToIntegrations } from '@/lib/integrations';
+import { trackReportWorkflowEvent } from '@/lib/report-crm-tracking';
 import type { Building, Contact } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -361,9 +362,35 @@ export default function ReportCenter() {
     };
     const next = saveJackieReportRecord(record);
     setSavedReports(next);
+    void trackReportWorkflowEvent({
+      building: reportDataToBuilding(reportData, {
+        name: inquiryContact,
+        email: inquiryEmail,
+        phone: inquiryPhone,
+        role: inquiryRole,
+        organization: inquiryOrganization,
+      }),
+      reportData,
+      packageType,
+      packageLabel: record.packageLabel,
+      action: 'generated',
+      filename,
+      reportNumber,
+      html,
+      extraContacts: [
+        {
+          name: inquiryContact || reportData.reportFocus?.inquiryContact || '',
+          role: inquiryRole || reportData.reportFocus?.inquiryRole || 'Inquiry contact',
+          email: inquiryEmail || reportData.reportFocus?.inquiryEmail,
+          phone: inquiryPhone || reportData.reportFocus?.inquiryPhone,
+          company: inquiryOrganization || reportData.reportFocus?.inquiryOrganization,
+          source: 'Jackie Report Center inquiry fields',
+        },
+      ],
+    });
     toast.success(`Saved to Generated Jackie Report Library: ${record.reportNumber}`);
     return record;
-  }, [inquiryContact, inquiryEmail, inquiryPhone, selectedFocus]);
+  }, [inquiryContact, inquiryEmail, inquiryOrganization, inquiryPhone, inquiryRole, selectedFocus]);
 
   const openPackageAndArchive = useCallback((
     reportData: MasterReportData,
@@ -489,16 +516,36 @@ export default function ReportCenter() {
       await downloadAsHTML(html, filenames.html);
     }
     const recipients = collectReportContactEmails(d, inquiryEmail);
-    openEmailDraft({
-      to: recipients.join(','),
-      cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
-      subject: `Introduction to Camelot Property Management regarding ${d.buildingName || d.address}`,
-      body:
+    const subject = `Introduction to Camelot Property Management regarding ${d.buildingName || d.address}`;
+    const body =
       `To the decision makers of ${d.buildingName || d.address},\n\n` +
       `Thank you for taking the time to review Camelot Property Management. Attached is a property-specific Camelot report for ${d.buildingName || d.address}.\n\n` +
       `Camelot is a New York-based property management company serving co-ops, condos, and rental buildings with senior attention, in-house accounting, legal and compliance guidance, practical technology, and hands-on local management. We would welcome the opportunity to speak with you by phone, Zoom, Google Meet, or in person to discuss where Camelot may be useful to your building.\n\n` +
       `Please attach the downloaded PDF report file before sending: ${filenames.pdf}\n\n` +
-      `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+      `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
+    openEmailDraft({
+      to: recipients.join(','),
+      cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
+      subject,
+      body,
+    });
+    void trackReportWorkflowEvent({
+      building: reportDataToBuilding(d, {
+        name: inquiryContact,
+        email: inquiryEmail,
+        phone: inquiryPhone,
+        role: inquiryRole,
+        organization: inquiryOrganization,
+      }),
+      reportData: d,
+      packageType: selectedPackage,
+      packageLabel: packageLabelFor(selectedPackage),
+      action: 'email_draft_opened',
+      filename: filenames.pdf,
+      html,
+      emailSubject: subject,
+      emailBody: body,
+      recipients,
     });
     copyToClipboard(email);
     toast.success(recipients.length ? 'PDF downloaded and addressed Gmail draft opened' : 'PDF downloaded and Gmail draft opened; add recipient before sending', { id: 'jackie-email' });
@@ -520,6 +567,21 @@ export default function ReportCenter() {
         role: inquiryRole,
         organization: inquiryOrganization,
       }));
+      void trackReportWorkflowEvent({
+        building: reportDataToBuilding(d, {
+          name: inquiryContact,
+          email: inquiryEmail,
+          phone: inquiryPhone,
+          role: inquiryRole,
+          organization: inquiryOrganization,
+        }),
+        reportData: d,
+        packageType: selectedPackage,
+        packageLabel: packageLabelFor(selectedPackage),
+        action: 'hubspot_push',
+        filename: filenames.html,
+        html,
+      });
       const hubspotText = result.hubspot?.status === 'ok' ? 'HubSpot synced' : result.hubspot?.message || 'HubSpot queued/skipped';
       toast.success(`Scout workflow complete. ${hubspotText}`, { id: 'jackie-hubspot' });
     } catch (err: any) {

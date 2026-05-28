@@ -17,6 +17,7 @@ import { searchNYDOSCorporation, generateExternalLinks, type NYDOSCorporation, t
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { downloadAsPDF, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
 import { pushBuildingToIntegrations } from '@/lib/integrations';
+import { trackReportWorkflowEvent } from '@/lib/report-crm-tracking';
 import type { MasterReportData } from '@/lib/camelot-report';
 import { normalizeBuildingForReportGuardrails } from '@/lib/property-guardrails';
 import toast from 'react-hot-toast';
@@ -381,12 +382,21 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     setPackageLoading(`preview:${reportPackage}`);
     try {
       toast.loading(`Preparing ${DETAIL_REPORT_LABELS[reportPackage]} preview...`, { id: 'detail-report-preview' });
-      const { html, filename } = await buildDetailPackage(reportPackage);
+      const { data, html, filename } = await buildDetailPackage(reportPackage);
       setReportPreview({
         reportPackage,
         label: DETAIL_REPORT_LABELS[reportPackage],
         html,
         filename,
+      });
+      void trackReportWorkflowEvent({
+        building: guardedBuilding,
+        reportData: data,
+        packageType: reportPackage,
+        packageLabel: DETAIL_REPORT_LABELS[reportPackage],
+        action: 'previewed',
+        filename,
+        html,
       });
       toast.success(`${DETAIL_REPORT_LABELS[reportPackage]} preview ready`, { id: 'detail-report-preview' });
     } catch (err) {
@@ -403,6 +413,14 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     try {
       toast.loading(`Creating compressed ${reportPreview.label} PDF...`, { id: 'detail-report-pdf' });
       await downloadAsPDF(reportPreview.html, reportPreview.filename);
+      void trackReportWorkflowEvent({
+        building: guardedBuilding,
+        packageType: reportPreview.reportPackage,
+        packageLabel: reportPreview.label,
+        action: 'downloaded',
+        filename: reportPreview.filename,
+        html: reportPreview.html,
+      });
       toast.success(`${reportPreview.label} PDF downloaded`, { id: 'detail-report-pdf' });
     } catch (err) {
       console.error('Preview PDF download failed:', err);
@@ -415,6 +433,14 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
   const handlePrintPreview = () => {
     if (!reportPreview) return;
     openBrochureForPrint(reportPreview.html, reportPreview.filename);
+    void trackReportWorkflowEvent({
+      building: guardedBuilding,
+      packageType: reportPreview.reportPackage,
+      packageLabel: reportPreview.label,
+      action: 'printed',
+      filename: reportPreview.filename,
+      html: reportPreview.html,
+    });
     toast.success('Preview opened in a printable tab. Use browser Print / Save as PDF.');
   };
 
@@ -424,17 +450,30 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     const recipients = uniqueContactEmails(contacts);
     const contactList = contactDirectory(contacts);
     const propertyLabel = guardedBuilding.name || guardedBuilding.address;
+    const subject = `${reportPreview.label} - ${propertyLabel}`;
+    const body =
+      `To the decision makers of ${propertyLabel},\n\n` +
+      `Thank you for taking the time to review Camelot Property Management. I am sending the ${reportPreview.label} for ${propertyLabel} for your review.\n\n` +
+      `Please attach the reviewed PDF before sending. Suggested file name: ${reportPreview.filename}\n\n` +
+      `Contacts currently saved for this outreach:\n${contactList}\n\n` +
+      `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
+      `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
     openEmailDraft({
       to: recipients.join(','),
       cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
-      subject: `${reportPreview.label} - ${propertyLabel}`,
-      body:
-        `To the decision makers of ${propertyLabel},\n\n` +
-        `Thank you for taking the time to review Camelot Property Management. I am sending the ${reportPreview.label} for ${propertyLabel} for your review.\n\n` +
-        `Please attach the reviewed PDF before sending. Suggested file name: ${reportPreview.filename}\n\n` +
-        `Contacts currently saved for this outreach:\n${contactList}\n\n` +
-        `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
-        `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+      subject,
+      body,
+    });
+    void trackReportWorkflowEvent({
+      building: guardedBuilding,
+      packageType: reportPreview.reportPackage,
+      packageLabel: reportPreview.label,
+      action: 'email_draft_opened',
+      filename: reportPreview.filename,
+      html: reportPreview.html,
+      emailSubject: subject,
+      emailBody: body,
+      recipients,
     });
     toast.success(recipients.length ? 'Email draft opened with available contacts' : 'Email draft opened; add recipient before sending');
   };
@@ -447,17 +486,31 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       const contacts = guardedBuilding.contacts || [];
       const recipients = uniqueContactEmails(contacts);
       const contactList = contactDirectory(contacts);
+      const subject = `${DETAIL_REPORT_LABELS[reportPackage]} - ${data.buildingName || guardedBuilding.name || guardedBuilding.address}`;
+      const body =
+        `To the decision makers of ${data.buildingName || guardedBuilding.name || guardedBuilding.address},\n\n` +
+        `Thank you for taking the time to review Camelot Property Management. Attached is the ${DETAIL_REPORT_LABELS[reportPackage]} for ${data.buildingName || guardedBuilding.name || guardedBuilding.address}.\n\n` +
+        `Please attach the reviewed PDF before sending: ${filename}\n\n` +
+        `Contacts currently saved for this outreach:\n${contactList}\n\n` +
+        `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
+        `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
       openEmailDraft({
         to: recipients.join(','),
         cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
-        subject: `${DETAIL_REPORT_LABELS[reportPackage]} - ${data.buildingName || guardedBuilding.name || guardedBuilding.address}`,
-        body:
-          `To the decision makers of ${data.buildingName || guardedBuilding.name || guardedBuilding.address},\n\n` +
-          `Thank you for taking the time to review Camelot Property Management. Attached is the ${DETAIL_REPORT_LABELS[reportPackage]} for ${data.buildingName || guardedBuilding.name || guardedBuilding.address}.\n\n` +
-          `Please attach the reviewed PDF before sending: ${filename}\n\n` +
-          `Contacts currently saved for this outreach:\n${contactList}\n\n` +
-          `We would welcome the opportunity to discuss the building by phone, Zoom, Google Meet, or in person.\n\n` +
-          `Sincerely,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+        subject,
+        body,
+      });
+      void trackReportWorkflowEvent({
+        building: guardedBuilding,
+        reportData: data,
+        packageType: reportPackage,
+        packageLabel: DETAIL_REPORT_LABELS[reportPackage],
+        action: 'email_draft_opened',
+        filename,
+        html,
+        emailSubject: subject,
+        emailBody: body,
+        recipients,
       });
       setReportPreview({ reportPackage, label: DETAIL_REPORT_LABELS[reportPackage], html, filename });
       toast.success(recipients.length ? 'Preview prepared and addressed email draft opened' : 'Preview prepared and email draft opened; add recipient before sending', { id: 'detail-report-email' });
@@ -474,6 +527,13 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     try {
       toast.loading('Pushing property and contacts to HubSpot...', { id: 'detail-hubspot' });
       const result = await pushBuildingToIntegrations(guardedBuilding);
+      void trackReportWorkflowEvent({
+        building: guardedBuilding,
+        packageType: 'quick_email_intro',
+        packageLabel: 'HubSpot Property Sync',
+        action: 'hubspot_push',
+        filename: undefined,
+      });
       const hubspotText = result.hubspot?.status === 'ok' ? 'HubSpot synced' : result.hubspot?.message || 'HubSpot queued/skipped';
       toast.success(`Scout workflow complete. ${hubspotText}`, { id: 'detail-hubspot' });
     } catch (err: any) {
@@ -536,6 +596,15 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       if (!w) { toast.error('Pop-up blocked — allow pop-ups for this site'); return; }
       w.document.write(html);
       w.document.close();
+      void trackReportWorkflowEvent({
+        building: guardedBuilding,
+        reportData: data,
+        packageType: 'appendix_full',
+        packageLabel: 'Full Jackie Appendix',
+        action: 'previewed',
+        filename: `${(data.buildingName || data.address).replace(/[^a-zA-Z0-9]+/g, '-')}-Full-Jackie.pdf`,
+        html,
+      });
     } catch (err) {
       console.error('Jackie report generation failed:', err);
       toast.error('Report generation failed — check console');
@@ -588,18 +657,29 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
     const signalPhrase = guardedBuilding.open_violations_count
       ? ` Our initial public-record scan shows ${guardedBuilding.open_violations_count} open violation${guardedBuilding.open_violations_count === 1 ? '' : 's'}, which may be worth reviewing as part of a broader management and compliance conversation.`
       : '';
+    const subject = `Complimentary Property Management Review - ${propertyLabel}`;
+    const body =
+      `${salutation}\n\n` +
+      `My name is David Goldoff, President of Camelot Property Management Services Corp. We are a New York-based property management and brokerage platform that works with co-ops, condos, rental buildings, owners, and boards that want more organized financial reporting, better vendor oversight, stronger compliance tracking, and a more responsive management experience.\n\n` +
+      `I am reaching out regarding ${propertyLabel}. Camelot uses a combination of senior property-management experience, public-record research, building operations review, accounting controls, resident-facing technology, and automation tools to evaluate how a property is being managed and where a board or owner may have opportunities to reduce risk, improve communication, tighten reporting, and better plan capital needs.${signalPhrase}\n\n` +
+      `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${guardedBuilding.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
+      `If you are open to it, I would welcome the chance to speak for 15 to 20 minutes about your current property management needs and whether Camelot could be a fit.\n\n` +
+      `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
 
     openEmailDraft({
       to: recipients.join(','),
       cc: 'info@camelot.nyc,dgoldoff@camelot.nyc',
-      subject: `Complimentary Property Management Review - ${propertyLabel}`,
-      body:
-        `${salutation}\n\n` +
-        `My name is David Goldoff, President of Camelot Property Management Services Corp. We are a New York-based property management and brokerage platform that works with co-ops, condos, rental buildings, owners, and boards that want more organized financial reporting, better vendor oversight, stronger compliance tracking, and a more responsive management experience.\n\n` +
-        `I am reaching out regarding ${propertyLabel}. Camelot uses a combination of senior property-management experience, public-record research, building operations review, accounting controls, resident-facing technology, and automation tools to evaluate how a property is being managed and where a board or owner may have opportunities to reduce risk, improve communication, tighten reporting, and better plan capital needs.${signalPhrase}\n\n` +
-        `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${guardedBuilding.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
-        `If you are open to it, I would welcome the chance to speak for 15 to 20 minutes about your current property management needs and whether Camelot could be a fit.\n\n` +
-        `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+      subject,
+      body,
+    });
+    void trackReportWorkflowEvent({
+      building: guardedBuilding,
+      packageType: 'quick_email_intro',
+      packageLabel: 'Quick Intro Email',
+      action: 'email_draft_opened',
+      emailSubject: subject,
+      emailBody: body,
+      recipients,
     });
     toast.success(recipients.length ? 'Intro email draft opened with available contacts' : 'Intro email draft opened; add recipient before sending');
   };

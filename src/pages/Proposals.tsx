@@ -16,6 +16,7 @@ import {
 import ProposalPDF from '@/components/ProposalPDF';
 import { openEmailDraft } from '@/lib/pdf-generator';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import { trackReportWorkflowEvent } from '@/lib/report-crm-tracking';
 import { cn, formatDate, formatCurrency } from '@/lib/utils';
 import { pdf } from '@react-pdf/renderer';
 import type { Building } from '@/types';
@@ -145,6 +146,22 @@ function makeArchiveRecord(
     attachments: data.attachments,
     created_at: data.generatedAt,
     updated_at: data.generatedAt,
+  };
+}
+
+function withProposalContact(building: Building, data: ProposalData): Building {
+  if (!data.contactName && !data.contactEmail && !data.contactPhone) return building;
+  const proposalContact = {
+    name: data.contactName || data.contactEmail || 'Proposal contact',
+    role: 'decision_maker',
+    email: data.contactEmail || undefined,
+    phone: data.contactPhone || undefined,
+    company: data.buildingName || data.buildingAddress,
+    source: 'Proposal of Services contact fields',
+  };
+  return {
+    ...building,
+    contacts: [proposalContact, ...(building.contacts || [])],
   };
 }
 
@@ -301,6 +318,29 @@ export default function Proposals() {
       setProposalData(data);
       const archiveRecord = makeArchiveRecord(data, selectedBuilding, sections);
       const localRows = saveLocalProposalRecord(archiveRecord);
+      void trackReportWorkflowEvent({
+        building: withProposalContact(selectedBuilding, data),
+        packageType: 'proposal_of_services',
+        packageLabel: 'Proposal of Property Management Services',
+        action: 'generated',
+        filename: safeProposalFilename(data),
+        reportNumber: data.proposalNumber,
+        extraContacts: [
+          {
+            name: data.contactName || '',
+            role: 'Proposal recipient',
+            email: data.contactEmail,
+            phone: data.contactPhone,
+            company: data.buildingName || data.buildingAddress,
+            source: 'Proposal Builder contact fields',
+          },
+        ],
+        metadata: {
+          pricingMonthly: data.pricing.totalMonthly,
+          pricingAnnual: data.pricing.totalAnnual,
+          enabledSections: sections.filter((section) => section.enabled).map((section) => section.id),
+        },
+      });
       setSavedProposals((prev) => {
         const remoteOnly = prev.filter((p) => p.id !== archiveRecord.id && !p.id.startsWith('local-'));
         return [...localRows, ...remoteOnly].sort(
@@ -401,17 +441,42 @@ export default function Proposals() {
     try {
       const filename = await downloadProposalPdf(data);
       const buildingLabel = data.buildingName || data.buildingAddress;
+      const subject = `Camelot Property Management Proposal - ${buildingLabel}`;
+      const body =
+        `Dear ${data.contactName || 'Board'},\n\n` +
+        `Thank you for considering Camelot for ${buildingLabel}. I am forwarding our property management proposal for your review, including the proposed management scope, Schedule A / ancillary fee structure, transition approach, and next steps.\n\n` +
+        `The proposal PDF has been downloaded as ${filename} so it can be attached to this email before sending.\n\n` +
+        `We would welcome a short board Zoom or on-site meet-and-greet to answer questions and refine the proposal around the building's financials, service needs, and transition timing.\n\n` +
+        `Best regards,\n` +
+        `${DAVID_GOLDOFF_SIGNATURE_TEXT}`;
       openEmailDraft({
         to: data.contactEmail || '',
-        subject: `Camelot Property Management Proposal - ${buildingLabel}`,
-        body:
-          `Dear ${data.contactName || 'Board'},\n\n` +
-          `Thank you for considering Camelot for ${buildingLabel}. I am forwarding our property management proposal for your review, including the proposed management scope, Schedule A / ancillary fee structure, transition approach, and next steps.\n\n` +
-          `The proposal PDF has been downloaded as ${filename} so it can be attached to this email before sending.\n\n` +
-          `We would welcome a short board Zoom or on-site meet-and-greet to answer questions and refine the proposal around the building's financials, service needs, and transition timing.\n\n` +
-          `Best regards,\n` +
-          `${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+        subject,
+        body,
       });
+      if (selectedBuilding) {
+        void trackReportWorkflowEvent({
+          building: withProposalContact(selectedBuilding, data),
+          packageType: 'proposal_of_services',
+          packageLabel: 'Proposal of Property Management Services',
+          action: 'email_draft_opened',
+          filename,
+          reportNumber: data.proposalNumber,
+          emailSubject: subject,
+          emailBody: body,
+          recipients: data.contactEmail ? [data.contactEmail] : [],
+          extraContacts: [
+            {
+              name: data.contactName || '',
+              role: 'Proposal recipient',
+              email: data.contactEmail,
+              phone: data.contactPhone,
+              company: buildingLabel,
+              source: 'Proposal Builder contact fields',
+            },
+          ],
+        });
+      }
 
       const sentAt = new Date().toISOString();
       if (data.proposalNumber) {
@@ -431,7 +496,7 @@ export default function Proposals() {
       console.error('Email draft failed:', err);
       toast.error('Email draft failed');
     }
-  }, [proposalData, downloadProposalPdf]);
+  }, [proposalData, selectedBuilding, downloadProposalPdf]);
 
   // Delete saved proposal
   const handleDeleteProposal = useCallback(

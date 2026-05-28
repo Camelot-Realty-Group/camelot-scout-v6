@@ -257,6 +257,8 @@ export function buildIntegrationLeadPayload(building: Building) {
       open_violations_count: building.open_violations_count,
       signals: building.signals || [],
       tags: building.tags || [],
+      report_activity: building.enriched_data?.hubspot_report_activity,
+      last_report_activity: building.enriched_data?.last_report_activity,
     },
     contact: contact
       ? {
