@@ -3876,7 +3876,13 @@ export function runReportQA(d: MasterReportData): QACheckResult {
   return { passed: failures === 0, checks, warnings, failures };
 }
 
-export function validateJackieReport(d: MasterReportData, html: string): QACheckResult {
+export type JackieValidationPackage = 'first_email_intro' | 'board_meeting_deck' | 'appendix_full';
+
+export function validateJackieReport(
+  d: MasterReportData,
+  html: string,
+  options: { packageType?: JackieValidationPackage } = {},
+): QACheckResult {
   const base = runReportQA(d);
   const checks: QACheckResult['checks'] = [...base.checks];
   const stripEmbeddedImagePayloads = (markup: string) =>
@@ -3905,6 +3911,13 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
   const is22East22 = hasExact22East22Subject(d.address, d.buildingName);
   const is36East22 = is36East22ndStreetSubject(d.address, d.buildingName, d.managementCompany);
   const is279Cpw = is279CentralParkWestSubject(d.address, d.buildingName, d.managementCompany);
+  const inferredPackage: JackieValidationPackage = options.packageType
+    || (/First Email Intro/i.test(html) ? 'first_email_intro'
+      : /Meeting Agenda Deck|1st Meeting Handout|Board Meeting Deck/i.test(html) ? 'board_meeting_deck'
+      : 'appendix_full');
+  const isFirstEmailIntro = inferredPackage === 'first_email_intro';
+  const isBoardMeetingDeck = inferredPackage === 'board_meeting_deck';
+  const isAppendixFull = inferredPackage === 'appendix_full';
   const requiredSlides = isFloridaReceivership
     ? [
         'Florida Receivership Property Management Takeover',
@@ -3918,6 +3931,27 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
         'Managing Agent Scope',
         'Required Intake Request',
         'Next Steps',
+      ]
+    : isFirstEmailIntro
+    ? [
+        'First Email Intro',
+        'Cover Letter',
+        'Property Snapshot &amp; New York Reach',
+        'Proposed Next Step',
+      ]
+    : isBoardMeetingDeck
+    ? [
+        'Meeting Agenda Deck',
+        'The Property',
+        'Building Intelligence',
+        'Why Camelot',
+        'About Camelot',
+        'Core Services',
+        'Technology Platform',
+        'The 90-Day Transition',
+        'The Proposed Investment',
+        'Next Steps',
+        'Thank You',
       ]
     : [
         'Elevating',
@@ -4013,29 +4047,33 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
       ? `${d.buildingPhotos.exterior.length} preferred image(s) available`
       : 'Street View image fallback is embedded for the subject property',
   });
-  checks.push({
-    name: 'StreetEasy Photo Source Rule',
-    status: html.includes('StreetEasy public building photos') || html.includes('onerror="if(this.src!==') ? 'pass' : 'fail',
-    detail: 'Subject property images must prefer verified/uploaded images, then StreetEasy public building photos when available, then Google Street View fallback',
-  });
-  checks.push({
-    name: 'Subject Image Fallback Chain',
-    status: html.includes('data-fallback-index') && html.includes('data-image-source') ? 'pass' : 'fail',
-    detail: 'Subject image slots must try verified/uploaded assets, official branding images, StreetEasy photos, and Google Street View before showing a placeholder',
-  });
+  if (isAppendixFull) {
+    checks.push({
+      name: 'StreetEasy Photo Source Rule',
+      status: html.includes('StreetEasy public building photos') || html.includes('onerror="if(this.src!==') ? 'pass' : 'fail',
+      detail: 'Subject property images must prefer verified/uploaded images, then StreetEasy public building photos when available, then Google Street View fallback',
+    });
+    checks.push({
+      name: 'Subject Image Fallback Chain',
+      status: html.includes('data-fallback-index') && html.includes('data-image-source') ? 'pass' : 'fail',
+      detail: 'Subject image slots must try verified/uploaded assets, official branding images, StreetEasy photos, and Google Street View before showing a placeholder',
+    });
+  }
   const landmarkLabels = resolveNearbyLandmarkLabels(d);
   const nearbyLandmarksBlock = (html.match(/<h4>Nearby Landmarks<\/h4>[\s\S]*?<\/ul>/i) || [])[0] || '';
   const landmarkItemCount = (nearbyLandmarksBlock.match(/<li\b/gi) || []).length;
-  checks.push({
-    name: 'Nearby Landmarks',
-    status: landmarkLabels.length >= 3 && landmarkItemCount >= 3 ? 'pass' : 'fail',
-    detail: landmarkLabels.length >= 3
-      ? `${landmarkItemCount} landmark item(s) rendered from LPC / neighborhood fallback context`
-      : 'Nearby Landmarks must use LPC Discover NYC Landmarks, known-property, or neighborhood fallback data before release',
-  });
+  if (isAppendixFull) {
+    checks.push({
+      name: 'Nearby Landmarks',
+      status: landmarkLabels.length >= 3 && landmarkItemCount >= 3 ? 'pass' : 'fail',
+      detail: landmarkLabels.length >= 3
+        ? `${landmarkItemCount} landmark item(s) rendered from LPC / neighborhood fallback context`
+        : 'Nearby Landmarks must use LPC Discover NYC Landmarks, known-property, or neighborhood fallback data before release',
+    });
+  }
   checks.push({
     name: 'Camelot Logo',
-    status: html.includes('./images/camelot-logo.png') || html.includes('./images/camelot-logo-white.png') ? 'pass' : 'fail',
+    status: html.includes('./images/camelot-logo.png') || html.includes('./images/camelot-logo-white.png') || html.includes('logo-badge-text') ? 'pass' : 'fail',
     detail: 'Brand logo reference verified',
   });
   const closingTokens = [
@@ -4048,13 +4086,15 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
     CAMELOT.email,
   ];
   const missingClosingTokens = closingTokens.filter(token => !html.includes(token));
-  checks.push({
-    name: 'Closing Contact Links',
-    status: missingClosingTokens.length === 0 ? 'pass' : 'fail',
-    detail: missingClosingTokens.length === 0
-      ? 'Closing page includes Camelot values language, Zoom, Google Meet, phone, email, and current office address'
-      : `Missing closing contact token(s): ${missingClosingTokens.join(', ')}`,
-  });
+  if (isAppendixFull) {
+    checks.push({
+      name: 'Closing Contact Links',
+      status: missingClosingTokens.length === 0 ? 'pass' : 'fail',
+      detail: missingClosingTokens.length === 0
+        ? 'Closing page includes Camelot values language, Zoom, Google Meet, phone, email, and current office address'
+        : `Missing closing contact token(s): ${missingClosingTokens.join(', ')}`,
+    });
+  }
   const imageSources = [...html.matchAll(/<img\b[^>]*?\s+src=(["'])(.*?)\1/gi)].map(m => m[2]);
   const badImages = imageSources.filter(isBrokenImageSrc);
   const badEmbeddedImages = badImages.filter(src => /^data:image\//i.test(src));
@@ -4146,49 +4186,62 @@ export function validateJackieReport(d: MasterReportData, html: string): QACheck
         : `Using locked Central Park West condominium profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
     });
   }
-  const sourceConflictWarning =
-    /(must not|will not) publish a board-facing report when BBL, borough, building class, unit count, or floor count conflicts/i.test(html) ||
-    (
-      /(must not|will not|cannot)\s+publish/i.test(html) &&
-      /BBL/i.test(html) &&
-      /borough/i.test(html) &&
-      /building[-\s]?class/i.test(html) &&
-      /unit/i.test(html) &&
-      /floor/i.test(html) &&
-      /conflict/i.test(html)
-    );
-  checks.push({
-    name: 'Source Conflict Release Gate',
-    status: sourceConflictWarning || isHoaRecovery ? 'pass' : 'fail',
-    detail: isHoaRecovery
-      ? 'Connecticut HOA proposal mode: NYC BBL/borough/building-class conflict gate is not applicable; report is governed by the HOA proposal brief and transition-file review'
-      : 'Report must include the hard release gate for BBL/borough/building-class/unit/floor conflicts',
-  });
-  const requiredComplianceSourceTokens = [
-    'Violation Source Coverage',
-    'HPD',
-    'DOB BIS &amp; DOB NOW',
-    'DOB NOW Safety / FISP facade filings',
-    'ECB/OATH',
-    'DHCR / rent stabilization',
-    'DOF tax liens',
-    'ACRIS liens',
-    '311 Service Requests',
-    'NYS eCourts / WebCivil',
-    'LexisNexis',
-  ];
-  const missingComplianceTokens = requiredComplianceSourceTokens.filter(token => !html.includes(token));
-  checks.push({
-    name: 'Compliance Source Stack',
-    status: isHoaRecovery || (missingComplianceTokens.length === 0 && d.complianceReleaseStatus !== 'blocked') ? 'pass' : 'fail',
-    detail: isHoaRecovery
-      ? 'Connecticut HOA proposal mode uses HOA records, insurance claim files, restoration/vendor records, municipal files, and transition documents instead of NYC HPD/DOB/DOF feeds'
-      : missingComplianceTokens.length
-      ? `Missing compliance token(s): ${missingComplianceTokens.join(', ')}`
-      : d.complianceReleaseStatus === 'blocked'
-        ? 'Compliance coverage blocked release; every automated public-risk source returned zero or source coverage is incomplete'
-        : 'HPD, DOB, DOB NOW/FISP, ECB/OATH, DHCR, DOF, ACRIS, 311, courts, and LexisNexis/manual enrichment are represented',
-  });
+
+  // First Email Intro and Meeting Agenda Deck are client-facing summaries.
+  // They must pass identity, render, photo, unit-count, and known-property
+  // guardrails, but they intentionally do not include every appendix-only
+  // source-stack, legal, portfolio, and diligence slide.
+  if (!isAppendixFull) {
+    const warnings = checks.filter(c => c.status === 'warn').length;
+    const failures = checks.filter(c => c.status === 'fail').length;
+    return { passed: failures === 0, checks, warnings, failures };
+  }
+
+  if (isAppendixFull) {
+    const sourceConflictWarning =
+      /(must not|will not) publish a board-facing report when BBL, borough, building class, unit count, or floor count conflicts/i.test(html) ||
+      (
+        /(must not|will not|cannot)\s+publish/i.test(html) &&
+        /BBL/i.test(html) &&
+        /borough/i.test(html) &&
+        /building[-\s]?class/i.test(html) &&
+        /unit/i.test(html) &&
+        /floor/i.test(html) &&
+        /conflict/i.test(html)
+      );
+    checks.push({
+      name: 'Source Conflict Release Gate',
+      status: sourceConflictWarning || isHoaRecovery ? 'pass' : 'fail',
+      detail: isHoaRecovery
+        ? 'Connecticut HOA proposal mode: NYC BBL/borough/building-class conflict gate is not applicable; report is governed by the HOA proposal brief and transition-file review'
+        : 'Report must include the hard release gate for BBL/borough/building-class/unit/floor conflicts',
+    });
+    const requiredComplianceSourceTokens = [
+      'Violation Source Coverage',
+      'HPD',
+      'DOB BIS &amp; DOB NOW',
+      'DOB NOW Safety / FISP facade filings',
+      'ECB/OATH',
+      'DHCR / rent stabilization',
+      'DOF tax liens',
+      'ACRIS liens',
+      '311 Service Requests',
+      'NYS eCourts / WebCivil',
+      'LexisNexis',
+    ];
+    const missingComplianceTokens = requiredComplianceSourceTokens.filter(token => !html.includes(token));
+    checks.push({
+      name: 'Compliance Source Stack',
+      status: isHoaRecovery || (missingComplianceTokens.length === 0 && d.complianceReleaseStatus !== 'blocked') ? 'pass' : 'fail',
+      detail: isHoaRecovery
+        ? 'Connecticut HOA proposal mode uses HOA records, insurance claim files, restoration/vendor records, municipal files, and transition documents instead of NYC HPD/DOB/DOF feeds'
+        : missingComplianceTokens.length
+        ? `Missing compliance token(s): ${missingComplianceTokens.join(', ')}`
+        : d.complianceReleaseStatus === 'blocked'
+          ? 'Compliance coverage blocked release; every automated public-risk source returned zero or source coverage is incomplete'
+          : 'HPD, DOB, DOB NOW/FISP, ECB/OATH, DHCR, DOF, ACRIS, 311, courts, and LexisNexis/manual enrichment are represented',
+    });
+  }
   checks.push({
     name: 'Commercial / Amenity Research',
     status: d.commercialIntel?.researchStatus === 'verified' ? 'pass' : 'warn',
