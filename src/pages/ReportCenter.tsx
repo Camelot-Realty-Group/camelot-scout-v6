@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Search, FileText, Download, Mail, Phone, Table2, Link2, Loader2, Eye, Copy, Check, X, ShieldCheck, ShieldX, AlertTriangle, Printer } from 'lucide-react';
 import { REPORT_FOCUS_THEMES, buildJackieIntelReportFilename, buildMasterReport, generateBrochureHTML, generateColdCallerSheet, generateEmailDraft, generateCSVExport, validateJackieReport, type MasterReportData, type QACheckResult, type ReportFocusInput, type ReportFocusKey } from '@/lib/camelot-report';
 import { JACKIE_REPORT_PACKAGES, buildJackiePackageFilename, generateBoardMeetingDeck, generateFirstEmailIntroReport, generateJackieReportPackage, generatePitchEmail, type JackieReportPackage } from '@/lib/pitch-report';
+import { applyJackieFactAuthority } from '@/lib/jackie-fact-authority';
 import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
 import { openBrochureForPrint, downloadAsHTML, downloadAsPDF, triggerCSVDownload, copyToClipboard, openEmailDraft } from '@/lib/pdf-generator';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
@@ -770,11 +771,11 @@ export default function ReportCenter() {
   const reportDataWithPhotos = useMemo((): MasterReportData | null => {
     if (!data) return null;
     const baseData = { ...data, reportFocus: buildReportFocus() };
-    if (uploadedPhotos.length === 0) return baseData;
+    if (uploadedPhotos.length === 0) return applyJackieFactAuthority(baseData).data as MasterReportData;
     const uploadedStack = uploadedPhotos.filter(Boolean);
     const existingExterior = baseData.buildingPhotos?.exterior || [];
     const existingInterior = baseData.buildingPhotos?.interior || [];
-    return {
+    return applyJackieFactAuthority({
       ...baseData,
       buildingPhotos: {
         exterior: [...uploadedStack, ...existingExterior],
@@ -783,7 +784,7 @@ export default function ReportCenter() {
         satellite: baseData.buildingPhotos?.satellite || '',
         source: `Uploaded by Camelot team (${uploadedStack.length} photo${uploadedStack.length === 1 ? '' : 's'})`,
       },
-    };
+    }).data as MasterReportData;
   }, [data, uploadedPhotos, buildReportFocus]);
 
   const getDataWithPhotos = useCallback((): MasterReportData | null => reportDataWithPhotos, [reportDataWithPhotos]);

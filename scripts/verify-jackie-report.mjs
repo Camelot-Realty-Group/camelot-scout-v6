@@ -30,7 +30,9 @@ const proposalsPageFile = resolve(root, 'src/pages/Proposals.tsx');
 const proposalGeneratorFile = resolve(root, 'src/lib/proposal-generator.ts');
 const proposalPdfFile = resolve(root, 'src/components/ProposalPDF.tsx');
 const camelotSignatureFile = resolve(root, 'src/lib/camelot-signature.ts');
+const jackieFactAuthorityFile = resolve(root, 'src/lib/jackie-fact-authority.ts');
 const jackieReportQaSkillFile = resolve(root, '.codex/skills/jackie-report-qa/SKILL.md');
+const jackieFactAuthoritySkillFile = resolve(root, '.codex/skills/jackie-fact-authority/SKILL.md');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
 const nycApiSource = readFileSync(nycApiFile, 'utf8');
@@ -54,12 +56,14 @@ const proposalsPageSource = readFileSync(proposalsPageFile, 'utf8');
 const proposalGeneratorSource = readFileSync(proposalGeneratorFile, 'utf8');
 const proposalPdfSource = readFileSync(proposalPdfFile, 'utf8');
 const camelotSignatureSource = readFileSync(camelotSignatureFile, 'utf8');
+const jackieFactAuthoritySource = readFileSync(jackieFactAuthorityFile, 'utf8');
 const jackieReportQaSkillSource = readFileSync(jackieReportQaSkillFile, 'utf8');
+const jackieFactAuthoritySkillSource = readFileSync(jackieFactAuthoritySkillFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${camelotSignatureSource}\n${jackieReportQaSkillSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${camelotSignatureSource}\n${jackieFactAuthoritySource}\n${jackieReportQaSkillSource}\n${jackieFactAuthoritySkillSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -81,6 +85,11 @@ const requiredTokens = [
   ['36 East 22nd elevator type', "propertyType: 'Pre-war Elevator Condominium'"],
   ['36 East 22nd local image asset', '/images/36-east-22nd/story-house-exterior.jpg'],
   ['36 East 22nd release guard', 'Known Property Guard: 36 East 22nd'],
+  ['Jackie fact authority module', 'Jackie fact authority module'],
+  ['Jackie fact authority applier', 'applyJackieFactAuthority'],
+  ['Jackie known-property HTML sanitizer', 'sanitizeJackieKnownPropertyHtml'],
+  ['Jackie fact authority skill', 'Jackie Fact Authority'],
+  ['279 Central Park West authority rule', '279 Central Park West must not include stale current-management names'],
   ['foreign address name rejection', 'foreignAddressPhrases.length'],
   ['Howard Coop known profile', "canonicalAddress: '88-32 155th Ave, Howard Beach, NY 11414'"],
   ['Howard Coop corporation owner', 'Howard Coop Corp.'],

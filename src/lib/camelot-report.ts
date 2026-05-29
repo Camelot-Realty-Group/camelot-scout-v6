@@ -34,6 +34,7 @@ import {
   is36East22ndStreetValue,
   is279CentralParkWestValue,
 } from '@/lib/property-guardrails';
+import { applyJackieFactAuthority, sanitizeJackieKnownPropertyHtml } from '@/lib/jackie-fact-authority';
 
 // ============================================================
 // Types
@@ -3747,7 +3748,7 @@ export async function buildMasterReport(address: string, borough?: string): Prom
     },
   };
 
-  return normalize36East22ndStreetReportData(normalize279CentralParkWestReportData(reportData));
+  return applyJackieFactAuthority(normalize36East22ndStreetReportData(normalize279CentralParkWestReportData(reportData))).data as MasterReportData;
 }
 
 // ============================================================
@@ -4879,6 +4880,7 @@ Camelot's first job is to create control: file transfer, court-order review, res
 }
 
 export function generateBrochureHTML(d: MasterReportData): string {
+  d = applyJackieFactAuthority(d).data as MasterReportData;
   if (isFloridaReceivershipReport(d)) {
     return generateFloridaReceivershipBrochureHTML(d);
   }
@@ -8144,9 +8146,10 @@ function generateProposal() {
 </script>
 </body>
 </html>`;
-  return html
+  const cleanHtml = html
     .replace(/\b-?Infinity\b/g, 'N/A')
     .replace(/\bNaN\b/g, 'N/A');
+  return sanitizeJackieKnownPropertyHtml(cleanHtml, d).data;
 }
 
 

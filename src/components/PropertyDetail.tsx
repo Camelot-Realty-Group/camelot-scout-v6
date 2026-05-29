@@ -328,6 +328,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       normalize36East22ndStreetReportData,
       normalize279CentralParkWestReportData,
     } = await import('@/lib/camelot-report');
+    const { applyJackieFactAuthority } = await import('@/lib/jackie-fact-authority');
     const isKnown279Cpw = is279CpwProperty(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
     const isKnown36East22 = is36East22ndStreetSubject(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
     const data: MasterReportData = await buildMasterReport(guardedBuilding.address, guardedBuilding.borough || undefined);
@@ -363,8 +364,12 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
 
     if (guardedBuilding.current_management && !isKnown279Cpw && !isKnown36East22) data.managementCompany = guardedBuilding.current_management;
     if (guardedBuilding.enriched_data?.dof?.owner) data.dofOwner = guardedBuilding.enriched_data.dof.owner;
-    if (isKnown36East22) return normalize36East22ndStreetReportData(data);
-    return isKnown279Cpw ? normalize279CentralParkWestReportData(data) : data;
+    const normalized = isKnown36East22
+      ? normalize36East22ndStreetReportData(data)
+      : isKnown279Cpw
+        ? normalize279CentralParkWestReportData(data)
+        : data;
+    return applyJackieFactAuthority(normalized).data as MasterReportData;
   };
 
   const buildDetailPackage = async (reportPackage: DetailReportPackage) => {
@@ -562,6 +567,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
         normalize279CentralParkWestReportData,
         validateJackieReport,
       } = await import('@/lib/camelot-report');
+      const { applyJackieFactAuthority } = await import('@/lib/jackie-fact-authority');
       toast.success('Generating Jackie report...');
       const isKnown279Cpw = is279CpwProperty(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
       const isKnown36East22 = is36East22ndStreetSubject(guardedBuilding.address, guardedBuilding.name, guardedBuilding.current_management);
@@ -593,6 +599,7 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
       if (guardedBuilding.enriched_data?.dof?.owner) data.dofOwner = guardedBuilding.enriched_data.dof.owner;
       if (isKnown36East22) data = normalize36East22ndStreetReportData(data);
       if (isKnown279Cpw) data = normalize279CentralParkWestReportData(data);
+      data = applyJackieFactAuthority(data).data as MasterReportData;
 
       const html = generateBrochureHTML(data);
       const qa = validateJackieReport(data, html);
