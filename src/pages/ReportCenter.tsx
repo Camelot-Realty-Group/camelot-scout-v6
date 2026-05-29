@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Search, FileText, Download, Mail, Phone, Table2, Link2, Loader2, Eye, Copy, Check, X, ShieldCheck, ShieldX, AlertTriangle, Printer } from 'lucide-react';
 import { REPORT_FOCUS_THEMES, buildJackieIntelReportFilename, buildMasterReport, generateBrochureHTML, generateColdCallerSheet, generateEmailDraft, generateCSVExport, validateJackieReport, type MasterReportData, type QACheckResult, type ReportFocusInput, type ReportFocusKey } from '@/lib/camelot-report';
 import { JACKIE_REPORT_PACKAGES, buildJackiePackageFilename, generateBoardMeetingDeck, generateFirstEmailIntroReport, generateJackieReportPackage, generatePitchEmail, type JackieReportPackage } from '@/lib/pitch-report';
+import { applyJackieFactAuthority } from '@/lib/jackie-fact-authority';
 import { generatePitchDeck } from '@/lib/pitch-deck-pptx';
 import { openBrochureForPrint, downloadAsHTML, downloadAsPDF, triggerCSVDownload, copyToClipboard, openEmailDraft } from '@/lib/pdf-generator';
 import { loadReportInputs, saveReportInputs } from '@/lib/report-input-memory';
@@ -17,11 +18,12 @@ const REPORT_FOCUS_OPTIONS = Object.values(REPORT_FOCUS_THEMES);
 const REPORT_CENTER_INPUT_SCOPE = 'jackie-report-center';
 const PHOTO_UPLOAD_LIMIT = 12;
 const PHOTO_MAX_SOURCE_BYTES = 18 * 1024 * 1024;
-const PHOTO_MAX_STORED_CHARS = 260_000;
-const PHOTO_INITIAL_MAX_SIDE = 1180;
+const PHOTO_MAX_STORED_CHARS = 170_000;
+const PHOTO_INITIAL_MAX_SIDE = 980;
 const PHOTO_MIN_MAX_SIDE = 520;
 const PHOTO_QUALITY_STEPS = [0.76, 0.68, 0.6, 0.52, 0.46];
-const PHOTO_PERSIST_CHAR_LIMIT = 3_200_000;
+const PHOTO_PERSIST_CHAR_LIMIT = 2_200_000;
+const SAFE_STORED_PHOTO_RE = /^data:image\/(?:jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/i;
 
 type ReportCenterSavedInputs = {
   address: string;
@@ -58,6 +60,19 @@ function collectReportContactEmails(d: MasterReportData, fallbackEmail?: string)
     if (found) emails.push(...found);
   });
   return uniqueEmails(emails);
+}
+
+function sanitizeStoredPhotoList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map(item => String(item || '').trim())
+    .filter(url => {
+      if (!url) return false;
+      if (url.startsWith('/images/')) return true;
+      if (!url.startsWith('data:image/')) return false;
+      return url.length <= PHOTO_MAX_STORED_CHARS && SAFE_STORED_PHOTO_RE.test(url);
+    })
+    .slice(0, PHOTO_UPLOAD_LIMIT);
 }
 
 function reportPackageFilenames(d: MasterReportData, packageType: JackieReportPackage) {
@@ -438,7 +453,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', 'appendix_full')) return;
     openPackageAndArchive(d, 'appendix_full', html, buildJackieIntelReportFilename(d, 'pdf'), buildJackieIntelReportFilename(d, 'html'));
   };
 
@@ -451,7 +466,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateSelectedPackageHTML(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', selectedPackage)) return;
     const filename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'pdf') : buildJackiePackageFilename(d, selectedPackage, 'pdf');
     const htmlFilename = selectedPackage === 'appendix_full' ? buildJackieIntelReportFilename(d, 'html') : buildJackiePackageFilename(d, selectedPackage, 'html');
     openPackageAndArchive(d, selectedPackage, html, filename, htmlFilename);
@@ -461,7 +476,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateFirstEmailIntroReport(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', 'first_email_intro')) return;
     openPackageAndArchive(d, 'first_email_intro', html, buildJackiePackageFilename(d, 'first_email_intro', 'pdf'), buildJackiePackageFilename(d, 'first_email_intro', 'html'));
   };
 
@@ -469,7 +484,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateBoardMeetingDeck(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', 'board_meeting_deck')) return;
     openPackageAndArchive(d, 'board_meeting_deck', html, buildJackiePackageFilename(d, 'board_meeting_deck', 'pdf'), buildJackiePackageFilename(d, 'board_meeting_deck', 'html'));
   };
 
@@ -477,7 +492,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateSelectedPackageHTML(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', selectedPackage)) return;
     const filename = reportPackageFilenames(d, selectedPackage).html;
     archiveJackieReport(d, selectedPackage, html, filename);
     downloadAsHTML(html, filename);
@@ -487,7 +502,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateSelectedPackageHTML(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', selectedPackage)) return;
     const filenames = reportPackageFilenames(d, selectedPackage);
     archiveJackieReport(d, selectedPackage, html, filenames.html);
     toast.loading('Generating PDF...', { id: 'jackie-pdf' });
@@ -505,7 +520,7 @@ export default function ReportCenter() {
     if (!d) return;
     const email = generatePitchEmail(d);
     const html = generateSelectedPackageHTML(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', selectedPackage)) return;
     const filenames = reportPackageFilenames(d, selectedPackage);
     archiveJackieReport(d, selectedPackage, html, filenames.html);
     toast.loading('Preparing PDF and email draft...', { id: 'jackie-email' });
@@ -555,7 +570,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateSelectedPackageHTML(d);
-    if (!verifyJackieRelease(d, html, 'internal')) return;
+    if (!verifyJackieRelease(d, html, 'internal', selectedPackage)) return;
     const filenames = reportPackageFilenames(d, selectedPackage);
     archiveJackieReport(d, selectedPackage, html, filenames.html);
     toast.loading('Pushing Jackie report lead to Scout / HubSpot...', { id: 'jackie-hubspot' });
@@ -594,7 +609,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const releaseHtml = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, releaseHtml, 'internal')) return;
+    if (!verifyJackieRelease(d, releaseHtml, 'internal', 'appendix_full')) return;
     toast.loading('Generating PowerPoint deck...', { id: 'pptx' });
     try {
       await generatePitchDeck(d);
@@ -609,7 +624,7 @@ export default function ReportCenter() {
     const d = getDataWithPhotos();
     if (!d) return;
     const html = generateBrochureHTML(d);
-    if (!verifyJackieRelease(d, html)) return;
+    if (!verifyJackieRelease(d, html, 'release', 'appendix_full')) return;
     archiveJackieReport(d, 'appendix_full', html, buildJackieIntelReportFilename(d, 'html'));
     downloadAsHTML(html, buildJackieIntelReportFilename(d, 'html'));
   };
@@ -723,13 +738,14 @@ export default function ReportCenter() {
       const acceptedUrls: string[] = [];
       for (const file of filesToProcess) {
         acceptedUrls.push(await readPhotoAsDataUrl(file));
+        await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
       }
       toast.dismiss(loadingToast);
       loadingToast = undefined;
       const next = [...uploadedPhotos, ...acceptedUrls];
       setUploadedPhotos(next);
       persistUploadedPhotos(next);
-      toast.success(`${acceptedUrls.length} photo(s) uploaded`);
+      toast.success(`${acceptedUrls.length} photo(s) uploaded and optimized for report/PDF use`);
       if (imageFiles.length > remainingSlots) {
         toast(`Only the first ${remainingSlots} photo(s) were added. Limit is ${PHOTO_UPLOAD_LIMIT}.`, { icon: 'Warning', duration: 4500 });
       }
@@ -748,13 +764,22 @@ export default function ReportCenter() {
     if (!key) return;
     try {
       const saved = JSON.parse(localStorage.getItem(key) || sessionStorage.getItem(key) || '[]');
-      if (Array.isArray(saved)) setUploadedPhotos(saved);
+      const safePhotos = sanitizeStoredPhotoList(saved);
+      setUploadedPhotos(safePhotos);
+      if (JSON.stringify(saved) !== JSON.stringify(safePhotos)) {
+        if (safePhotos.length > 0) persistUploadedPhotos(safePhotos);
+        else {
+          localStorage.removeItem(key);
+          sessionStorage.removeItem(key);
+        }
+        toast('Jackie removed stale or oversized saved photos for this address. Please re-upload clean JPG/PNG/WEBP images if needed.', { icon: 'Warning', duration: 5500 });
+      }
     } catch {
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
       setUploadedPhotos([]);
     }
-  }, [photoStorageKey]);
+  }, [persistUploadedPhotos, photoStorageKey]);
 
   useEffect(() => {
     loadSavedPhotos();
@@ -769,11 +794,11 @@ export default function ReportCenter() {
   const reportDataWithPhotos = useMemo((): MasterReportData | null => {
     if (!data) return null;
     const baseData = { ...data, reportFocus: buildReportFocus() };
-    if (uploadedPhotos.length === 0) return baseData;
+    if (uploadedPhotos.length === 0) return applyJackieFactAuthority(baseData).data as MasterReportData;
     const uploadedStack = uploadedPhotos.filter(Boolean);
     const existingExterior = baseData.buildingPhotos?.exterior || [];
     const existingInterior = baseData.buildingPhotos?.interior || [];
-    return {
+    return applyJackieFactAuthority({
       ...baseData,
       buildingPhotos: {
         exterior: [...uploadedStack, ...existingExterior],
@@ -782,13 +807,18 @@ export default function ReportCenter() {
         satellite: baseData.buildingPhotos?.satellite || '',
         source: `Uploaded by Camelot team (${uploadedStack.length} photo${uploadedStack.length === 1 ? '' : 's'})`,
       },
-    };
+    }).data as MasterReportData;
   }, [data, uploadedPhotos, buildReportFocus]);
 
   const getDataWithPhotos = useCallback((): MasterReportData | null => reportDataWithPhotos, [reportDataWithPhotos]);
 
-  const verifyJackieRelease = (d: MasterReportData, html: string, mode: 'internal' | 'release' = 'release') => {
-    const qa = validateJackieReport(d, html);
+  const verifyJackieRelease = (
+    d: MasterReportData,
+    html: string,
+    mode: 'internal' | 'release' = 'release',
+    packageType: JackieReportPackage = selectedPackage,
+  ) => {
+    const qa = validateJackieReport(d, html, { packageType });
     setReleaseQA(qa);
     if (qa.failures > 0) {
       const detail = qa.checks.filter(c => c.status === 'fail').slice(0, 4).map(c => `${c.name}: ${c.detail}`).join('\n');
@@ -1089,7 +1119,7 @@ export default function ReportCenter() {
                   <Eye className="w-4 h-4" /> First Email Intro (6-8)
                 </button>
                 <button onClick={handlePreviewBoardDeck} className="px-4 py-2 bg-[#5B4A1F] text-white rounded-lg hover:bg-[#473916] text-sm font-medium flex items-center gap-2">
-                  <Eye className="w-4 h-4" /> Board Meeting Deck (15)
+                  <Eye className="w-4 h-4" /> 1st Meeting Handout (15)
                 </button>
                 <button onClick={handlePreviewBrochure} className="px-4 py-2 bg-[#A89035] text-white rounded-lg hover:bg-[#8A7A2C] text-sm font-medium flex items-center gap-2">
                   <Eye className="w-4 h-4" /> Appendix: Full Jackie

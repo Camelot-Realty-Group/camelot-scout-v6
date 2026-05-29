@@ -14,12 +14,13 @@ import {
   type MasterReportData,
 } from './camelot-report';
 import { DAVID_GOLDOFF_SIGNATURE_IMAGE, DAVID_GOLDOFF_SIGNATURE_TEXT } from './camelot-signature';
+import { applyJackieFactAuthority, sanitizeJackieKnownPropertyHtml } from './jackie-fact-authority';
 
 export type JackieReportPackage = 'first_email_intro' | 'board_meeting_deck' | 'appendix_full';
 
 export const JACKIE_REPORT_PACKAGES: Array<{ key: JackieReportPackage; label: string; pages: string; description: string }> = [
   { key: 'first_email_intro', label: 'First Email Intro', pages: '6-8 pages', description: 'Short board-safe teaser for first outreach.' },
-  { key: 'board_meeting_deck', label: 'Board Meeting Deck', pages: '15 pages', description: 'Main presentation for live board meetings.' },
+  { key: 'board_meeting_deck', label: '1st Meeting Handout', pages: '15 pages', description: 'Main presentation for first board/ownership meetings.' },
   { key: 'appendix_full', label: 'Appendix: Full Jackie Report', pages: 'Full appendix', description: 'Complete source-backed internal and diligence packet.' },
 ];
 
@@ -151,14 +152,16 @@ function is279CentralParkWestReport(d: Pick<MasterReportData, 'address' | 'build
 }
 
 function normalizePitchReportData(d: MasterReportData): MasterReportData {
+  let normalized = d;
   if (is36East22ndStreetSubject(d.address, d.buildingName, d.managementCompany)) {
-    return normalize36East22ndStreetReportData(d);
+    normalized = normalize36East22ndStreetReportData(d);
+  } else if (is279CentralParkWestReport(d)) {
+    normalized = normalize279CentralParkWestReportData({
+      ...d,
+      managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
+    });
   }
-  if (!is279CentralParkWestReport(d)) return d;
-  return normalize279CentralParkWestReportData({
-    ...d,
-    managementCompany: CAMELOT_279_CPW_MANAGEMENT_TO_VERIFY,
-  });
+  return applyJackieFactAuthority(normalized).data as MasterReportData;
 }
 
 const JACKSON_85TH_SCOPE_INCLUDED = [
@@ -839,7 +842,8 @@ ${mdsAccountingSlide()}
 ${residentPortalSlide(d)}
 ${onboardingChecklistSlide(d)}
 <div class="slide slide-dark"><div style="position:absolute;inset:0"><img src="${rotatingPropertyImage(d, 3)}" alt="${escapeHtml(d.buildingName || d.address)} closing visual context" style="width:100%;height:100%;object-fit:cover;opacity:.26" onerror="this.style.display='none'"></div><div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(34,47,58,.98),rgba(34,47,58,.9),rgba(34,47,58,.68))"></div><div class="pad" style="position:relative;z-index:3">${logoBadge()}<div style="height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;max-width:980px;margin:0 auto"><div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:48px;font-style:italic;color:#B8973A;margin-bottom:14px">Proposed Next Step</div><p style="font-size:20px;line-height:1.55;color:rgba(255,255,255,.86);margin-bottom:24px">We would welcome the opportunity to meet with the board, ownership, or decision-makers for ${d.buildingName || d.address}.</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px"><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">Zoom or Google Meet</div><p class="small">Best for a quick first screen share, report review, and Q&amp;A.</p></div><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">Phone Call</div><p class="small">A focused 15-minute call to confirm priorities and timing.</p></div><div class="gold-card" style="background:rgba(255,255,255,.96);text-align:left"><div class="sub-heading" style="font-size:18px">In-Person Meeting</div><p class="small">Camelot can meet near the building or at our New York office.</p></div></div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px auto 22px"><a href="https://calendar.google.com/calendar/u/0/r/eventedit?text=Camelot+Management+Discussion+-+${encodeURIComponent(d.buildingName || d.address)}&details=${encodeURIComponent('Please generate a Google Meet link for this Camelot management discussion.\n\nSubject property: ' + (d.buildingName || d.address))}&add=${CAMELOT_CONTACT_EMAIL}" target="_blank" style="background:#B8973A;color:#fff;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Google Meet</a><a href="https://zoom.us/start/videomeeting" target="_blank" rel="noopener" style="background:#2D8CFF;color:#fff;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Zoom</a><a href="tel:+12122069939;ext=701" style="background:#fff;color:#314655;text-decoration:none;border-radius:6px;padding:10px 14px;font-size:12px;font-weight:700">Call 212-206-9939 x701</a></div><div style="font-size:15px;color:rgba(255,255,255,.82);line-height:1.9"><strong style="color:#B8973A">${CAMELOT_CONTACT_NAME}, ${CAMELOT_CONTACT_TITLE}</strong><br>${CAMELOT_PHONE}<br>${CAMELOT_CONTACT_EMAIL} | ${CAMELOT_GENERAL_EMAIL}<br>${CAMELOT_WEBSITE}<br>${CAMELOT_OFFICE_ADDRESS}</div></div></div></div>`;
-  return deckShell(`Camelot First Email Intro - ${d.buildingName || d.address}`, enrichEveryOtherDeckPage(slides, d));
+  const html = deckShell(`Camelot First Email Intro - ${d.buildingName || d.address}`, enrichEveryOtherDeckPage(slides, d));
+  return sanitizeJackieKnownPropertyHtml(html, d).data;
 }
 
 export function generateBoardMeetingDeck(d: MasterReportData): string {
@@ -849,13 +853,14 @@ export function generateBoardMeetingDeck(d: MasterReportData): string {
   const base = generatePitchReport(d);
   const insert = `${executiveTeamSlide()}`;
   const exact22East22 = /\b22\s+e(?:ast)?\.?\s+22(?:nd)?\s+(?:st|street)\b/i.test(`${d.address} ${d.buildingName || ''}`) && !/\b220\s+e(?:ast)?\.?\s+22(?:nd)?\s+(?:st|street)\b/i.test(`${d.address}`);
-  return base
+  const html = base
     .replace(/<!-- SLIDE 1: Cover[\s\S]*?<!-- SLIDE 2:/, `${meetingDeckCoverSlide(d)}\n\n<!-- SLIDE 2:`)
     .replace('<!-- SLIDE 13: Next Steps (Dark) -->', `${insert}\n<!-- SLIDE 13: Next Steps (Dark) -->`)
     .replace(/REALTY GROUP/g, 'PROPERTY MANAGEMENT')
     .replace(/Property Intelligence Report/g, 'Meeting Agenda Deck')
     .replace('<!-- SLIDE 14: Thank You (Dark) -->', '<!-- SLIDE 15: Thank You (Dark) -->')
     .replace(exact22East22 ? /220 East 22nd Street_2022|220 East 22nd Street|220 E 22nd St/g : /$a/, exact22East22 ? '22 East 22nd Street' : '');
+  return sanitizeJackieKnownPropertyHtml(html, d).data;
 }
 
 function meetingDeckCoverSlide(d: MasterReportData): string {
@@ -915,7 +920,7 @@ export function buildJackiePackageFilename(d: MasterReportData, reportPackage: J
   const suffix = reportPackage === 'first_email_intro'
     ? 'CamelotEmailIntro'
     : reportPackage === 'board_meeting_deck'
-      ? 'CamelotBoardDeck'
+      ? 'CamelotFirstMeetingHandout'
       : 'CamelotFullJackieAppendix';
   return `${client}_${suffix}__${dateStamp}.${extension}`;
 }

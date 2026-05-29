@@ -30,7 +30,9 @@ const proposalsPageFile = resolve(root, 'src/pages/Proposals.tsx');
 const proposalGeneratorFile = resolve(root, 'src/lib/proposal-generator.ts');
 const proposalPdfFile = resolve(root, 'src/components/ProposalPDF.tsx');
 const camelotSignatureFile = resolve(root, 'src/lib/camelot-signature.ts');
+const jackieFactAuthorityFile = resolve(root, 'src/lib/jackie-fact-authority.ts');
 const jackieReportQaSkillFile = resolve(root, '.codex/skills/jackie-report-qa/SKILL.md');
+const jackieFactAuthoritySkillFile = resolve(root, '.codex/skills/jackie-fact-authority/SKILL.md');
 const source = readFileSync(reportFile, 'utf8');
 const streetEasySource = readFileSync(streetEasyFile, 'utf8');
 const nycApiSource = readFileSync(nycApiFile, 'utf8');
@@ -54,12 +56,14 @@ const proposalsPageSource = readFileSync(proposalsPageFile, 'utf8');
 const proposalGeneratorSource = readFileSync(proposalGeneratorFile, 'utf8');
 const proposalPdfSource = readFileSync(proposalPdfFile, 'utf8');
 const camelotSignatureSource = readFileSync(camelotSignatureFile, 'utf8');
+const jackieFactAuthoritySource = readFileSync(jackieFactAuthorityFile, 'utf8');
 const jackieReportQaSkillSource = readFileSync(jackieReportQaSkillFile, 'utf8');
+const jackieFactAuthoritySkillSource = readFileSync(jackieFactAuthoritySkillFile, 'utf8');
 const reportCenter = readFileSync(reportCenterFile, 'utf8');
 const instantProposal = readFileSync(instantProposalFile, 'utf8');
 const propertyDetail = readFileSync(propertyDetailFile, 'utf8');
 const pitchReportSource = readFileSync(pitchReportFile, 'utf8');
-const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${camelotSignatureSource}\n${jackieReportQaSkillSource}`;
+const sourceStack = `${source}\n${pitchReportSource}\n${streetEasySource}\n${nycApiSource}\n${nycViolationsSource}\n${gutCheckSource}\n${jackieV2Source}\n${scoutDoctrineSource}\n${sentinelReportSource}\n${integrationsSource}\n${integrationsPageSource}\n${serverSource}\n${botsPageSource}\n${acquisitionPipelineSource}\n${arthurPageSource}\n${arthurUnderwritingSource}\n${nyResearchSourcesSource}\n${aiClientSource}\n${agreementsSource}\n${excaliburSource}\n${proposalsPageSource}\n${proposalGeneratorSource}\n${proposalPdfSource}\n${camelotSignatureSource}\n${jackieFactAuthoritySource}\n${jackieReportQaSkillSource}\n${jackieFactAuthoritySkillSource}`;
 
 const requiredTokens = [
   ['201 East 79 known profile', "canonicalAddress: '201 East 79th Street, New York, NY 10075'"],
@@ -81,6 +85,11 @@ const requiredTokens = [
   ['36 East 22nd elevator type', "propertyType: 'Pre-war Elevator Condominium'"],
   ['36 East 22nd local image asset', '/images/36-east-22nd/story-house-exterior.jpg'],
   ['36 East 22nd release guard', 'Known Property Guard: 36 East 22nd'],
+  ['Jackie fact authority module', 'Jackie fact authority module'],
+  ['Jackie fact authority applier', 'applyJackieFactAuthority'],
+  ['Jackie known-property HTML sanitizer', 'sanitizeJackieKnownPropertyHtml'],
+  ['Jackie fact authority skill', 'Jackie Fact Authority'],
+  ['279 Central Park West authority rule', '279 Central Park West must not include stale current-management names'],
   ['foreign address name rejection', 'foreignAddressPhrases.length'],
   ['Howard Coop known profile', "canonicalAddress: '88-32 155th Ave, Howard Beach, NY 11414'"],
   ['Howard Coop corporation owner', 'Howard Coop Corp.'],
@@ -168,6 +177,11 @@ const requiredTokens = [
   ['Jackie accounting focus monthly reports', 'monthly management reports deployed between the 20th and 25th'],
   ['Jackie focus facts remain source checked', 'the selected focus only changes what Camelot emphasizes'],
   ['Jackie report package registry', 'JACKIE_REPORT_PACKAGES'],
+  ['Jackie package-aware validation type', 'JackieValidationPackage'],
+  ['Jackie first email validation package', 'first_email_intro'],
+  ['Jackie board meeting validation package', 'board_meeting_deck'],
+  ['Jackie appendix validation package', 'appendix_full'],
+  ['Jackie package-aware QA options', 'options: { packageType?: JackieValidationPackage } = {}'],
   ['Jackie first email intro package', 'First Email Intro'],
   ['Jackie board meeting deck package', 'Board Meeting Deck'],
   ['Jackie appendix package', 'Appendix: Full Jackie Report'],
@@ -415,7 +429,10 @@ const workflowTokens = [
   ['visible release panel', 'Jackie Verified Release'],
   ['review-issue release language', 'Jackie can still preview, export, and draft'],
   ['verified release language', 'Jackie verified the factual guardrails'],
-  ['pitch preview verifies selected package', "if (!verifyJackieRelease(d, html, 'internal')) return;"],
+  ['pitch preview verifies selected package', "if (!verifyJackieRelease(d, html, 'internal', selectedPackage)) return;"],
+  ['first email uses package-aware validation', "if (!verifyJackieRelease(d, html, 'internal', 'first_email_intro')) return;"],
+  ['board meeting uses package-aware validation', "if (!verifyJackieRelease(d, html, 'internal', 'board_meeting_deck')) return;"],
+  ['appendix uses package-aware validation', "if (!verifyJackieRelease(d, html, 'release', 'appendix_full')) return;"],
   ['release QA stateful', 'const [releaseQA, setReleaseQA]'],
   ['release QA not auto-building appendix', 'setReleaseQA(qa);'],
   ['instant proposal validates Jackie', 'validateJackieReport(reportData, fullHtml)'],
@@ -426,7 +443,7 @@ const workflowTokens = [
   ['report center focus notes', 'Optional notes from Get-a-Quote'],
   ['report center package controls', 'Jackie Output Package'],
   ['report center selected package preview', 'Preview Selected Package'],
-  ['report center board meeting deck preview', 'Board Meeting Deck (15)'],
+  ['report center first meeting handout preview', '1st Meeting Handout (15)'],
   ['report center first email intro preview', 'First Email Intro (6-8)'],
 ];
 
@@ -437,6 +454,18 @@ const workflowFailures = workflowTokens
 
 if (instantProposal.includes("Mgmt: {d?.managementCompany || 'Self-Managed'}")) {
   workflowFailures.push('instant proposal self-managed fallback: forbidden token still present');
+}
+
+if (!propertyDetail.includes('normalize36East22ndStreetReportData')) {
+  workflowFailures.push('property detail 36 East 22nd normalizer: missing known-property report cleanup');
+}
+
+if (!propertyDetail.includes('isKnown36East22')) {
+  workflowFailures.push('property detail 36 East 22nd guard: missing known-property card guard');
+}
+
+if (!propertyDetail.includes('!isKnown279Cpw && !isKnown36East22')) {
+  workflowFailures.push('property detail stale management merge guard: missing multi-property management override protection');
 }
 
 if (workflowFailures.length) {
