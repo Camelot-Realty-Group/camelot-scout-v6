@@ -1,5 +1,7 @@
 import type { MasterReportData, ReportFocusKey } from './camelot-report';
+import { applyJackieFactAuthority, sanitizeJackieKnownPropertyHtml } from './jackie-fact-authority';
 import { JACKIE_REPORT_PACKAGES, type JackieReportPackage } from './pitch-report';
+import { CPW_279_ADDRESS, CPW_279_NAME, is279CentralParkWestValue, is36East22ndStreetValue } from './property-guardrails';
 
 export type SavedJackieReport = {
   id: string;
@@ -23,6 +25,33 @@ export const JACKIE_REPORT_LIBRARY_KEY = 'camelot_generated_jackie_report_librar
 const JACKIE_REPORT_LIBRARY_BACKUP_KEY = `${JACKIE_REPORT_LIBRARY_KEY}_oversized_backup`;
 const MAX_STORED_REPORT_HTML_CHARS = 1_250_000;
 const MAX_LIBRARY_RAW_CHARS = 7_000_000;
+
+function normalizeSavedRecord(record: SavedJackieReport): SavedJackieReport {
+  const dataSnapshot = record.dataSnapshot
+    ? applyJackieFactAuthority(record.dataSnapshot).data
+    : undefined;
+  const is279 = is279CentralParkWestValue(record.address, record.buildingName, dataSnapshot?.address, dataSnapshot?.buildingName, dataSnapshot?.managementCompany, record.html);
+  const is36 = is36East22ndStreetValue(record.address, record.buildingName, dataSnapshot?.address, dataSnapshot?.buildingName, dataSnapshot?.managementCompany, record.html);
+  const htmlData = dataSnapshot || { address: record.address, buildingName: record.buildingName };
+  const html = (is279 || is36) ? sanitizeJackieKnownPropertyHtml(record.html, htmlData).data : record.html;
+
+  if (is279) {
+    return {
+      ...record,
+      address: CPW_279_ADDRESS,
+      buildingName: CPW_279_NAME,
+      filename: record.filename.replace(/halstead[-_\s]+/gi, ''),
+      html,
+      dataSnapshot,
+    };
+  }
+
+  return {
+    ...record,
+    html,
+    dataSnapshot,
+  };
+}
 
 export const packageLabelFor = (packageType: JackieReportPackage) => (
   JACKIE_REPORT_PACKAGES.find(pkg => pkg.key === packageType)?.label || 'Jackie Report'
@@ -54,7 +83,12 @@ export const loadLocalJackieReportLibrary = (): SavedJackieReport[] => {
       return [];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    const normalized = parsed.map(normalizeSavedRecord);
+    if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
+      writeLocalJackieReportLibrary(normalized);
+    }
+    return normalized;
   } catch {
     localStorage.removeItem(JACKIE_REPORT_LIBRARY_KEY);
     return [];
@@ -70,7 +104,7 @@ const compactRecordForStorage = (record: SavedJackieReport): SavedJackieReport =
 };
 
 export const writeLocalJackieReportLibrary = (records: SavedJackieReport[]) => {
-  const trimmed = records.slice(0, 80).map(compactRecordForStorage);
+  const trimmed = records.slice(0, 80).map(normalizeSavedRecord).map(compactRecordForStorage);
   try {
     localStorage.setItem(JACKIE_REPORT_LIBRARY_KEY, JSON.stringify(trimmed));
     return trimmed;

@@ -23,6 +23,7 @@ const PHOTO_INITIAL_MAX_SIDE = 980;
 const PHOTO_MIN_MAX_SIDE = 520;
 const PHOTO_QUALITY_STEPS = [0.76, 0.68, 0.6, 0.52, 0.46];
 const PHOTO_PERSIST_CHAR_LIMIT = 2_200_000;
+const SAFE_STORED_PHOTO_RE = /^data:image\/(?:jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/i;
 
 type ReportCenterSavedInputs = {
   address: string;
@@ -59,6 +60,19 @@ function collectReportContactEmails(d: MasterReportData, fallbackEmail?: string)
     if (found) emails.push(...found);
   });
   return uniqueEmails(emails);
+}
+
+function sanitizeStoredPhotoList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map(item => String(item || '').trim())
+    .filter(url => {
+      if (!url) return false;
+      if (url.startsWith('/images/')) return true;
+      if (!url.startsWith('data:image/')) return false;
+      return url.length <= PHOTO_MAX_STORED_CHARS && SAFE_STORED_PHOTO_RE.test(url);
+    })
+    .slice(0, PHOTO_UPLOAD_LIMIT);
 }
 
 function reportPackageFilenames(d: MasterReportData, packageType: JackieReportPackage) {
@@ -750,13 +764,22 @@ export default function ReportCenter() {
     if (!key) return;
     try {
       const saved = JSON.parse(localStorage.getItem(key) || sessionStorage.getItem(key) || '[]');
-      if (Array.isArray(saved)) setUploadedPhotos(saved);
+      const safePhotos = sanitizeStoredPhotoList(saved);
+      setUploadedPhotos(safePhotos);
+      if (JSON.stringify(saved) !== JSON.stringify(safePhotos)) {
+        if (safePhotos.length > 0) persistUploadedPhotos(safePhotos);
+        else {
+          localStorage.removeItem(key);
+          sessionStorage.removeItem(key);
+        }
+        toast('Jackie removed stale or oversized saved photos for this address. Please re-upload clean JPG/PNG/WEBP images if needed.', { icon: 'Warning', duration: 5500 });
+      }
     } catch {
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
       setUploadedPhotos([]);
     }
-  }, [photoStorageKey]);
+  }, [persistUploadedPhotos, photoStorageKey]);
 
   useEffect(() => {
     loadSavedPhotos();
