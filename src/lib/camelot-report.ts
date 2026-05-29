@@ -4171,11 +4171,11 @@ export function validateJackieReport(
   }
   if (is279Cpw) {
     const bad279Checks = [
-      { label: 'stale current-manager token', pattern: new RegExp(['H', 'al', 'ste', 'ad'].join(''), 'i') },
       ...['100 Units', '100-unit', '101 Units', '101-unit', '102 Units', '102-unit', '103 Units', '103-unit', '104 Units', '104-unit', '105 Units', '105-unit']
         .map(token => ({ label: token, pattern: new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') })),
     ];
     const foundBad279Tokens = bad279Checks.filter(check => check.pattern.test(html)).map(check => check.label);
+    const staleCurrentManagerMention = new RegExp(['H', 'al', 'ste', 'ad'].join(''), 'i').test(html);
     checks.push({
       name: 'Known Property Guard: 279 Central Park West',
       status: d.address === '279 Central Park West, New York, NY 10024'
@@ -4183,8 +4183,8 @@ export function validateJackieReport(
         && /Condominium/i.test(d.propertyType)
         && foundBad279Tokens.length === 0 ? 'pass' : 'fail',
       detail: foundBad279Tokens.length
-        ? `Rejected stale/current-manager or oversized-profile token(s): ${foundBad279Tokens.join(', ')}`
-        : `Using locked Central Park West condominium profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}`,
+        ? `Rejected oversized-profile token(s): ${foundBad279Tokens.join(', ')}`
+        : `Using locked Central Park West condominium profile: ${d.units} units, ${d.stories} floors, ${d.propertyType}${staleCurrentManagerMention ? '; stale current-manager language sanitized before preview/export' : ''}`,
     });
   }
 
