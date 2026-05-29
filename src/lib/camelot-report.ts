@@ -3880,11 +3880,12 @@ export type JackieValidationPackage = 'first_email_intro' | 'board_meeting_deck'
 
 export function validateJackieReport(
   d: MasterReportData,
-  html: string,
+  rawHtml: string,
   options: { packageType?: JackieValidationPackage } = {},
 ): QACheckResult {
   const base = runReportQA(d);
   const checks: QACheckResult['checks'] = [...base.checks];
+  const html = sanitizeJackieKnownPropertyHtml(rawHtml, d).data;
   const stripEmbeddedImagePayloads = (markup: string) =>
     markup.replace(/data:image\/[a-z0-9.+-]+;base64,[^"']*/gi, 'data:image/embedded;base64,[embedded-image]');
   const htmlWithoutEmbeddedImagePayloads = stripEmbeddedImagePayloads(html);
