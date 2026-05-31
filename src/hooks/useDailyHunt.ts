@@ -59,6 +59,7 @@ const stateFromAddress = (address: string) => {
 };
 
 const shouldUseServerDailyHunt = () =>
+  String(import.meta.env.VITE_ENABLE_SERVER_INTEGRATIONS || '').toLowerCase() === 'true' &&
   String(import.meta.env.VITE_DISABLE_SERVER_INTEGRATIONS || '').toLowerCase() !== 'true';
 
 const demoLeads: DailyHuntLead[] = DAILY_HUNT_SEED_LEADS.map((lead) => ({
