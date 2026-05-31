@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "verify:jackie": "node scripts/verify-jackie-report.mjs",
+    "hubspot:rollout": "node scripts/hubspot-rollout.mjs setup",
+    "hubspot:daily": "node scripts/hubspot-rollout.mjs daily",
     "preview": "vite preview",
     "lint": "eslint .",
     "start": "node server.js"

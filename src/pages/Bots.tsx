@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { BotStatus } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
 import { SCOUT_AGENT_DOCTRINES } from '@/lib/scout-ai-doctrines';
+import { CAMELOT_BOT_OPERATING_MODEL, JACKIE_SPLIT_RULES } from '@/lib/camelot-bot-operating-model';
 import { NY_OWNERSHIP_HUNT_SOURCE_NAMES, NY_PEOPLE_ENTITY_COMP_SOURCE_NAMES } from '@/lib/ny-research-sources';
 import { CAMELOT_ACQUISITION_PIPELINE, JACKIE_ACQUISITION_FIT_SECTIONS, SENTINEL_HANDOFF_RULES } from '@/lib/acquisition-pipeline';
 import { TWIN_KNOWLEDGE_IMPORTED_AT, TWIN_KNOWLEDGE_PROJECTS, TWIN_KNOWLEDGE_STATS } from '@/lib/twin-knowledge';
@@ -361,13 +362,15 @@ const DEMO_BOTS: DashboardBot[] = [
     tasks_completed: 12,
     tasks_queued: 1,
     last_run_at: new Date(Date.now() - 1000 * 60 * 13).toISOString(),
-    outputs: ['Lead Quality Audit', 'Scout API push', 'HubSpot contact sync', 'Routing tags', 'Sync status report'],
+    outputs: ['Lead Quality Audit', 'Scout API push', 'HubSpot contact sync', 'Routing tags', 'Sync status report', 'Daily manager review'],
     quality_gates: [
       'SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID, and HUBSPOT_PRIVATE_APP_TOKEN validation visible before push',
       'Single-word contact names do not duplicate into firstname and lastname',
       'HubSpot associations use the v3 batch endpoint before deal linkage is considered complete',
       'Every bot activity includes property, contact, CTA scenario, next task, due date, and recommended pipeline stage before HubSpot sync',
       'CTA scenarios cover compliance, LL97, financing, board management, transition, vendor savings, arrears, capital projects, resident experience, proposals, and new engagements',
+      'HubSpot rollout script runs dry-run by default; --apply is required before custom fields are created or updated',
+      'Daily HubSpot review flags unassigned deals, missing report links, low-confidence records, and proposal follow-ups',
       'No lead is pushed without property address and quality/routing metadata',
       'Lead Generator Deployment Prompt covers hybrid batch processing, real-time webhooks, Slack alerts, Scout export, and HubSpot sync',
       'Bidirectional Scout outcome and HubSpot deal status sync is tracked as the next lifecycle phase',
@@ -376,6 +379,8 @@ const DEMO_BOTS: DashboardBot[] = [
       { name: 'src/pages/Integrations.tsx', kind: 'Repo', status: 'synced' },
       { name: 'src/lib/integrations.ts', kind: 'Repo', status: 'synced' },
       { name: 'server.js /api/integrations/*', kind: 'Repo', status: 'synced' },
+      { name: 'scripts/hubspot-rollout.mjs', kind: 'Repo', status: 'synced' },
+      { name: 'docs/HUBSPOT_CAMELOT_OS_OPERATING_MODEL.md', kind: 'Repo', status: 'synced' },
     ],
     actions: [
       { label: 'Integrations', href: '/integrations', icon: GitBranch },
@@ -617,6 +622,43 @@ export default function Bots() {
           <p className="text-xs text-gray-500 mt-3">
             Jackie Acquisition Fit sections: {JACKIE_ACQUISITION_FIT_SECTIONS.join(' | ')}
           </p>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-bold">Jackie Split Operating Model</h2>
+              <p className="text-sm text-gray-500 mt-1 max-w-3xl">
+                Jackie now acts as the fact authority, not the whole factory. Specialist desks own media, compliance,
+                financing, proposals, meeting handouts, HubSpot handoff, and follow-up so heavy report work can be
+                tested and repaired in smaller pieces.
+              </p>
+            </div>
+            <Link
+              to="/integrations"
+              className="inline-flex items-center gap-2 text-sm border border-camelot-gold text-camelot-dark px-3 py-2 rounded-md hover:bg-camelot-gold/10"
+            >
+              <GitBranch size={14} /> HubSpot Sync
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mt-4">
+            {CAMELOT_BOT_OPERATING_MODEL.map((bot) => (
+              <div key={bot.id} className="border border-gray-200 rounded-lg p-3 bg-[#FCFBF7]">
+                <p className="text-[10px] uppercase tracking-wide text-camelot-gold font-bold">{bot.phase}</p>
+                <h3 className="font-bold mt-1">{bot.name}</h3>
+                <p className="text-xs text-gray-500 mt-2">{bot.owns.slice(0, 2).join(' • ')}</p>
+                <p className="text-[11px] text-gray-400 mt-2">Handoff: {bot.handoffTo.join(', ') || 'none'}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
+            {JACKIE_SPLIT_RULES.map((rule) => (
+              <div key={rule} className="flex items-start gap-2 text-sm text-gray-600">
+                <CheckCircle size={15} className="text-emerald-600 mt-0.5 flex-shrink-0" />
+                <span>{rule}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="bg-[#263747] text-white border border-[#C9A227]/40 rounded-lg p-5">

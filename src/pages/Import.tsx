@@ -348,7 +348,6 @@ export default function Import() {
       for (let i = 0; i < buildings.length; i += 1) {
         // Sequential calls avoid hammering NYC endpoints and make progress easier to follow.
         // A PropertyShark list is usually worth being slower and more accurate here.
-        // eslint-disable-next-line no-await-in-loop
         enriched.push(await enrichBuildingFromPublicRecords(buildings[i], i, buildings.length));
       }
       buildings = enriched;

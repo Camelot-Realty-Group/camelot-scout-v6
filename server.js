@@ -175,6 +175,40 @@ async function hubspotRequest(pathname, payload, method = 'POST') {
   return data;
 }
 
+function cleanProperties(properties = {}) {
+  const next = { ...properties };
+  Object.keys(next).forEach((key) => {
+    if (next[key] === undefined || next[key] === null || next[key] === '') delete next[key];
+  });
+  return next;
+}
+
+function isHubSpotPropertySchemaError(error) {
+  const text = [
+    error?.message,
+    error?.data?.message,
+    JSON.stringify(error?.data || {}),
+  ].filter(Boolean).join(' ');
+  return /property|properties|validation/i.test(text) && /not exist|invalid|was not valid|read-only|readonly/i.test(text);
+}
+
+async function hubspotObjectWrite(pathname, properties, method = 'POST') {
+  const cleaned = cleanProperties(properties);
+  try {
+    return await hubspotRequest(pathname, { properties: cleaned }, method);
+  } catch (error) {
+    const fallback = cleanProperties(
+      Object.fromEntries(
+        Object.entries(cleaned).filter(([key]) => !/^camelot_|^(property_address|building_type|units|current_management|opportunity_score|opportunity_tier|distress_signals|open_violations|estimated_management_fee_opportunity|research_confidence|last_camelot_os_sync|building_role|decision_maker_type|contact_confidence|camelot_contact_source|do_not_contact_reason|primary_pain_point|next_recommended_angle)$/i.test(key))
+      )
+    );
+    if (!isHubSpotPropertySchemaError(error) || Object.keys(fallback).length === Object.keys(cleaned).length) throw error;
+    const result = await hubspotRequest(pathname, { properties: fallback }, method);
+    result._camelotWarnings = [`HubSpot custom properties missing or incompatible; retried with standard fields only. Run npm run hubspot:rollout -- --apply. Original: ${error.message}`];
+    return result;
+  }
+}
+
 async function searchHubSpotObject(objectType, propertyName, value) {
   if (!value) return null;
   const data = await hubspotRequest(`/crm/v3/objects/${objectType}/search`, {
@@ -197,7 +231,7 @@ async function searchHubSpotObject(objectType, propertyName, value) {
 async function upsertHubSpotContact(contact = {}, building = {}) {
   if (!contact.email) return null;
   const parsedName = parseContactName(contact.name);
-  const properties = {
+  const properties = cleanProperties({
     email: contact.email,
     firstname: contact.firstname || parsedName.firstname,
     lastname: contact.lastname || parsedName.lastname,
@@ -205,16 +239,51 @@ async function upsertHubSpotContact(contact = {}, building = {}) {
     company: contact.company || building.name || building.address || '',
     address: building.address || '',
     city: building.borough || building.region || building.neighborhood || '',
-  };
-  Object.keys(properties).forEach((key) => {
-    if (properties[key] === undefined || properties[key] === null || properties[key] === '') delete properties[key];
+    building_role: contact.role,
+    decision_maker_type: contact.role,
+    contact_confidence: contact.confidence || building.research_confidence || '',
+    camelot_contact_source: contact.source || 'Camelot OS',
   });
 
   const existing = await searchHubSpotObject('contacts', 'email', contact.email);
   if (existing?.id) {
-    return hubspotRequest(`/crm/v3/objects/contacts/${existing.id}`, { properties }, 'PATCH');
+    return hubspotObjectWrite(`/crm/v3/objects/contacts/${existing.id}`, properties, 'PATCH');
   }
-  return hubspotRequest('/crm/v3/objects/contacts', { properties });
+  return hubspotObjectWrite('/crm/v3/objects/contacts', properties);
+}
+
+async function upsertHubSpotCompany(building = {}, quality = {}, routing = {}) {
+  const companyName = building.name || building.address;
+  if (!companyName) return null;
+  const properties = cleanProperties({
+    name: companyName,
+    address: building.address,
+    city: building.borough || building.region || building.neighborhood,
+    description: [
+      building.address ? `Property: ${building.address}` : '',
+      quality.tier ? `Camelot lead tier: ${quality.tier}` : '',
+      routing.team ? `Routing: ${routing.team}` : '',
+    ].filter(Boolean).join('\n'),
+    camelot_os_building_id: building.id,
+    property_address: building.address,
+    building_type: building.type,
+    units: building.units ? String(building.units) : '',
+    current_management: building.current_management,
+    opportunity_score: quality.score !== undefined ? String(quality.score) : '',
+    opportunity_tier: quality.tier,
+    distress_signals: [...(building.signals || []), ...(routing.tags || [])].join('; '),
+    open_violations: building.open_violations_count !== undefined ? String(building.open_violations_count) : '',
+    estimated_management_fee_opportunity: building.estimated_management_fee_opportunity ? String(building.estimated_management_fee_opportunity) : '',
+    camelot_os_report_link: building.report_url || building.camelot_os_report_link || building.enriched_data?.last_report_activity?.url,
+    research_confidence: building.research_confidence || (quality.tier === 'review' ? 'Low' : quality.tier ? 'Medium' : ''),
+    last_camelot_os_sync: Date.now(),
+  });
+
+  const existing = await searchHubSpotObject('companies', 'name', companyName);
+  if (existing?.id) {
+    return hubspotObjectWrite(`/crm/v3/objects/companies/${existing.id}`, properties, 'PATCH');
+  }
+  return hubspotObjectWrite('/crm/v3/objects/companies', properties);
 }
 
 async function upsertHubSpotDeal(building = {}, quality = {}, routing = {}) {
@@ -224,18 +293,24 @@ async function upsertHubSpotDeal(building = {}, quality = {}, routing = {}) {
   const reportActivity = building.report_activity || building.enriched_data?.hubspot_report_activity;
   const botActivity = building.bot_activity || building.enriched_data?.hubspot_bot_activity;
   const dealname = `${building.name || building.address} - Camelot Management Opportunity`;
-  const properties = {
+  const properties = cleanProperties({
     dealname,
     dealstage: dealStage,
     pipeline: process.env.HUBSPOT_PIPELINE_ID || 'default',
     amount: String(building.market_value || ''),
-  };
-  if (!properties.amount) delete properties.amount;
+    property_address: building.address,
+    building_type: building.type,
+    units: building.units ? String(building.units) : '',
+    primary_pain_point: quality.strengths?.[0] || building.signals?.[0] || 'Property management opportunity',
+    next_recommended_angle: botActivity?.ctaBody || reportActivity?.packageLabel || routing.team,
+    camelot_os_report_link: building.report_url || building.camelot_os_report_link || building.enriched_data?.last_report_activity?.url,
+    research_confidence: building.research_confidence || (quality.tier === 'review' ? 'Low' : quality.tier ? 'Medium' : ''),
+  });
 
   const existing = await searchHubSpotObject('deals', 'dealname', dealname);
   const deal = existing?.id
-    ? await hubspotRequest(`/crm/v3/objects/deals/${existing.id}`, { properties }, 'PATCH')
-    : await hubspotRequest('/crm/v3/objects/deals', { properties });
+    ? await hubspotObjectWrite(`/crm/v3/objects/deals/${existing.id}`, properties, 'PATCH')
+    : await hubspotObjectWrite('/crm/v3/objects/deals', properties);
 
   if (botActivity) {
     console.log('HubSpot bot activity synced:', {
@@ -294,6 +369,30 @@ async function associateHubSpotContactDeal(contactId, dealId) {
         from: { id: String(contactId) },
         to: { id: String(dealId) },
         type: 'contact_to_deal',
+      },
+    ],
+  });
+}
+
+async function associateHubSpotCompanyDeal(companyId, dealId) {
+  return hubspotRequest('/crm/v3/associations/companies/deals/batch/create', {
+    inputs: [
+      {
+        from: { id: String(companyId) },
+        to: { id: String(dealId) },
+        type: 'company_to_deal',
+      },
+    ],
+  });
+}
+
+async function associateHubSpotContactCompany(contactId, companyId) {
+  return hubspotRequest('/crm/v3/associations/contacts/companies/batch/create', {
+    inputs: [
+      {
+        from: { id: String(contactId) },
+        to: { id: String(companyId) },
+        type: 'contact_to_company',
       },
     ],
   });
@@ -388,7 +487,7 @@ app.get('/api/integrations/status', (_req, res) => {
       configured: Boolean(hubspotKey),
       dealsEnabled: Boolean(process.env.HUBSPOT_DEAL_STAGE_ID),
       tasksEnabled: String(process.env.HUBSPOT_CREATE_TASKS || '').toLowerCase() === 'true',
-      associationEndpoint: '/crm/v3/associations/contacts/deals/batch/create',
+      associationEndpoint: '/crm/v3/associations contacts-companies, companies-deals, contacts-deals batch/create',
     },
     timestamp: new Date().toISOString(),
   });
@@ -447,17 +546,37 @@ app.post('/api/integrations/push-building', async (req, res) => {
   if (hubspotKey) {
     try {
       const warnings = [];
+      let companyRecord = null;
       let contactRecord = null;
       let dealRecord = null;
 
+      companyRecord = await upsertHubSpotCompany(building, quality, routing);
+      if (companyRecord?._camelotWarnings?.length) warnings.push(...companyRecord._camelotWarnings);
+
       if (contact.email) {
         contactRecord = await upsertHubSpotContact(contact, building);
+        if (contactRecord?._camelotWarnings?.length) warnings.push(...contactRecord._camelotWarnings);
+        if (contactRecord?.id && companyRecord?.id) {
+          try {
+            await associateHubSpotContactCompany(contactRecord.id, companyRecord.id);
+          } catch (associationErr) {
+            warnings.push(associationErr.message || 'HubSpot contact/company association failed.');
+          }
+        }
       } else {
         warnings.push('No verified contact email was available; property deal sync can still proceed when HUBSPOT_DEAL_STAGE_ID is configured.');
       }
 
       if (process.env.HUBSPOT_DEAL_STAGE_ID) {
         dealRecord = await upsertHubSpotDeal(building, quality, routing);
+        if (dealRecord?._camelotWarnings?.length) warnings.push(...dealRecord._camelotWarnings);
+        if (companyRecord?.id && dealRecord?.id) {
+          try {
+            await associateHubSpotCompanyDeal(companyRecord.id, dealRecord.id);
+          } catch (associationErr) {
+            warnings.push(associationErr.message || 'HubSpot company/deal association failed.');
+          }
+        }
         if (contactRecord?.id && dealRecord?.id) {
           try {
             await associateHubSpotContactDeal(contactRecord.id, dealRecord.id);
@@ -478,15 +597,17 @@ app.post('/api/integrations/push-building', async (req, res) => {
         }
       }
 
-      if (contactRecord || dealRecord) {
+      if (companyRecord || contactRecord || dealRecord) {
         result.hubspot = {
           status: 'ok',
-          message: contactRecord && dealRecord
-            ? 'HubSpot contact and opportunity synced.'
-            : contactRecord
-              ? 'HubSpot contact synced; add HUBSPOT_DEAL_STAGE_ID for pipeline opportunity sync.'
-              : 'HubSpot opportunity synced without contact; add a verified email for contact sync.',
-          id: dealRecord?.id || contactRecord?.id,
+          message: companyRecord && contactRecord && dealRecord
+            ? 'HubSpot company, contact, and opportunity synced.'
+            : dealRecord
+              ? 'HubSpot company/opportunity synced; add a verified email for contact sync.'
+              : contactRecord
+                ? 'HubSpot company/contact synced; add HUBSPOT_DEAL_STAGE_ID for pipeline opportunity sync.'
+                : 'HubSpot company synced; add a verified email and HUBSPOT_DEAL_STAGE_ID for full pipeline sync.',
+          id: dealRecord?.id || companyRecord?.id || contactRecord?.id,
           url: dealRecord?.id && process.env.HUBSPOT_PORTAL_ID
             ? `https://app.hubspot.com/contacts/${process.env.HUBSPOT_PORTAL_ID}/deal/${dealRecord.id}`
             : undefined,

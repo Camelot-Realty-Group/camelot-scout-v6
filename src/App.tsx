@@ -1,37 +1,46 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Layout from '@/components/Layout';
 import GuidedTour from '@/components/GuidedTour';
 import { useTour } from '@/hooks/useTour';
-import Search from '@/pages/Search';
-import Results from '@/pages/Results';
-import DailyHunt from '@/pages/DailyHunt';
-import Saved from '@/pages/Saved';
-import Import from '@/pages/Import';
-import Pipeline from '@/pages/Pipeline';
-import Outreach from '@/pages/Outreach';
-import Chat from '@/pages/Chat';
-import Archive from '@/pages/Archive';
-import Export from '@/pages/Export';
-import Integrations from '@/pages/Integrations';
-import Bots from '@/pages/Bots';
-import Settings from '@/pages/Settings';
-import Tutorials from '@/pages/Tutorials';
-import Compliance from '@/pages/Compliance';
-import Alerts from '@/pages/Alerts';
-import Proposals from '@/pages/Proposals';
-import InstantProposal from '@/pages/InstantProposal';
-import Intelligence from '@/pages/Intelligence';
-import Reports from '@/pages/Reports';
-import ReportCenter from '@/pages/ReportCenter';
-import Agreements from '@/pages/Agreements';
-import Sentinel from '@/pages/Sentinel';
-import Violations from '@/pages/Violations';
-import LegalReportTerms from '@/pages/LegalReportTerms';
-import Arthur from '@/pages/Arthur';
-import ContentEngine from '@/pages/ContentEngine';
 import { useBuildings } from '@/hooks/useBuildings';
+
+const Search = lazy(() => import('@/pages/Search'));
+const Results = lazy(() => import('@/pages/Results'));
+const DailyHunt = lazy(() => import('@/pages/DailyHunt'));
+const Saved = lazy(() => import('@/pages/Saved'));
+const Import = lazy(() => import('@/pages/Import'));
+const Pipeline = lazy(() => import('@/pages/Pipeline'));
+const Outreach = lazy(() => import('@/pages/Outreach'));
+const Chat = lazy(() => import('@/pages/Chat'));
+const Archive = lazy(() => import('@/pages/Archive'));
+const Export = lazy(() => import('@/pages/Export'));
+const Integrations = lazy(() => import('@/pages/Integrations'));
+const Bots = lazy(() => import('@/pages/Bots'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Tutorials = lazy(() => import('@/pages/Tutorials'));
+const Compliance = lazy(() => import('@/pages/Compliance'));
+const Alerts = lazy(() => import('@/pages/Alerts'));
+const Proposals = lazy(() => import('@/pages/Proposals'));
+const InstantProposal = lazy(() => import('@/pages/InstantProposal'));
+const Intelligence = lazy(() => import('@/pages/Intelligence'));
+const Reports = lazy(() => import('@/pages/Reports'));
+const ReportCenter = lazy(() => import('@/pages/ReportCenter'));
+const Agreements = lazy(() => import('@/pages/Agreements'));
+const Sentinel = lazy(() => import('@/pages/Sentinel'));
+const Violations = lazy(() => import('@/pages/Violations'));
+const LegalReportTerms = lazy(() => import('@/pages/LegalReportTerms'));
+const Arthur = lazy(() => import('@/pages/Arthur'));
+const ContentEngine = lazy(() => import('@/pages/ContentEngine'));
+
+function page(Page: ComponentType) {
+  return (
+    <Suspense fallback={<div className="p-8 text-sm text-gray-500">Loading Camelot OS...</div>}>
+      <Page />
+    </Suspense>
+  );
+}
 
 export default function App() {
   const { loadBuildings } = useBuildings();
@@ -56,33 +65,33 @@ export default function App() {
       <GuidedTour isOpen={isTourOpen} onClose={closeTour} />
       <Layout onStartTour={startTour}>
         <Routes>
-          <Route path="/" element={<Search />} />
-          <Route path="/results" element={<Results />} />
-          <Route path="/daily-hunt" element={<DailyHunt />} />
-          <Route path="/saved" element={<Saved />} />
-          <Route path="/import" element={<Import />} />
-          <Route path="/pipeline" element={<Pipeline />} />
-          <Route path="/outreach" element={<Outreach />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/archive" element={<Archive />} />
-          <Route path="/export" element={<Export />} />
-          <Route path="/integrations" element={<Integrations />} />
-          <Route path="/bots" element={<Bots />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/tutorials" element={<Tutorials />} />
-          <Route path="/compliance" element={<Compliance />} />
-          <Route path="/alerts" element={<Alerts />} />
-          <Route path="/instant-proposal" element={<InstantProposal />} />
-          <Route path="/proposals" element={<Proposals />} />
-          <Route path="/intelligence" element={<Intelligence />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/report-center" element={<ReportCenter />} />
-          <Route path="/agreements" element={<Agreements />} />
-          <Route path="/sentinel" element={<Sentinel />} />
-          <Route path="/arthur" element={<Arthur />} />
-          <Route path="/content-engine" element={<ContentEngine />} />
-          <Route path="/violations" element={<Violations />} />
-          <Route path="/legal-report-terms" element={<LegalReportTerms />} />
+          <Route path="/" element={page(Search)} />
+          <Route path="/results" element={page(Results)} />
+          <Route path="/daily-hunt" element={page(DailyHunt)} />
+          <Route path="/saved" element={page(Saved)} />
+          <Route path="/import" element={page(Import)} />
+          <Route path="/pipeline" element={page(Pipeline)} />
+          <Route path="/outreach" element={page(Outreach)} />
+          <Route path="/chat" element={page(Chat)} />
+          <Route path="/archive" element={page(Archive)} />
+          <Route path="/export" element={page(Export)} />
+          <Route path="/integrations" element={page(Integrations)} />
+          <Route path="/bots" element={page(Bots)} />
+          <Route path="/settings" element={page(Settings)} />
+          <Route path="/tutorials" element={page(Tutorials)} />
+          <Route path="/compliance" element={page(Compliance)} />
+          <Route path="/alerts" element={page(Alerts)} />
+          <Route path="/instant-proposal" element={page(InstantProposal)} />
+          <Route path="/proposals" element={page(Proposals)} />
+          <Route path="/intelligence" element={page(Intelligence)} />
+          <Route path="/reports" element={page(Reports)} />
+          <Route path="/report-center" element={page(ReportCenter)} />
+          <Route path="/agreements" element={page(Agreements)} />
+          <Route path="/sentinel" element={page(Sentinel)} />
+          <Route path="/arthur" element={page(Arthur)} />
+          <Route path="/content-engine" element={page(ContentEngine)} />
+          <Route path="/violations" element={page(Violations)} />
+          <Route path="/legal-report-terms" element={page(LegalReportTerms)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
