@@ -366,6 +366,8 @@ const DEMO_BOTS: DashboardBot[] = [
       'SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID, and HUBSPOT_PRIVATE_APP_TOKEN validation visible before push',
       'Single-word contact names do not duplicate into firstname and lastname',
       'HubSpot associations use the v3 batch endpoint before deal linkage is considered complete',
+      'Every bot activity includes property, contact, CTA scenario, next task, due date, and recommended pipeline stage before HubSpot sync',
+      'CTA scenarios cover compliance, LL97, financing, board management, transition, vendor savings, arrears, capital projects, resident experience, proposals, and new engagements',
       'No lead is pushed without property address and quality/routing metadata',
       'Lead Generator Deployment Prompt covers hybrid batch processing, real-time webhooks, Slack alerts, Scout export, and HubSpot sync',
       'Bidirectional Scout outcome and HubSpot deal status sync is tracked as the next lifecycle phase',

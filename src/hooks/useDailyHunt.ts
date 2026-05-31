@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { DAILY_HUNT_SEED_LEADS } from '@/lib/daily-hunt-seed';
+import { reportBotActivityToHubSpot } from '@/lib/bot-hubspot-reporting';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { useBuildings } from '@/hooks/useBuildings';
 import type { PipelineStage } from '@/types';
@@ -190,6 +191,42 @@ export function useDailyHunt() {
     if (isSupabaseConfigured() && lead.source_mode === 'supabase') {
       await moveToPipeline(lead.id, stage);
     }
+    void reportBotActivityToHubSpot({
+      botId: 'dailyhunt',
+      botName: 'Daily Hunt Lead Verifier',
+      action: 'pipeline_added',
+      source: lead.lead_source || 'Daily Hunt',
+      pipelineStage: stage,
+      building: {
+        id: lead.id,
+        name: lead.name,
+        address: lead.address,
+        borough: lead.state === 'NY' ? 'NY' : lead.state || undefined,
+        region: lead.city || lead.state || undefined,
+        units: lead.unit_count || undefined,
+        type: 'other',
+        current_management: lead.developer_or_owner || undefined,
+        source: lead.lead_source || 'Daily Hunt',
+        status: 'active',
+        grade: lead.lead_priority === 'HIGH' ? 'A' : lead.lead_priority === 'MEDIUM' ? 'B' : 'C',
+        score: lead.lead_priority === 'HIGH' ? 82 : lead.lead_priority === 'MEDIUM' ? 64 : 42,
+        signals: [lead.lead_pitch_angle, lead.lead_contact_path, lead.lead_category].filter(Boolean) as string[],
+        tags: ['daily-hunt', `priority:${lead.lead_priority || 'review'}`, `category:${lead.lead_category || 'unknown'}`],
+        pipeline_stage: stage,
+        violations_count: 0,
+        open_violations_count: 0,
+        contacts: [],
+        enriched_data: {
+          lead_source_url: lead.lead_source_url,
+          verification_status: lead.verification_status,
+          verified_sources: lead.verified_sources,
+          corrections: lead.corrections,
+        },
+        created_at: lead.lead_found_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      notes: `${lead.lead_pitch_angle || ''} ${lead.lead_contact_path || ''}`.trim(),
+    });
     setLeads((prev) => prev.filter((item) => item.id !== lead.id));
     toast.success(`${lead.name} pushed to Pipeline`);
   }, [moveToPipeline]);

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { openEmailDraft } from '@/lib/pdf-generator';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { normalizeBuildingForReportGuardrails } from '@/lib/property-guardrails';
+import { reportBotActivityToHubSpot } from '@/lib/bot-hubspot-reporting';
 import {
   LayoutGrid, List, Search, SlidersHorizontal, Download, GitBranch,
   Users, CheckSquare, Square, X,
@@ -89,6 +90,21 @@ export default function Results() {
         `We would like to offer a complimentary initial property evaluation for your ${unitPhrase}${building.type || 'building'}. This is not a sales obligation. It is simply a practical review of available public data, management signals, compliance items, and operating opportunities so you can see where Camelot may be useful.\n\n` +
         `If you are open to it, I would welcome the chance to speak for 15 to 20 minutes about your current property management needs and whether Camelot could be a fit.\n\n` +
         `Warm regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`,
+    });
+    void reportBotActivityToHubSpot({
+      botId: 'scout',
+      botName: 'Scout Results & Scoring',
+      action: 'outreach_drafted',
+      source: 'results_card',
+      building,
+      contacts,
+      ctaScenarioId: building.open_violations_count ? 'compliance_violations' : 'general_management_review',
+      notes: 'Intro email draft opened from Results & Scoring.',
+      metadata: {
+        recipients,
+        subject: `Complimentary Property Management Review - ${propertyLabel}`,
+        propertyLabel,
+      },
     });
 
     toast.success(recipients.length ? 'Intro email draft opened with available contacts' : 'Intro email draft opened; add recipient before sending');
@@ -222,6 +238,17 @@ export default function Results() {
                 onAddToPipeline={() => {
                   updateBuilding(building.id, { pipeline_stage: 'scored' });
                   const guardedBuilding = normalizeBuildingForReportGuardrails(building);
+                  void reportBotActivityToHubSpot({
+                    botId: 'scout',
+                    botName: 'Scout Results & Scoring',
+                    action: 'pipeline_added',
+                    source: 'results_card',
+                    building: guardedBuilding,
+                    contacts: guardedBuilding.contacts || [],
+                    pipelineStage: 'scored',
+                    ctaScenarioId: guardedBuilding.open_violations_count ? 'compliance_violations' : 'general_management_review',
+                    notes: 'Property moved to Scored from Results & Scoring.',
+                  });
                   toast.success(`${guardedBuilding.name || guardedBuilding.address} moved to Scored`);
                 }}
               />

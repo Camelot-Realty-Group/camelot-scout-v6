@@ -222,6 +222,7 @@ async function upsertHubSpotDeal(building = {}, quality = {}, routing = {}) {
   if (!dealStage) return null;
 
   const reportActivity = building.report_activity || building.enriched_data?.hubspot_report_activity;
+  const botActivity = building.bot_activity || building.enriched_data?.hubspot_bot_activity;
   const dealname = `${building.name || building.address} - Camelot Management Opportunity`;
   const properties = {
     dealname,
@@ -236,7 +237,15 @@ async function upsertHubSpotDeal(building = {}, quality = {}, routing = {}) {
     ? await hubspotRequest(`/crm/v3/objects/deals/${existing.id}`, { properties }, 'PATCH')
     : await hubspotRequest('/crm/v3/objects/deals', { properties });
 
-  if (reportActivity) {
+  if (botActivity) {
+    console.log('HubSpot bot activity synced:', {
+      dealId: deal.id,
+      bot: botActivity.botName || botActivity.botId,
+      action: botActivity.action,
+      cta: botActivity.ctaLabel || botActivity.primaryCta,
+      property: building.address,
+    });
+  } else if (reportActivity) {
     console.log('HubSpot report activity synced:', {
       dealId: deal.id,
       action: reportActivity.action,
@@ -252,6 +261,30 @@ async function upsertHubSpotDeal(building = {}, quality = {}, routing = {}) {
     });
   }
   return deal;
+}
+
+async function createHubSpotTaskForBotActivity(botActivity = {}, building = {}) {
+  if (String(process.env.HUBSPOT_CREATE_TASKS || '').toLowerCase() !== 'true') return null;
+  const subject = botActivity.taskTitle || botActivity.ctaSubject || botActivity.primaryCta || `Follow up on ${building.address || 'Camelot OS lead'}`;
+  const body = [
+    botActivity.ctaBody,
+    botActivity.notes,
+    building.address ? `Property: ${building.address}` : '',
+    building.name && building.name !== building.address ? `Building: ${building.name}` : '',
+    botActivity.botName ? `Source bot: ${botActivity.botName}` : '',
+    botActivity.action ? `Action: ${botActivity.action}` : '',
+    botActivity.ctaScenarioId ? `CTA scenario: ${botActivity.ctaScenarioId}` : '',
+  ].filter(Boolean).join('\n\n');
+  const dueAt = botActivity.taskDueAt || botActivity.dueAt || new Date(Date.now() + 2 * 86_400_000).toISOString();
+  return hubspotRequest('/crm/v3/objects/tasks', {
+    properties: {
+      hs_task_subject: subject,
+      hs_task_body: body,
+      hs_task_status: 'NOT_STARTED',
+      hs_task_priority: botActivity.priority === 'same-day' ? 'HIGH' : 'MEDIUM',
+      hs_timestamp: new Date(dueAt).toISOString(),
+    },
+  });
 }
 
 async function associateHubSpotContactDeal(contactId, dealId) {
@@ -354,6 +387,7 @@ app.get('/api/integrations/status', (_req, res) => {
     hubspot: {
       configured: Boolean(hubspotKey),
       dealsEnabled: Boolean(process.env.HUBSPOT_DEAL_STAGE_ID),
+      tasksEnabled: String(process.env.HUBSPOT_CREATE_TASKS || '').toLowerCase() === 'true',
       associationEndpoint: '/crm/v3/associations/contacts/deals/batch/create',
     },
     timestamp: new Date().toISOString(),
@@ -389,12 +423,18 @@ app.post('/api/integrations/push-building', async (req, res) => {
     return res.status(400).json(result);
   }
 
+  const botActivity = building.bot_activity || building.enriched_data?.hubspot_bot_activity;
   const localLead = saveLocalScoutLead({
-    source: building.enriched_data?.hubspot_report_activity ? 'Camelot OS Report Workflow' : 'Camelot OS Lead Sync',
+    source: botActivity
+      ? 'Camelot OS Bot Activity'
+      : building.report_activity || building.enriched_data?.hubspot_report_activity
+        ? 'Camelot OS Report Workflow'
+        : 'Camelot OS Lead Sync',
     building,
     contact,
     quality,
     routing,
+    botActivity,
   });
   result.scout = {
     status: 'ok',
@@ -427,6 +467,15 @@ app.post('/api/integrations/push-building', async (req, res) => {
         }
       } else {
         warnings.push('Deal creation skipped; set HUBSPOT_DEAL_STAGE_ID and HUBSPOT_PIPELINE_ID to sync opportunities into the pipeline.');
+      }
+
+      if (botActivity) {
+        try {
+          const taskRecord = await createHubSpotTaskForBotActivity(botActivity, building);
+          if (taskRecord?.id) warnings.push(`HubSpot follow-up task created: ${taskRecord.id}`);
+        } catch (taskErr) {
+          warnings.push(taskErr.message || 'HubSpot follow-up task creation failed.');
+        }
       }
 
       if (contactRecord || dealRecord) {

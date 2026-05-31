@@ -17,6 +17,8 @@ import { useBuildings } from '@/hooks/useBuildings';
 import type { Building } from '@/types';
 import { cn } from '@/lib/utils';
 import { CAMELOT_ACQUISITION_PIPELINE, SENTINEL_HANDOFF_RULES } from '@/lib/acquisition-pipeline';
+import { CTA_SCENARIOS } from '@/lib/cta-scenarios';
+import { loadBotHubSpotActivity } from '@/lib/bot-hubspot-reporting';
 import { LEAD_GENERATOR_DEPLOYMENT_PROMPT } from '@/lib/scout-ai-doctrines';
 import {
   auditLeadQuality,
@@ -75,6 +77,7 @@ export default function Integrations() {
       avg: rows.length ? Math.round(rows.reduce((sum, row) => sum + row.score, 0) / rows.length) : 0,
     };
   }, [auditRows]);
+  const botActivity = useMemo(() => loadBotHubSpotActivity(), []);
 
   const refreshStatus = async () => {
     setStatusLoading(true);
@@ -191,8 +194,8 @@ export default function Integrations() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <StatusCard label="Scout API" ok={Boolean(status?.scout.configured)} detail={status?.scout.configured ? 'Configured' : 'Needs SCOUT_API_URL, SCOUT_API_KEY, workspace'} />
           <StatusCard label="HubSpot" ok={Boolean(status?.hubspot.configured)} detail={status?.hubspot.configured ? 'Contacts and pipeline sync enabled server-side' : 'Needs HUBSPOT_PRIVATE_APP_TOKEN'} />
+          <StatusCard label="HubSpot Tasks" ok={Boolean(status?.hubspot.tasksEnabled)} soft detail={status?.hubspot.tasksEnabled ? 'CTA follow-up tasks enabled' : 'Optional: set HUBSPOT_CREATE_TASKS=true'} />
           <StatusCard label="Lead Quality Avg" ok={summary.avg >= 55} detail={`${summary.avg}/100 across visible audit`} />
-          <StatusCard label="Feedback Loop" ok={false} soft detail="Planned: Scout outcomes and HubSpot deal status sync back" />
         </div>
 
         <section className="bg-white border border-gray-200 rounded-lg p-5">
@@ -212,6 +215,31 @@ export default function Integrations() {
               <div key={stage.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
                 <p className="font-semibold">{stage.name}</p>
                 <p className="text-xs text-gray-500 mt-1">{stage.output}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-white border border-gray-200 rounded-lg p-5">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h2 className="font-bold">Bot Activity & CTA Matrix</h2>
+              <p className="text-sm text-gray-500">
+                Every bot event now has a HubSpot-ready activity record: source bot, property, contacts, CTA, next task, due date, and stage.
+              </p>
+            </div>
+            <p className="text-xs text-gray-500">
+              {botActivity.length} local bot activity record{botActivity.length === 1 ? '' : 's'} queued or synced
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mt-4">
+            {CTA_SCENARIOS.map((scenario) => (
+              <div key={scenario.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <p className="font-semibold text-sm">{scenario.label}</p>
+                <p className="text-xs text-gray-500 mt-1">{scenario.primaryCta}</p>
+                <p className="text-[10px] uppercase tracking-wide text-camelot-gold mt-2">
+                  {scenario.priority} | {scenario.hubspotStage}
+                </p>
               </div>
             ))}
           </div>
@@ -365,7 +393,7 @@ export default function Integrations() {
               <p className="text-sm text-white/70 mt-2">
                 Add these Render environment variables for full mode: SCOUT_API_URL, SCOUT_API_KEY,
                 SCOUT_WORKSPACE_ID, HUBSPOT_PRIVATE_APP_TOKEN. Pipeline sync activates when HUBSPOT_PIPELINE_ID
-                and HUBSPOT_DEAL_STAGE_ID are set.
+                and HUBSPOT_DEAL_STAGE_ID are set. HubSpot task creation activates with HUBSPOT_CREATE_TASKS=true.
               </p>
               <button
                 type="button"

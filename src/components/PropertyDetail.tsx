@@ -18,6 +18,7 @@ import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
 import { downloadAsPDF, openBrochureForPrint, openEmailDraft } from '@/lib/pdf-generator';
 import { pushBuildingToIntegrations } from '@/lib/integrations';
 import { trackReportWorkflowEvent } from '@/lib/report-crm-tracking';
+import { reportBotActivityToHubSpot } from '@/lib/bot-hubspot-reporting';
 import type { MasterReportData } from '@/lib/camelot-report';
 import { normalizeBuildingForReportGuardrails } from '@/lib/property-guardrails';
 import toast from 'react-hot-toast';
@@ -665,6 +666,17 @@ export default function PropertyDetail({ building, onClose, onUpdate }: Property
 
   const handleAddToPipeline = () => {
     onUpdate?.(building.id, { pipeline_stage: 'discovered' as any, pipeline_moved_at: new Date().toISOString() });
+    void reportBotActivityToHubSpot({
+      botId: 'property-detail',
+      botName: 'Property Detail Card',
+      action: 'pipeline_added',
+      source: 'property_detail_card',
+      building: guardedBuilding,
+      contacts: guardedBuilding.contacts || [],
+      pipelineStage: 'discovered',
+      ctaScenarioId: guardedBuilding.open_violations_count ? 'compliance_violations' : 'general_management_review',
+      notes: 'Property added to Pipeline from the detail card.',
+    });
     toast.success(`${guardedBuilding.name || guardedBuilding.address} added to Pipeline -> Discovered`);
   };
 

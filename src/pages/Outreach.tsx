@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useBuildings } from '@/hooks/useBuildings';
 import { renderOutreachEmail, getAvailableVariables } from '@/lib/email-templates';
 import { DAVID_GOLDOFF_SIGNATURE_TEXT } from '@/lib/camelot-signature';
+import { reportBotActivityToHubSpot } from '@/lib/bot-hubspot-reporting';
 import type { OutreachTemplate, Building, Contact } from '@/types';
 import { cn, formatDate } from '@/lib/utils';
 import {
@@ -181,6 +182,24 @@ export default function Outreach() {
   };
 
   const handleSend = () => {
+    if (selectedBuilding) {
+      const contact = selectedBuilding.contacts?.[selectedContactIdx];
+      void reportBotActivityToHubSpot({
+        botId: 'outreach',
+        botName: 'Outreach Follow-Up Bot',
+        action: 'outreach_drafted',
+        source: 'outreach_compose',
+        building: selectedBuilding,
+        contacts: contact ? [contact] : selectedBuilding.contacts || [],
+        ctaScenarioId: selectedBuilding.open_violations_count ? 'compliance_violations' : 'general_management_review',
+        notes: `Outreach draft prepared${selectedTemplate ? ` using ${selectedTemplate.name}` : ''}.`,
+        metadata: {
+          templateId: selectedTemplate?.id,
+          templateName: selectedTemplate?.name,
+          subject: composeSubject,
+        },
+      });
+    }
     toast.success('Email saved as draft (email sending requires backend configuration)');
   };
 
@@ -238,6 +257,32 @@ export default function Outreach() {
       `Hi ${entry.contact_name.split(' ')[0]},\n\nI wanted to follow up on my recent email about ${entry.building_name}. I'd love to find 15 minutes to discuss how Camelot can help with your property management needs.\n\nWe offer a complimentary 30-day property evaluation at no cost and no obligation — it's our way of demonstrating value upfront.\n\nWould this week work for a quick call?\n\nBest regards,\n${DAVID_GOLDOFF_SIGNATURE_TEXT}`
     );
     window.open(`mailto:${entry.contact_email}?subject=${subject}&body=${body}`, '_self');
+    void reportBotActivityToHubSpot({
+      botId: 'outreach',
+      botName: 'Outreach Follow-Up Bot',
+      action: 'follow_up_due',
+      source: 'outreach_hot_leads',
+      building: {
+        id: entry.building_id,
+        name: entry.building_name,
+        address: entry.building_name,
+        pipeline_stage: 'contacted',
+      },
+      contacts: [{
+        name: entry.contact_name,
+        email: entry.contact_email,
+        phone: entry.contact_phone,
+        role: entry.contact_role as any,
+      }],
+      ctaScenarioId: 'proposal_follow_up',
+      pipelineStage: 'contacted',
+      notes: `Follow-up draft opened after ${entry.status} outreach signal.`,
+      metadata: {
+        originalSubject: entry.subject,
+        originalStatus: entry.status,
+        openedAt: entry.opened_at,
+      },
+    });
     toast.success(`Follow-up email opened for ${entry.contact_name}`);
   };
 

@@ -27,6 +27,7 @@ export interface IntegrationStatus {
   hubspot: {
     configured: boolean;
     dealsEnabled: boolean;
+    tasksEnabled?: boolean;
     associationEndpoint: string;
   };
   timestamp: string;
@@ -88,6 +89,7 @@ function clientOnlyIntegrationStatus(): IntegrationStatus {
     hubspot: {
       configured: false,
       dealsEnabled: false,
+      tasksEnabled: false,
       associationEndpoint: 'client-only mode',
     },
     timestamp: new Date().toISOString(),
@@ -257,6 +259,7 @@ export function buildIntegrationLeadPayload(building: Building) {
       signals: building.signals || [],
       tags: building.tags || [],
       report_activity: building.enriched_data?.hubspot_report_activity,
+      bot_activity: building.enriched_data?.hubspot_bot_activity,
       last_report_activity: building.enriched_data?.last_report_activity,
     },
     contact: contact

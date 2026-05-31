@@ -2,15 +2,31 @@ import { usePipeline } from '@/hooks/usePipeline';
 import { useBuildings } from '@/hooks/useBuildings';
 import PipelineBoard from '@/components/PipelineBoard';
 import { formatCurrency } from '@/lib/utils';
+import { reportBotActivityToHubSpot } from '@/lib/bot-hubspot-reporting';
 import { GitBranch, TrendingUp, Building2, DollarSign, Clock } from 'lucide-react';
 import type { PipelineStage } from '@/types';
 
 export default function Pipeline() {
   const { pipelineData, stageCounts, totalValue, stages } = usePipeline();
-  const { moveToPipeline } = useBuildings();
+  const { buildings, moveToPipeline } = useBuildings();
 
   const handleMoveBuilding = (id: string, stage: PipelineStage) => {
     moveToPipeline(id, stage);
+    const building = buildings.find((candidate) => candidate.id === id);
+    if (building) {
+      void reportBotActivityToHubSpot({
+        botId: 'pipeline',
+        botName: 'Pipeline Board',
+        action: 'task_created',
+        source: 'pipeline_drag_drop',
+        building,
+        contacts: building.contacts || [],
+        pipelineStage: stage,
+        ctaScenarioId: stage === 'proposal' ? 'proposal_follow_up' : stage === 'won' ? 'new_engagement' : undefined,
+        notes: `Property moved to ${stage} in the Pipeline.`,
+        metadata: { stage },
+      });
+    }
   };
 
   const totalActive = Object.values(stageCounts).reduce((a, b) => a + b, 0);

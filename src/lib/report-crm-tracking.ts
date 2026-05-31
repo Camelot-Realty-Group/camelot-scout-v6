@@ -1,4 +1,5 @@
 import { pushBuildingToIntegrations, type IntegrationPushResult } from '@/lib/integrations';
+import { renderCtaTemplate, selectCtaScenario } from '@/lib/cta-scenarios';
 import { useBuildingsStore } from '@/lib/store';
 import type { MasterReportData } from '@/lib/camelot-report';
 import type { JackieReportPackage } from '@/lib/pitch-report';
@@ -298,6 +299,13 @@ export async function trackReportWorkflowEvent({
   const contacts = extractDecisionMakerContacts(building, reportData, extraContacts);
   const propertyName = reportData?.buildingName || building.name || building.address;
   const propertyAddress = reportData?.address || building.address;
+  const ctaScenario = selectCtaScenario(building, {
+    action,
+    packageType,
+    packageLabel,
+    reportFocus: reportData?.reportFocus?.selectedFocus,
+    notes: `${emailSubject || ''} ${emailBody || ''}`,
+  });
   const id = `${propertyAddress}-${packageType}-${action}-${generatedAt}`.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
 
   let record: ReportWorkflowRecord = {
@@ -319,7 +327,15 @@ export async function trackReportWorkflowEvent({
     recipients: Array.from(new Set(recipients.map(normalizeEmail).filter(Boolean))),
     htmlLength: html?.length,
     hubspotQueued: true,
-    metadata,
+    metadata: {
+      ...(metadata || {}),
+      ctaScenarioId: ctaScenario.id,
+      ctaLabel: ctaScenario.label,
+      primaryCta: ctaScenario.primaryCta,
+      secondaryCta: ctaScenario.secondaryCta,
+      hubspotTaskTitle: ctaScenario.taskTitle,
+      hubspotTaskDueAt: new Date(Date.now() + ctaScenario.taskDueDays * 86_400_000).toISOString(),
+    },
   };
 
   const buildingForCrm = upsertPipelineBuilding(
@@ -358,6 +374,24 @@ export async function trackReportWorkflowEvent({
       enriched_data: {
         ...(buildingForCrm.enriched_data || {}),
         hubspot_report_activity: record,
+        hubspot_bot_activity: {
+          id: record.id,
+          botId: 'jackie',
+          botName: 'Jackie Reports',
+          action: action === 'generated' ? 'report_generated' : action,
+          packageType,
+          packageLabel,
+          ctaScenarioId: ctaScenario.id,
+          ctaLabel: ctaScenario.label,
+          primaryCta: ctaScenario.primaryCta,
+          secondaryCta: ctaScenario.secondaryCta,
+          taskTitle: ctaScenario.taskTitle,
+          taskDueAt: new Date(Date.now() + ctaScenario.taskDueDays * 86_400_000).toISOString(),
+          emailSubject: renderCtaTemplate(ctaScenario.emailSubject, buildingForCrm),
+          emailBody: renderCtaTemplate(ctaScenario.emailBody, buildingForCrm),
+          priority: ctaScenario.priority,
+          createdAt: record.generatedAt,
+        },
       },
     });
     record = {
