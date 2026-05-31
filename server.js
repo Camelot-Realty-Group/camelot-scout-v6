@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 10000;
 app.use(express.json());
 
 function getHubSpotApiKey() {
-  return process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY || '';
+  return process.env.HUBSPOT_PRIVATE_APP_TOKEN || process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY || '';
 }
 
 function getScoutConfig() {
@@ -154,14 +154,14 @@ function routeLeadSnapshot(building = {}, quality = {}) {
   };
 }
 
-async function hubspotRequest(pathname, payload) {
+async function hubspotRequest(pathname, payload, method = 'POST') {
   const apiKey = getHubSpotApiKey();
   if (!apiKey) throw new Error('HubSpot API key not configured');
 
   const resp = await fetch(`https://api.hubapi.com${pathname}`, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify(payload),
+    body: payload ? JSON.stringify(payload) : undefined,
   });
   const text = await resp.text();
   let data;
@@ -173,6 +173,85 @@ async function hubspotRequest(pathname, payload) {
     throw error;
   }
   return data;
+}
+
+async function searchHubSpotObject(objectType, propertyName, value) {
+  if (!value) return null;
+  const data = await hubspotRequest(`/crm/v3/objects/${objectType}/search`, {
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName,
+            operator: 'EQ',
+            value: String(value),
+          },
+        ],
+      },
+    ],
+    limit: 1,
+  });
+  return data?.results?.[0] || null;
+}
+
+async function upsertHubSpotContact(contact = {}, building = {}) {
+  if (!contact.email) return null;
+  const parsedName = parseContactName(contact.name);
+  const properties = {
+    email: contact.email,
+    firstname: contact.firstname || parsedName.firstname,
+    lastname: contact.lastname || parsedName.lastname,
+    phone: normalizePhone(contact.phone),
+    company: contact.company || building.name || building.address || '',
+    address: building.address || '',
+    city: building.borough || building.region || building.neighborhood || '',
+  };
+  Object.keys(properties).forEach((key) => {
+    if (properties[key] === undefined || properties[key] === null || properties[key] === '') delete properties[key];
+  });
+
+  const existing = await searchHubSpotObject('contacts', 'email', contact.email);
+  if (existing?.id) {
+    return hubspotRequest(`/crm/v3/objects/contacts/${existing.id}`, { properties }, 'PATCH');
+  }
+  return hubspotRequest('/crm/v3/objects/contacts', { properties });
+}
+
+async function upsertHubSpotDeal(building = {}, quality = {}, routing = {}) {
+  const dealStage = process.env.HUBSPOT_DEAL_STAGE_ID;
+  if (!dealStage) return null;
+
+  const reportActivity = building.report_activity || building.enriched_data?.hubspot_report_activity;
+  const dealname = `${building.name || building.address} - Camelot Management Opportunity`;
+  const properties = {
+    dealname,
+    dealstage: dealStage,
+    pipeline: process.env.HUBSPOT_PIPELINE_ID || 'default',
+    amount: String(building.market_value || ''),
+  };
+  if (!properties.amount) delete properties.amount;
+
+  const existing = await searchHubSpotObject('deals', 'dealname', dealname);
+  const deal = existing?.id
+    ? await hubspotRequest(`/crm/v3/objects/deals/${existing.id}`, { properties }, 'PATCH')
+    : await hubspotRequest('/crm/v3/objects/deals', { properties });
+
+  if (reportActivity) {
+    console.log('HubSpot report activity synced:', {
+      dealId: deal.id,
+      action: reportActivity.action,
+      package: reportActivity.packageLabel,
+      property: reportActivity.propertyAddress,
+    });
+  } else {
+    console.log('HubSpot lead synced:', {
+      dealId: deal.id,
+      property: building.address,
+      tier: quality.tier,
+      team: routing.team,
+    });
+  }
+  return deal;
 }
 
 async function associateHubSpotContactDeal(contactId, dealId) {
@@ -189,7 +268,7 @@ async function associateHubSpotContactDeal(contactId, dealId) {
 
 // Log available env vars on startup (keys only, not values)
 const envKeys = Object.keys(process.env).filter(k => k.includes('HUBSPOT') || k.includes('APOLLO') || k.includes('SUPABASE') || k.includes('AI_API'));
-console.log('Camelot OS server starting. Available API keys:', envKeys.length > 0 ? envKeys.join(', ') : 'NONE — set HUBSPOT_API_KEY, APOLLO_API_KEY in Render env vars');
+console.log('Camelot OS server starting. Available API keys:', envKeys.length > 0 ? envKeys.join(', ') : 'NONE — set HUBSPOT_PRIVATE_APP_TOKEN, APOLLO_API_KEY in Render env vars');
 
 // ============================================================
 // HubSpot API Proxy — avoids CORS issues with browser-side calls
@@ -202,10 +281,10 @@ console.log('Scout integration config:', {
 });
 
 app.post('/api/hubspot/contacts', async (req, res) => {
-  const apiKey = process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY;
+  const apiKey = getHubSpotApiKey();
   if (!apiKey) {
-    console.error('HubSpot: No API key found. Set HUBSPOT_API_KEY in Render environment.');
-    return res.status(400).json({ error: 'HubSpot API key not configured. Go to Render → Environment and add HUBSPOT_API_KEY (without VITE_ prefix).' });
+    console.error('HubSpot: No API key found. Set HUBSPOT_PRIVATE_APP_TOKEN in Render environment.');
+    return res.status(400).json({ error: 'HubSpot API key not configured. Go to Render → Environment and add HUBSPOT_PRIVATE_APP_TOKEN.' });
   }
   try {
     console.log('HubSpot: Creating contact...');
@@ -230,9 +309,9 @@ app.post('/api/hubspot/contacts', async (req, res) => {
 });
 
 app.post('/api/hubspot/deals', async (req, res) => {
-  const apiKey = process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY;
+  const apiKey = getHubSpotApiKey();
   if (!apiKey) {
-    return res.status(400).json({ error: 'HubSpot API key not configured. Add HUBSPOT_API_KEY in Render environment.' });
+    return res.status(400).json({ error: 'HubSpot API key not configured. Add HUBSPOT_PRIVATE_APP_TOKEN in Render environment.' });
   }
   try {
     console.log('HubSpot: Creating deal...');
@@ -274,7 +353,7 @@ app.get('/api/integrations/status', (_req, res) => {
     },
     hubspot: {
       configured: Boolean(hubspotKey),
-      dealsEnabled: process.env.HUBSPOT_CREATE_DEALS === 'true' && Boolean(process.env.HUBSPOT_DEAL_STAGE_ID),
+      dealsEnabled: Boolean(process.env.HUBSPOT_DEAL_STAGE_ID),
       associationEndpoint: '/crm/v3/associations/contacts/deals/batch/create',
     },
     timestamp: new Date().toISOString(),
@@ -311,7 +390,7 @@ app.post('/api/integrations/push-building', async (req, res) => {
   }
 
   const localLead = saveLocalScoutLead({
-    source: 'Arthur AI Underwriter',
+    source: building.enriched_data?.hubspot_report_activity ? 'Camelot OS Report Workflow' : 'Camelot OS Lead Sync',
     building,
     contact,
     quality,
@@ -326,87 +405,56 @@ app.post('/api/integrations/push-building', async (req, res) => {
 
   const hubspotKey = getHubSpotApiKey();
   if (hubspotKey) {
-    if (!contact.email) {
-      if (process.env.HUBSPOT_CREATE_DEALS === 'true' && process.env.HUBSPOT_DEAL_STAGE_ID) {
-        try {
-          const dealPayload = {
-            properties: {
-              dealname: `${building.name || building.address} - Scout Lead`,
-              dealstage: process.env.HUBSPOT_DEAL_STAGE_ID,
-              pipeline: process.env.HUBSPOT_PIPELINE_ID || 'default',
-              amount: String(building.market_value || ''),
-            },
-          };
-          const deal = await hubspotRequest('/crm/v3/objects/deals', dealPayload);
-          result.hubspot = {
-            status: 'ok',
-            message: 'HubSpot deal synced without contact; add a verified email to create/associate a contact.',
-            id: deal.id,
-            warnings: ['No verified contact email was available for contact creation.'],
-          };
-        } catch (dealErr) {
-          result.hubspot = {
-            status: 'error',
-            message: dealErr.message || 'HubSpot deal sync failed.',
-          };
+    try {
+      const warnings = [];
+      let contactRecord = null;
+      let dealRecord = null;
+
+      if (contact.email) {
+        contactRecord = await upsertHubSpotContact(contact, building);
+      } else {
+        warnings.push('No verified contact email was available; property deal sync can still proceed when HUBSPOT_DEAL_STAGE_ID is configured.');
+      }
+
+      if (process.env.HUBSPOT_DEAL_STAGE_ID) {
+        dealRecord = await upsertHubSpotDeal(building, quality, routing);
+        if (contactRecord?.id && dealRecord?.id) {
+          try {
+            await associateHubSpotContactDeal(contactRecord.id, dealRecord.id);
+          } catch (associationErr) {
+            warnings.push(associationErr.message || 'HubSpot contact/deal association failed.');
+          }
         }
+      } else {
+        warnings.push('Deal creation skipped; set HUBSPOT_DEAL_STAGE_ID and HUBSPOT_PIPELINE_ID to sync opportunities into the pipeline.');
+      }
+
+      if (contactRecord || dealRecord) {
+        result.hubspot = {
+          status: 'ok',
+          message: contactRecord && dealRecord
+            ? 'HubSpot contact and opportunity synced.'
+            : contactRecord
+              ? 'HubSpot contact synced; add HUBSPOT_DEAL_STAGE_ID for pipeline opportunity sync.'
+              : 'HubSpot opportunity synced without contact; add a verified email for contact sync.',
+          id: dealRecord?.id || contactRecord?.id,
+          url: dealRecord?.id && process.env.HUBSPOT_PORTAL_ID
+            ? `https://app.hubspot.com/contacts/${process.env.HUBSPOT_PORTAL_ID}/deal/${dealRecord.id}`
+            : undefined,
+          warnings,
+        };
       } else {
         result.hubspot = {
           status: 'skipped',
-          message: 'HubSpot skipped: no verified email and deal sync is not enabled.',
-          warnings: ['Set HUBSPOT_CREATE_DEALS=true and HUBSPOT_DEAL_STAGE_ID to create property deals without contacts.'],
-        };
-      }
-    } else {
-      try {
-        const parsedName = parseContactName(contact.name);
-        const contactPayload = {
-          properties: {
-            email: contact.email,
-            firstname: contact.firstname || parsedName.firstname,
-            lastname: contact.lastname || parsedName.lastname,
-            phone: normalizePhone(contact.phone),
-            company: contact.company || building.name || building.address,
-            address: building.address,
-            city: building.borough || building.region || '',
-          },
-        };
-        const createdContact = await hubspotRequest('/crm/v3/objects/contacts', contactPayload);
-        const warnings = [];
-        let dealId;
-
-        if (process.env.HUBSPOT_CREATE_DEALS === 'true' && process.env.HUBSPOT_DEAL_STAGE_ID) {
-          try {
-            const dealPayload = {
-              properties: {
-                dealname: `${building.name || building.address} - Scout Lead`,
-                dealstage: process.env.HUBSPOT_DEAL_STAGE_ID,
-                pipeline: process.env.HUBSPOT_PIPELINE_ID || 'default',
-                amount: String(building.market_value || ''),
-              },
-            };
-            const deal = await hubspotRequest('/crm/v3/objects/deals', dealPayload);
-            dealId = deal.id;
-            await associateHubSpotContactDeal(createdContact.id, deal.id);
-          } catch (dealErr) {
-            warnings.push(dealErr.message || 'HubSpot deal association failed');
-          }
-        } else {
-          warnings.push('Deal creation skipped; set HUBSPOT_CREATE_DEALS=true and HUBSPOT_DEAL_STAGE_ID to enable.');
-        }
-
-        result.hubspot = {
-          status: 'ok',
-          message: dealId ? 'HubSpot contact and deal synced.' : 'HubSpot contact synced.',
-          id: createdContact.id,
+          message: 'HubSpot skipped: add a verified email or configure HUBSPOT_DEAL_STAGE_ID for opportunity sync.',
           warnings,
         };
-      } catch (err) {
-        result.hubspot = {
-          status: 'error',
-          message: err.message || 'HubSpot sync failed.',
-        };
       }
+    } catch (err) {
+      result.hubspot = {
+        status: 'error',
+        message: err.message || 'HubSpot sync failed.',
+      };
     }
   }
 
@@ -494,7 +542,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     version: '7.4.2',
-    hubspot: !!(process.env.HUBSPOT_API_KEY || process.env.VITE_HUBSPOT_API_KEY),
+    hubspot: !!getHubSpotApiKey(),
     apollo: !!(process.env.APOLLO_API_KEY || process.env.VITE_APOLLO_API_KEY),
     timestamp: new Date().toISOString()
   });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getSupabaseStatusMessage, isSupabaseConfigured } from '@/lib/supabase';
 import { isAIConfigured, getAIConfig } from '@/lib/ai-client';
@@ -20,6 +20,14 @@ interface ServiceStatus {
 export default function Settings() {
   const { members } = useAuth();
   const [activeSection, setActiveSection] = useState<'status' | 'api' | 'team' | 'company'>('status');
+  const [hubSpotConfigured, setHubSpotConfigured] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/integrations/status')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setHubSpotConfigured(Boolean(data?.hubspot?.configured)))
+      .catch(() => setHubSpotConfigured(false));
+  }, []);
 
   // Check service statuses — each API listed individually
   const services: ServiceStatus[] = [
@@ -71,8 +79,8 @@ export default function Settings() {
     },
     {
       name: 'HubSpot CRM',
-      configured: !!(import.meta.env.VITE_HUBSPOT_API_KEY || ''),
-      details: import.meta.env.VITE_HUBSPOT_API_KEY ? 'API key set — CRM sync active' : 'Set VITE_HUBSPOT_API_KEY for CRM sync',
+      configured: hubSpotConfigured,
+      details: hubSpotConfigured ? 'Server-side private app token set — CRM sync active' : 'Set HUBSPOT_PRIVATE_APP_TOKEN in Render/server environment for CRM sync',
     },
     {
       name: 'AI Chat',
@@ -212,9 +220,9 @@ export default function Settings() {
                   },
                   {
                     label: 'HubSpot',
-                    envVars: ['VITE_HUBSPOT_API_KEY'],
-                    configured: !!(import.meta.env.VITE_HUBSPOT_API_KEY || ''),
-                    description: 'CRM sync for deals and contacts.',
+                    envVars: ['HUBSPOT_PRIVATE_APP_TOKEN', 'HUBSPOT_PIPELINE_ID', 'HUBSPOT_DEAL_STAGE_ID'],
+                    configured: hubSpotConfigured,
+                    description: 'Server-side CRM sync for contacts, management opportunities, report events, and outreach history.',
                   },
                   {
                     label: 'Google Maps',

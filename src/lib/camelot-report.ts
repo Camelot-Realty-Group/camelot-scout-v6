@@ -1536,7 +1536,7 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lng: numb
 async function fetchOfficialBuildingBranding(address: string, buildingName: string): Promise<any | null> {
   try {
     if (typeof window === 'undefined') return null;
-    if (String(import.meta.env.VITE_ENABLE_SERVER_INTEGRATIONS || '').toLowerCase() !== 'true') return null;
+    if (String(import.meta.env.VITE_DISABLE_SERVER_INTEGRATIONS || '').toLowerCase() === 'true') return null;
     const params = new URLSearchParams({ address, name: buildingName || address });
     const res = await fetch(`/api/building/brand?${params.toString()}`);
     if (!res.ok) return null;

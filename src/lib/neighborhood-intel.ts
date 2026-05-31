@@ -56,7 +56,7 @@ async function fetch311Stats(zip: string): Promise<{ total: number; top: Array<{
  */
 async function fetchLandmarks(lat: number, lng: number, radius: number = 800): Promise<Array<{ name: string; type: string; date: string }>> {
   try {
-    if (typeof window !== 'undefined' && String(import.meta.env.VITE_ENABLE_SERVER_INTEGRATIONS || '').toLowerCase() !== 'true') return [];
+    if (typeof window !== 'undefined' && String(import.meta.env.VITE_DISABLE_SERVER_INTEGRATIONS || '').toLowerCase() === 'true') return [];
     const params = new URLSearchParams({
       $limit: '10',
       $where: `within_circle(the_geom,${lat},${lng},${radius})`,

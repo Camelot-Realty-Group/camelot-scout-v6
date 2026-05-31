@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_PROSPEO_API_KEY: string;
   readonly VITE_HUBSPOT_API_KEY: string;
   readonly VITE_GOOGLE_MAPS_API_KEY: string;
+  readonly VITE_DISABLE_SERVER_INTEGRATIONS: string;
   readonly VITE_ENABLE_SERVER_INTEGRATIONS: string;
 }
 

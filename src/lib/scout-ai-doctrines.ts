@@ -76,7 +76,7 @@ Lead Generator Deployment Prompt - Scout Hybrid Lead System
 - _push_to_scout(): implement Scout webhook/API integration.
 - _queue_lead(): implement lead queue backing store.
 - Flask/FastAPI wrapper: expose webhook endpoint.
-- Environment templates: HUBSPOT_API_KEY, SLACK_WEBHOOK_URL, SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID.
+- Environment templates: HUBSPOT_PRIVATE_APP_TOKEN, SLACK_WEBHOOK_URL, SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID.
 - Bug fixes: no default webhook secret in production, import cleanup, stronger type checks, safer contact-name parsing, HubSpot v3 association payload.
 
 5. Step-by-Step Setup
@@ -92,8 +92,8 @@ Lead Generator Deployment Prompt - Scout Hybrid Lead System
 - Test each component independently, then run full batch and webhook tests.
 
 6. Configuration Reference
-- Required: HUBSPOT_API_KEY, SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID, SLACK_WEBHOOK_URL, WEBHOOK_SECRET.
-- Optional: HUBSPOT_CREATE_DEALS, HUBSPOT_PIPELINE_ID, HUBSPOT_DEAL_STAGE_ID, LEAD_MIN_CONFIDENCE, LEAD_HOT_THRESHOLD, LEAD_WARM_THRESHOLD.
+- Required: HUBSPOT_PRIVATE_APP_TOKEN, SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID, SLACK_WEBHOOK_URL, WEBHOOK_SECRET.
+- Optional: HUBSPOT_PIPELINE_ID, HUBSPOT_DEAL_STAGE_ID, LEAD_MIN_CONFIDENCE, LEAD_HOT_THRESHOLD, LEAD_WARM_THRESHOLD.
 - Quality defaults: min_confidence 55, hot_threshold 76, warm_threshold 55.
 - Lead source configuration should list source name, fetch cadence, API credentials, source priority and allowed lead types.
 - Team mapping format should route by state, borough/region, property type, unit count, lead tier and compliance pain.

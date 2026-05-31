@@ -98,6 +98,10 @@ export interface Building {
   archive_reason?: string;
   archived_at?: string;
   assigned_to?: string;
+  assigned_at?: string;
+  outreach_status?: string;
+  outreach_last_sent?: string;
+  outreach_last_reply?: string;
   notes?: string;
   tags: string[];
   pipeline_stage: PipelineStage;

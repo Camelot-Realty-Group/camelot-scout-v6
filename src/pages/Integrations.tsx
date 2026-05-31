@@ -190,7 +190,7 @@ export default function Integrations() {
       <div className="p-6 md:p-8 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <StatusCard label="Scout API" ok={Boolean(status?.scout.configured)} detail={status?.scout.configured ? 'Configured' : 'Needs SCOUT_API_URL, SCOUT_API_KEY, workspace'} />
-          <StatusCard label="HubSpot" ok={Boolean(status?.hubspot.configured)} detail={status?.hubspot.configured ? 'Contacts enabled' : 'Needs HUBSPOT_API_KEY'} />
+          <StatusCard label="HubSpot" ok={Boolean(status?.hubspot.configured)} detail={status?.hubspot.configured ? 'Contacts and pipeline sync enabled server-side' : 'Needs HUBSPOT_PRIVATE_APP_TOKEN'} />
           <StatusCard label="Lead Quality Avg" ok={summary.avg >= 55} detail={`${summary.avg}/100 across visible audit`} />
           <StatusCard label="Feedback Loop" ok={false} soft detail="Planned: Scout outcomes and HubSpot deal status sync back" />
         </div>
@@ -364,8 +364,8 @@ export default function Integrations() {
               <h2 className="font-bold">Configuration</h2>
               <p className="text-sm text-white/70 mt-2">
                 Add these Render environment variables for full mode: SCOUT_API_URL, SCOUT_API_KEY,
-                SCOUT_WORKSPACE_ID, HUBSPOT_API_KEY. Deal sync is opt-in with HUBSPOT_CREATE_DEALS,
-                HUBSPOT_PIPELINE_ID, and HUBSPOT_DEAL_STAGE_ID.
+                SCOUT_WORKSPACE_ID, HUBSPOT_PRIVATE_APP_TOKEN. Pipeline sync activates when HUBSPOT_PIPELINE_ID
+                and HUBSPOT_DEAL_STAGE_ID are set.
               </p>
               <button
                 type="button"

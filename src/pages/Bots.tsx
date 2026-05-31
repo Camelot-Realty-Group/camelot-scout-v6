@@ -363,7 +363,7 @@ const DEMO_BOTS: DashboardBot[] = [
     last_run_at: new Date(Date.now() - 1000 * 60 * 13).toISOString(),
     outputs: ['Lead Quality Audit', 'Scout API push', 'HubSpot contact sync', 'Routing tags', 'Sync status report'],
     quality_gates: [
-      'SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID, and HUBSPOT_API_KEY validation visible before push',
+      'SCOUT_API_URL, SCOUT_API_KEY, SCOUT_WORKSPACE_ID, and HUBSPOT_PRIVATE_APP_TOKEN validation visible before push',
       'Single-word contact names do not duplicate into firstname and lastname',
       'HubSpot associations use the v3 batch endpoint before deal linkage is considered complete',
       'No lead is pushed without property address and quality/routing metadata',

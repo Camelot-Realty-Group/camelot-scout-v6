@@ -52,8 +52,7 @@ const LOCAL_INTEGRATION_QUEUE_KEY = 'camelot:scout-integration-local-queue';
 
 function isStaticRenderClient() {
   if (typeof window === 'undefined') return false;
-  const serverMode = String(import.meta.env.VITE_ENABLE_SERVER_INTEGRATIONS || '').toLowerCase() === 'true';
-  return !serverMode;
+  return String(import.meta.env.VITE_DISABLE_SERVER_INTEGRATIONS || '').toLowerCase() === 'true';
 }
 
 function getLocalQueue(): unknown[] {
@@ -277,8 +276,6 @@ export function buildIntegrationLeadPayload(building: Building) {
 }
 
 export async function getIntegrationStatus(): Promise<IntegrationStatus> {
-  if (isStaticRenderClient()) return clientOnlyIntegrationStatus();
-
   try {
     const response = await fetch('/api/integrations/status');
     if (!response.ok) {
