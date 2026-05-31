@@ -501,6 +501,78 @@ app.get('/api/integrations/local-leads', (_req, res) => {
   });
 });
 
+app.post('/api/daily-hunt/run', async (req, res) => {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const functionUrl = supabaseUrl && !/placeholder/i.test(supabaseUrl)
+    ? `${supabaseUrl.replace(/\/$/, '')}/functions/v1/daily-lead-hunt`
+    : '';
+
+  if (!functionUrl || !supabaseKey || /placeholder/i.test(supabaseKey)) {
+    return res.status(202).json({
+      status: 'fallback',
+      mode: 'seed-export',
+      message: 'Daily Hunt function is not configured on Render yet. Showing the imported Claude/Twin lead queue.',
+      run: {
+        id: `fallback-${Date.now()}`,
+        started_at: new Date().toISOString(),
+        finished_at: new Date().toISOString(),
+        triggered_by: req.body?.triggered_by || 'manual_ui',
+        sources_queried: ['Claude/Twin export'],
+        candidates_found: 0,
+        new_leads_inserted: 0,
+        duplicates_skipped: 0,
+        rejected_count: 0,
+        corrected_count: 0,
+      },
+    });
+  }
+
+  try {
+    const upstream = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        triggered_by: req.body?.triggered_by || 'manual_ui',
+        source: 'render-server',
+      }),
+    });
+    const text = await upstream.text();
+    let payload = {};
+    try {
+      payload = text ? JSON.parse(text) : {};
+    } catch {
+      payload = { raw: text };
+    }
+
+    if (!upstream.ok) {
+      return res.status(202).json({
+        status: 'fallback',
+        mode: 'seed-export',
+        message: `Daily Hunt function responded ${upstream.status}. Showing the imported Claude/Twin lead queue until the function is deployed cleanly.`,
+        upstream: payload,
+      });
+    }
+
+    return res.json({
+      status: 'ok',
+      mode: 'supabase-function',
+      message: 'Daily Hunt function run started.',
+      upstream: payload,
+    });
+  } catch (error) {
+    return res.status(202).json({
+      status: 'fallback',
+      mode: 'seed-export',
+      message: 'Daily Hunt function could not be reached from Render. Showing the imported Claude/Twin lead queue.',
+      error: error.message,
+    });
+  }
+});
+
 app.post('/api/integrations/push-building', async (req, res) => {
   const body = req.body || {};
   const building = body.building || {};

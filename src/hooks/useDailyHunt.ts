@@ -58,6 +58,9 @@ const stateFromAddress = (address: string) => {
   return 'NY';
 };
 
+const shouldUseServerDailyHunt = () =>
+  String(import.meta.env.VITE_DISABLE_SERVER_INTEGRATIONS || '').toLowerCase() !== 'true';
+
 const demoLeads: DailyHuntLead[] = DAILY_HUNT_SEED_LEADS.map((lead) => ({
   id: lead.id,
   name: lead.target,
@@ -247,20 +250,37 @@ export function useDailyHunt() {
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/daily-lead-hunt`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ triggered_by: 'manual_ui' }),
-      });
-      if (!response.ok) throw new Error(`Daily Hunt failed: ${response.status}`);
+      let response: Response;
+      if (shouldUseServerDailyHunt()) {
+        response = await fetch('/api/daily-hunt/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ triggered_by: 'manual_ui' }),
+        });
+      } else {
+        const { data: { session } } = await supabase.auth.getSession();
+        response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/daily-lead-hunt`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ triggered_by: 'manual_ui' }),
+        });
+      }
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.message || `Daily Hunt failed: ${response.status}`);
       await reload();
-      toast.success('Daily Hunt run started');
+      if (payload.status === 'fallback') {
+        toast(payload.message || 'Daily Hunt backend is not deployed yet; showing the imported queue.');
+      } else {
+        toast.success(payload.message || 'Daily Hunt run started');
+      }
     } catch (error: any) {
-      toast.error(error?.message || 'Daily Hunt run failed');
+      console.warn('Daily Hunt run failed; keeping imported queue visible.', error?.message || error);
+      await reload();
+      toast('Daily Hunt backend is unavailable right now. The imported Claude/Twin queue is still available.');
     } finally {
       setRunning(false);
     }
