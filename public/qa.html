@@ -48,13 +48,44 @@
         .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then((d) => {
           const s = d.summary;
-          const deployReady = s.brokenPages === 0 && s.missingPackages === 0 && !d.checks.some((c) => c.status === 'fail');
+          const REQUIRED = ['typecheck', 'build'];
+          const importScanPassed = s.importScanPassed != null ? s.importScanPassed : s.workingPages;
+          // Prefer scanner-computed verdict; recompute for older reports.
+          let verdict = d.verdict;
+          if (!verdict) {
+            const cs = (n) => { const c = d.checks.find((x) => x.name === n); return c ? c.status : 'not-run'; };
+            const req = REQUIRED.map(cs);
+            const scanClean = s.brokenPages === 0 && s.missingPackages === 0;
+            const failed = req.some((x) => x === 'fail' || x === 'error');
+            const passed = req.every((x) => x === 'pass');
+            const incomplete = req.some((x) => x === 'blocked' || x === 'not-run');
+            const level = (!scanClean || failed) ? 'fail' : (passed ? 'pass' : 'warn');
+            verdict = {
+              level: level,
+              headline: level === 'pass'
+                ? 'Deploy-ready — route import scan passed and typecheck + build passed.'
+                : (level === 'fail'
+                    ? 'Attention required before deploy — broken pages, missing packages, or a failed check.'
+                    : 'Static route import scan passed, but checks are INCOMPLETE — typecheck/build did not run, so deploy-readiness is unverified.'),
+              requiredChecks: REQUIRED, requiredChecksPassed: passed,
+              requiredChecksIncomplete: incomplete, requiredChecksFailed: failed,
+            };
+          }
+          const tone = verdict.level === 'pass' ? 'good' : (verdict.level === 'fail' ? 'bad' : 'warn');
           const card = (n, l, cls) => `<div class="card ${cls}"><div class="n">${n}</div><div class="l">${l}</div></div>`;
           let html = '';
-          html += `<div class="card ${deployReady ? 'good' : 'bad'}" style="margin-bottom:16px"><strong>${deployReady ? 'Static checks pass.' : 'Attention required before deploy.'}</strong><div class="note">Generated ${esc(new Date(d.generatedAt).toLocaleString())} &middot; ${esc(d.git.branch)}@${esc(d.git.shortCommit)}</div></div>`;
+          html += `<div class="card ${tone}" style="margin-bottom:16px"><strong>${esc(verdict.headline)}</strong><div class="note">Generated ${esc(new Date(d.generatedAt).toLocaleString())} &middot; ${esc(d.git.branch)}@${esc(d.git.shortCommit)}</div>`;
+          if (!verdict.requiredChecksPassed) {
+            html += `<div class="note" style="color:#92400e;margin-top:6px">Required checks (${esc(verdict.requiredChecks.join(' + '))}) ${verdict.requiredChecksFailed ? 'failed — see Build &amp; Test Checks below.' : 'did not complete (blocked / not-run). Type and runtime correctness remain UNVERIFIED.'}</div>`;
+          }
+          if (Array.isArray(d.scanLimits) && d.scanLimits.length) {
+            html += '<div class="note" style="margin-top:6px"><strong>Scan limits:</strong><ul style="margin:4px 0 0">' +
+              d.scanLimits.map((l) => `<li>${esc(l)}</li>`).join('') + '</ul></div>';
+          }
+          html += '</div>';
           html += '<div class="cards">';
           html += card(s.totalRoutes, 'Routes', '');
-          html += card(s.workingPages, 'Working pages', 'good');
+          html += card(importScanPassed, 'Import-scan passed', '');
           html += card(s.brokenPages, 'Broken pages', s.brokenPages ? 'bad' : 'good');
           html += card(s.missingPackages, 'Missing packages', s.missingPackages ? 'bad' : 'good');
           html += card(s.sourceFiles, 'Source files', '');
@@ -62,14 +93,19 @@
 
           html += '<h2>Build &amp; Test Checks</h2>';
           for (const c of d.checks) {
-            html += `<div class="check ${esc(c.status)}"><strong style="text-transform:capitalize">${esc(c.name)}</strong> &mdash; ${esc(c.status)}` +
+            const reqTag = REQUIRED.indexOf(c.name) !== -1 ? ' <span class="note">(required)</span>' : '';
+            html += `<div class="check ${esc(c.status)}"><strong style="text-transform:capitalize">${esc(c.name)}</strong>${reqTag} &mdash; ${esc(c.status)}` +
               (c.command ? `<div class="note"><code>${esc(c.command)}</code></div>` : '') +
               (c.detail ? `<pre>${esc(c.detail)}</pre>` : '') + '</div>';
           }
 
           if (d.baseline) {
             const b = d.baseline;
-            html += '<h2>Compared to last working baseline</h2><div class="check">';
+            const fb = b.source === 'fallback';
+            html += '<h2>Compared to last working baseline' + (fb ? ' (cached / fallback)' : '') + '</h2><div class="check' + (fb ? ' blocked' : '') + '">';
+            if (fb) {
+              html += `<div class="note" style="color:#92400e">Live git history was unavailable (likely a shallow deploy clone). Showing the last committed baseline snapshot${b.capturedAgainstShortCommit ? ' (captured against ' + esc(b.capturedAgainstShortCommit) + ')' : ''}.</div>`;
+            }
             html += `<strong>${esc(b.shortSha)}</strong> &mdash; ${esc(b.subject)}<div class="note">${esc(b.rationale)}</div>`;
             html += `<div class="note" style="margin-top:6px">${b.changedFileCount} frontend file(s) changed since baseline:</div><ul>`;
             for (const f of b.changedFiles) {
@@ -95,7 +131,9 @@
             }
           }
 
-          html += `<h2>Working Pages (${s.workingPages})</h2><table><thead><tr><th>Route</th><th>Component</th><th>Imports</th><th>Source</th></tr></thead><tbody>`;
+          html += `<h2>Routes — import scan passed (${importScanPassed})</h2>`;
+          html += `<p class="note">&ldquo;Import scan passed&rdquo; means the page file exists, its import graph resolves on disk, and it exposes a default export &mdash; not that it renders correctly. Named exports, types, and runtime behavior are covered by typecheck and build.</p>`;
+          html += `<table><thead><tr><th>Route</th><th>Component</th><th>Imports</th><th>Source</th></tr></thead><tbody>`;
           for (const p of d.pages.filter((x) => x.status !== 'broken')) {
             html += `<tr><td><code>${esc(p.path)}</code></td><td>${p.status === 'redirect' ? '<span class="note">' + esc(p.note || 'redirect') + '</span>' : esc(p.component)}</td>` +
               `<td>${p.status === 'redirect' ? '&mdash;' : (p.importedModuleCount || 0) + ' modules'}</td>` +
