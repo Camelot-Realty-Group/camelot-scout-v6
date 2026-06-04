@@ -6,3 +6,4 @@ dist/
 desktop.ini
 **/desktop.ini
 tmp_pdf_extracts/
+.qa-cache/

@@ -30,6 +30,7 @@ import {
   X,
   Megaphone,
   Sparkles,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/store';
@@ -97,6 +98,7 @@ const navigation: NavSection[] = [
       { label: 'AI Bots', href: '/bots', icon: <Bot size={18} /> },
       { label: 'Settings', href: '/settings', icon: <Settings size={18} />, tourId: 'settings' },
       { label: 'Tutorials', href: '/tutorials', icon: <BookOpen size={18} /> },
+      { label: 'QA Console', href: '/qa', icon: <Activity size={18} /> },
     ],
   },
 ];

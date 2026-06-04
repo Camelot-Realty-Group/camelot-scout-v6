@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Scout QA Console (static fallback)</title>
+    <style>
+      :root { --gold:#dbba2e; --dark:#1a1a1a; }
+      * { box-sizing: border-box; }
+      body { margin:0; font-family: Inter, system-ui, -apple-system, sans-serif; background:#faf8f5; color:#1a1a1a; }
+      header { background:var(--dark); color:#fff; padding:20px 28px; }
+      header h1 { margin:0; font-size:20px; }
+      header p { margin:4px 0 0; font-size:13px; color:#cbd5e1; }
+      main { max-width:1000px; margin:0 auto; padding:24px; }
+      .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
+      .card { border:1px solid #e5e7eb; border-radius:12px; padding:14px; background:#fff; }
+      .card .n { font-size:26px; font-weight:700; }
+      .card .l { font-size:12px; color:#6b7280; margin-top:4px; }
+      .bad { border-color:#fecaca; background:#fef2f2; }
+      .good { border-color:#bbf7d0; background:#f0fdf4; }
+      .warn { border-color:#fde68a; background:#fffbeb; }
+      h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#374151; margin:24px 0 8px; }
+      table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; font-size:13px; }
+      th,td { text-align:left; padding:8px 12px; border-bottom:1px solid #f3f4f6; }
+      th { background:#f9fafb; color:#6b7280; font-size:11px; text-transform:uppercase; }
+      code { font-family: ui-monospace, Menlo, monospace; font-size:12px; }
+      a { color:#b89b1e; }
+      .check { border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin-bottom:8px; }
+      .check.fail { border-color:#fecaca; background:#fef2f2; }
+      .check.blocked { border-color:#fde68a; background:#fffbeb; }
+      .check.pass { border-color:#bbf7d0; background:#f0fdf4; }
+      pre { white-space:pre-wrap; font-size:11px; background:#fff8; padding:8px; border-radius:6px; max-height:160px; overflow:auto; }
+      .err { border:1px solid #fecaca; background:#fef2f2; padding:14px; border-radius:12px; color:#991b1b; }
+      .note { font-size:12px; color:#6b7280; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Scout QA Console <span style="color:var(--gold)">&middot; static fallback</span></h1>
+      <p>Plain-HTML view of qa-report.json. The full in-app console is at <code>/#/qa</code>.</p>
+    </header>
+    <main id="app"><p class="note">Loading qa-report.json&hellip;</p></main>
+    <script>
+      const el = document.getElementById('app');
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+      fetch('./qa-report.json?t=' + Date.now(), { cache: 'no-store' })
+        .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then((d) => {
+          const s = d.summary;
+          const deployReady = s.brokenPages === 0 && s.missingPackages === 0 && !d.checks.some((c) => c.status === 'fail');
+          const card = (n, l, cls) => `<div class="card ${cls}"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+          let html = '';
+          html += `<div class="card ${deployReady ? 'good' : 'bad'}" style="margin-bottom:16px"><strong>${deployReady ? 'Static checks pass.' : 'Attention required before deploy.'}</strong><div class="note">Generated ${esc(new Date(d.generatedAt).toLocaleString())} &middot; ${esc(d.git.branch)}@${esc(d.git.shortCommit)}</div></div>`;
+          html += '<div class="cards">';
+          html += card(s.totalRoutes, 'Routes', '');
+          html += card(s.workingPages, 'Working pages', 'good');
+          html += card(s.brokenPages, 'Broken pages', s.brokenPages ? 'bad' : 'good');
+          html += card(s.missingPackages, 'Missing packages', s.missingPackages ? 'bad' : 'good');
+          html += card(s.sourceFiles, 'Source files', '');
+          html += '</div>';
+
+          html += '<h2>Build &amp; Test Checks</h2>';
+          for (const c of d.checks) {
+            html += `<div class="check ${esc(c.status)}"><strong style="text-transform:capitalize">${esc(c.name)}</strong> &mdash; ${esc(c.status)}` +
+              (c.command ? `<div class="note"><code>${esc(c.command)}</code></div>` : '') +
+              (c.detail ? `<pre>${esc(c.detail)}</pre>` : '') + '</div>';
+          }
+
+          if (d.baseline) {
+            const b = d.baseline;
+            html += '<h2>Compared to last working baseline</h2><div class="check">';
+            html += `<strong>${esc(b.shortSha)}</strong> &mdash; ${esc(b.subject)}<div class="note">${esc(b.rationale)}</div>`;
+            html += `<div class="note" style="margin-top:6px">${b.changedFileCount} frontend file(s) changed since baseline:</div><ul>`;
+            for (const f of b.changedFiles) {
+              html += `<li><code>${esc(f.status)}</code> <a href="${esc(f.link)}" target="_blank" rel="noreferrer">${esc(f.file)}</a></li>`;
+            }
+            html += '</ul></div>';
+          }
+
+          const broken = d.pages.filter((p) => p.status === 'broken');
+          if (broken.length) {
+            html += '<h2 style="color:#b91c1c">Broken Pages</h2>';
+            for (const p of broken) {
+              html += `<div class="check fail"><code>${esc(p.path)}</code>` +
+                (p.fileLink ? ` &mdash; <a href="${esc(p.fileLink)}" target="_blank" rel="noreferrer">${esc(p.file)}</a>` : '') +
+                '<ul>' + p.issues.map((i) => `<li>${esc(i)}</li>`).join('') + '</ul></div>';
+            }
+          }
+
+          if (d.missingPackages.length) {
+            html += '<h2 style="color:#b91c1c">Missing Packages</h2>';
+            for (const m of d.missingPackages) {
+              html += `<div class="check fail"><code>${esc(m.name)}</code> &mdash; <code>npm i ${esc(m.name)}</code></div>`;
+            }
+          }
+
+          html += `<h2>Working Pages (${s.workingPages})</h2><table><thead><tr><th>Route</th><th>Component</th><th>Imports</th><th>Source</th></tr></thead><tbody>`;
+          for (const p of d.pages.filter((x) => x.status !== 'broken')) {
+            html += `<tr><td><code>${esc(p.path)}</code></td><td>${p.status === 'redirect' ? '<span class="note">' + esc(p.note || 'redirect') + '</span>' : esc(p.component)}</td>` +
+              `<td>${p.status === 'redirect' ? '&mdash;' : (p.importedModuleCount || 0) + ' modules'}</td>` +
+              `<td>${p.fileLink ? `<a href="${esc(p.fileLink)}" target="_blank" rel="noreferrer">${esc(p.file)}</a>` : '&mdash;'}</td></tr>`;
+          }
+          html += '</tbody></table>';
+          el.innerHTML = html;
+        })
+        .catch((e) => {
+          el.innerHTML = '<div class="err"><strong>Could not load qa-report.json</strong><p>' + esc(e.message || e) +
+            '</p><p>Generate it with <code>npm run qa</code> (or <code>npm run qa:scan</code>), then redeploy.</p></div>';
+        });
+    </script>
+  </body>
+</html>
