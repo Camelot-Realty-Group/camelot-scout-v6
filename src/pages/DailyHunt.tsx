@@ -4,12 +4,14 @@ import {
   Building2,
   ExternalLink,
   Eye,
+  Info,
   RefreshCcw,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import { useDailyHunt, type DailyHuntLead } from '@/hooks/useDailyHunt';
 import { cn } from '@/lib/utils';
+import { runTriggersEnabled } from '@/lib/runtime-mode';
 
 const priorityStyles: Record<string, string> = {
   HIGH: 'bg-[#B99425] text-white border-[#B99425]',
@@ -59,15 +61,31 @@ export default function DailyHunt() {
               Daily Hunt is built to find boutique-fit board, sponsor, distress, referral, and acquisition opportunities.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={runNow}
-            disabled={running}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#263747] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#182532] disabled:opacity-60"
-          >
-            <RefreshCcw size={16} className={running ? 'animate-spin' : ''} />
-            {running ? 'Running' : 'Run Daily Hunt'}
-          </button>
+          {runTriggersEnabled() ? (
+            <button
+              type="button"
+              onClick={runNow}
+              disabled={running}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#263747] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#182532] disabled:opacity-60"
+            >
+              <RefreshCcw size={16} className={running ? 'animate-spin' : ''} />
+              {running ? 'Running' : 'Run Daily Hunt'}
+            </button>
+          ) : (
+            <div
+              className="inline-flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-600 max-w-sm"
+              title="Daily Hunt runs server-side via Supabase Edge Functions + pg_cron. The button is hidden on the static build until the Edge Function is deployed and VITE_ENABLE_RUN_TRIGGERS=true."
+            >
+              <Info size={14} className="mt-0.5 flex-shrink-0 text-[#B99425]" />
+              <div>
+                <div className="font-semibold text-slate-800">Read-only queue</div>
+                <div className="mt-0.5 leading-snug">
+                  Daily Hunt runs server-side on a schedule. Deploy the Edge
+                  Function and set <code className="text-[10px]">VITE_ENABLE_RUN_TRIGGERS=true</code> to enable manual runs.
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
