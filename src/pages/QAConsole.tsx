@@ -30,6 +30,7 @@ interface PageEntry {
   fileLink: string | null;
   brokenImports: BrokenImport[];
   importedModuleCount?: number;
+  hasDefaultExport?: boolean;
   note?: string;
 }
 interface CheckEntry {
@@ -53,19 +54,36 @@ interface BaselineDiff {
   changedFiles: { status: string; file: string; link: string }[];
   changedFileCount: number;
   diffStatTail: string;
+  source?: 'live' | 'fallback';
+  capturedAt?: string;
+  capturedAgainstShortCommit?: string;
+}
+interface Verdict {
+  level: 'pass' | 'warn' | 'fail';
+  deployReady: boolean;
+  headline: string;
+  scanClean: boolean;
+  requiredChecks: string[];
+  requiredChecksPassed: boolean;
+  requiredChecksIncomplete: boolean;
+  requiredChecksFailed: boolean;
 }
 interface QAReport {
   generatedAt: string;
   git: { branch: string; commit: string; shortCommit: string; githubSlug: string; blobBase: string };
+  verdict?: Verdict;
+  scanLimits?: string[];
   baseline: BaselineDiff | null;
   summary: {
     totalRoutes: number;
+    importScanPassed?: number;
     workingPages: number;
     brokenPages: number;
     redirectRoutes: number;
     missingPackages: number;
     sourceFiles: number;
     checks: Record<string, CheckStatus>;
+    requiredChecksPassed?: boolean;
   };
   pages: PageEntry[];
   missingPackages: MissingPackage[];
@@ -133,10 +151,44 @@ export default function QAConsole() {
 
   useEffect(load, []);
 
-  const blocked = report?.checks.some((c) => c.status === 'blocked');
-  const anyFail = report?.checks.some((c) => c.status === 'fail');
-  const deployReady =
-    report && report.summary.brokenPages === 0 && report.summary.missingPackages === 0 && !anyFail;
+  // Derive a tri-state verdict. Prefer the scanner-computed verdict; fall back
+  // to recomputing from raw data for older reports that predate the field.
+  const REQUIRED = ['typecheck', 'build'];
+  const verdict: Verdict | null = report
+    ? report.verdict ??
+      (() => {
+        const checkStatus = (n: string) =>
+          report.checks.find((c) => c.name === n)?.status ?? 'not-run';
+        const required = REQUIRED.map(checkStatus);
+        const scanClean =
+          report.summary.brokenPages === 0 && report.summary.missingPackages === 0;
+        const failed = required.some((s) => s === 'fail' || s === 'error');
+        const incomplete = required.some((s) => s === 'blocked' || s === 'not-run');
+        const passed = required.every((s) => s === 'pass');
+        const level: Verdict['level'] = !scanClean || failed ? 'fail' : passed ? 'pass' : 'warn';
+        return {
+          level,
+          deployReady: level === 'pass',
+          headline:
+            level === 'pass'
+              ? 'Deploy-ready — route import scan passed and typecheck + build passed.'
+              : level === 'fail'
+                ? 'Attention required before deploy — broken pages, missing packages, or a failed check.'
+                : 'Static route import scan passed, but checks are INCOMPLETE — typecheck/build did not run, so deploy-readiness is unverified.',
+          scanClean,
+          requiredChecks: REQUIRED,
+          requiredChecksPassed: passed,
+          requiredChecksIncomplete: incomplete,
+          requiredChecksFailed: failed,
+        };
+      })()
+    : null;
+
+  const verdictTone =
+    verdict?.level === 'pass' ? 'good' : verdict?.level === 'fail' ? 'bad' : 'warn';
+  const importScanPassed = report
+    ? report.summary.importScanPassed ?? report.summary.workingPages
+    : 0;
 
   return (
     <div className="min-h-screen bg-camelot-cream/40">
@@ -187,31 +239,62 @@ export default function QAConsole() {
             {/* Deploy verdict */}
             <div
               className={`rounded-xl border p-4 flex items-start gap-3 ${
-                deployReady
+                verdictTone === 'good'
                   ? 'border-green-200 bg-green-50'
-                  : 'border-red-200 bg-red-50'
+                  : verdictTone === 'warn'
+                    ? 'border-amber-200 bg-amber-50'
+                    : 'border-red-200 bg-red-50'
               }`}
             >
-              {deployReady ? (
+              {verdictTone === 'good' ? (
                 <CheckCircle2 className="text-green-600 mt-0.5" size={20} />
               ) : (
-                <AlertTriangle className="text-red-600 mt-0.5" size={20} />
+                <AlertTriangle
+                  className={`${verdictTone === 'warn' ? 'text-amber-600' : 'text-red-600'} mt-0.5`}
+                  size={20}
+                />
               )}
               <div className="text-sm">
-                <p className={`font-semibold ${deployReady ? 'text-green-800' : 'text-red-800'}`}>
-                  {deployReady
-                    ? 'Static checks pass — no broken pages or missing packages detected.'
-                    : 'Attention required before deploy.'}
+                <p
+                  className={`font-semibold ${
+                    verdictTone === 'good'
+                      ? 'text-green-800'
+                      : verdictTone === 'warn'
+                        ? 'text-amber-800'
+                        : 'text-red-800'
+                  }`}
+                >
+                  {verdict?.headline ?? 'QA status'}
                 </p>
                 <p className="text-gray-600 mt-0.5">
                   Report generated {new Date(report.generatedAt).toLocaleString()} &middot; loaded{' '}
                   {loadedAt ? new Date(loadedAt).toLocaleTimeString() : ''}
                 </p>
-                {blocked && (
+                {verdict && !verdict.requiredChecksPassed && (
                   <p className="text-amber-700 mt-1">
-                    Note: build/typecheck/lint were <strong>blocked</strong> (toolchain not installed in the
-                    generating environment). Route/import analysis below is still authoritative.
+                    Required checks ({verdict.requiredChecks.join(' + ')}){' '}
+                    {verdict.requiredChecksFailed ? (
+                      <>
+                        <strong>failed</strong> — see Build &amp; Test Checks below.
+                      </>
+                    ) : (
+                      <>
+                        did not complete (<strong>blocked / not-run</strong> — toolchain not installed
+                        in the generating environment). Static route/import analysis below is
+                        authoritative; type and runtime correctness remain <strong>unverified</strong>.
+                      </>
+                    )}
                   </p>
+                )}
+                {report.scanLimits && report.scanLimits.length > 0 && (
+                  <details className="mt-2 text-xs text-gray-600">
+                    <summary className="cursor-pointer font-medium">What this scan does and does not cover</summary>
+                    <ul className="mt-1 space-y-1 list-disc pl-5">
+                      {report.scanLimits.map((l, i) => (
+                        <li key={i}>{l}</li>
+                      ))}
+                    </ul>
+                  </details>
                 )}
               </div>
             </div>
@@ -219,7 +302,12 @@ export default function QAConsole() {
             {/* Summary stats */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <StatCard label="Routes" value={report.summary.totalRoutes} tone="neutral" icon={<Activity size={22} />} />
-              <StatCard label="Working pages" value={report.summary.workingPages} tone="good" icon={<CheckCircle2 size={22} />} />
+              <StatCard
+                label="Import-scan passed"
+                value={importScanPassed}
+                tone="neutral"
+                icon={<CheckCircle2 size={22} />}
+              />
               <StatCard
                 label="Broken pages"
                 value={report.summary.brokenPages}
@@ -242,7 +330,14 @@ export default function QAConsole() {
                 {report.checks.map((c) => (
                   <div key={c.name} className={`rounded-xl border p-4 ${checkColor[c.status]}`}>
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold capitalize">{c.name}</span>
+                      <span className="font-semibold capitalize flex items-center gap-1">
+                        {c.name}
+                        {(verdict?.requiredChecks ?? REQUIRED).includes(c.name) && (
+                          <span className="text-[9px] font-bold uppercase tracking-wide rounded bg-gray-200 text-gray-700 px-1 py-0.5">
+                            required
+                          </span>
+                        )}
+                      </span>
                       <span className="text-xs font-bold uppercase">{c.status}</span>
                     </div>
                     {c.command && <code className="block text-[11px] mt-1 opacity-70 break-all">{c.command}</code>}
@@ -261,8 +356,23 @@ export default function QAConsole() {
               <section>
                 <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-1">
                   <GitCompare size={15} /> Compared to last working baseline
+                  {report.baseline.source === 'fallback' && (
+                    <span className="ml-1 inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+                      cached / fallback
+                    </span>
+                  )}
                 </h2>
                 <div className="rounded-xl border border-gray-200 bg-white p-4">
+                  {report.baseline.source === 'fallback' && (
+                    <p className="text-xs text-amber-700 mb-2">
+                      Live git history was unavailable (likely a shallow deploy clone). Showing the last
+                      committed baseline snapshot
+                      {report.baseline.capturedAgainstShortCommit
+                        ? ` (captured against ${report.baseline.capturedAgainstShortCommit})`
+                        : ''}
+                      .
+                    </p>
+                  )}
                   <p className="text-sm text-gray-700">
                     Baseline:{' '}
                     <a
@@ -374,11 +484,16 @@ export default function QAConsole() {
               </section>
             )}
 
-            {/* Working pages */}
+            {/* Routes that passed the static import scan */}
             <section>
               <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-2 flex items-center gap-1">
-                <CheckCircle2 size={15} className="text-green-600" /> Working Pages ({report.summary.workingPages})
+                <CheckCircle2 size={15} className="text-green-600" /> Routes — import scan passed ({importScanPassed})
               </h2>
+              <p className="text-xs text-gray-500 mb-2">
+                &ldquo;Import scan passed&rdquo; means the route page file exists, its import graph resolves on
+                disk, and it exposes a default export. It does <strong>not</strong> mean the page renders
+                correctly — named exports, types, and runtime behavior are covered by typecheck and build.
+              </p>
               <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
