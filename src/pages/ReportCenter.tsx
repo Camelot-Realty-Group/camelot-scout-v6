@@ -895,15 +895,15 @@ export default function ReportCenter() {
   const isConnecticutMode = /connecticut|\bct\b|monroe/i.test(`${borough} ${address} ${data?.borough || ''} ${data?.address || ''}`);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Jackie</h1>
-        <p className="text-gray-500 mt-1">Camelot&rsquo;s AI pitch engine — Property Intelligence Reports, management proposals, and email drafts. One address, every output.</p>
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Jackie</h1>
+        <p className="text-sm md:text-base text-gray-500 mt-1">Camelot&rsquo;s AI pitch engine — Property Intelligence Reports, management proposals, and email drafts. One address, every output.</p>
       </div>
 
       {/* Search */}
-      <div className="bg-white rounded-xl border p-6 shadow-sm">
+      <div className="bg-white rounded-xl border p-4 md:p-6 shadow-sm">
         <div className="flex flex-col xl:flex-row gap-3">
           <div className="flex flex-1 gap-3">
             <input

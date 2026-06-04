@@ -1,3 +1,9 @@
+/**
+ * @deprecated v2026.05.31 — this 1,420-line client-side knowledge engine is
+ * being replaced by the `perplexity-research` Edge Function. New code MUST
+ * call `@/lib/perplexity-client` (TBD) instead. Once `src/pages/Bots.tsx` is
+ * migrated, delete this file.
+ */
 export type TwinKnowledgeProject = {
   id: string;
   name: string;

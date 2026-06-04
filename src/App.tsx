@@ -3,6 +3,8 @@ import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Layout from '@/components/Layout';
 import GuidedTour from '@/components/GuidedTour';
+import OfflineBanner from '@/components/OfflineBanner';
+import VersionStamp from '@/components/VersionStamp';
 import { useTour } from '@/hooks/useTour';
 import { useBuildings } from '@/hooks/useBuildings';
 
@@ -63,6 +65,7 @@ export default function App() {
           },
         }}
       />
+      <OfflineBanner />
       <GuidedTour isOpen={isTourOpen} onClose={closeTour} />
       <Layout onStartTour={startTour}>
         <Routes>
@@ -98,6 +101,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
+      <VersionStamp />
     </>
   );
 }

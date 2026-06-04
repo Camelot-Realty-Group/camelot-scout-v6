@@ -1,4 +1,13 @@
 /**
+ * @deprecated v2026.05.31 — Excalibur will be replaced by an Edge Function
+ * (`agreements-generate`) backed by the same Fact Packet store as Jackie. The
+ * 800-line client-side generator ships brand-fragile output and bakes the
+ * AI prompt into the browser bundle. Migrate `src/pages/Agreements.tsx` to
+ * call the new function, then delete this file.
+ *
+ * Tracking: see Camelot_OS_v2026.05.31_Diagnostic_and_Rebuild.md § Cleanup.
+ *
+ * ORIGINAL HEADER:
  * Excalibur — Camelot Agreement Engine
  * Generates branded property management agreements by asset class.
  * Pulls building data from Jackie/SCOUT to auto-populate where possible.

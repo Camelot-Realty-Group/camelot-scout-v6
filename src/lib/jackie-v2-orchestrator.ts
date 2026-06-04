@@ -1,3 +1,8 @@
+/**
+ * @deprecated v2026.05.31 — superseded by `@/lib/jackie-engine`. The prompt
+ * here still drives the `ai-client` until the call site is migrated to the
+ * Fact Packet flow. Delete after `src/lib/ai-client.ts` switches over.
+ */
 export const JACKIE_V2_ORCHESTRATOR_PROMPT = `
 # Jackie v2 - Universal AI Orchestrator
 
