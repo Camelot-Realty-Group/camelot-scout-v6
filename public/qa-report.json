@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-04T05:11:20.181Z",
+  "generatedAt": "2026-06-16T19:17:14.172Z",
   "git": {
     "branch": "main",
-    "commit": "1bd49ebe6759c32e3d108a686472833ab7e2dc05",
-    "shortCommit": "1bd49eb",
-    "remoteUrl": "https://github.com/dgoldoff-hue/camelot-scout-v6",
+    "commit": "0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76",
+    "shortCommit": "0d67a859",
+    "remoteUrl": "https://github.com/dgoldoff-hue/camelot-scout-v6.git",
     "githubSlug": "dgoldoff-hue/camelot-scout-v6",
-    "blobBase": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05"
+    "blobBase": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76"
   },
   "baseline": {
     "ref": "124e56c",
@@ -18,93 +18,178 @@
       {
         "status": "M",
         "file": "src/App.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/App.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/App.tsx"
+      },
+      {
+        "status": "M",
+        "file": "src/components/Layout.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/Layout.tsx"
+      },
+      {
+        "status": "A",
+        "file": "src/components/OfflineBanner.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/OfflineBanner.tsx"
       },
       {
         "status": "M",
         "file": "src/components/PropertyDetail.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/components/PropertyDetail.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/PropertyDetail.tsx"
+      },
+      {
+        "status": "A",
+        "file": "src/components/VersionStamp.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/VersionStamp.tsx"
       },
       {
         "status": "M",
         "file": "src/hooks/useDailyHunt.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/hooks/useDailyHunt.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/hooks/useDailyHunt.ts"
+      },
+      {
+        "status": "A",
+        "file": "src/lib/app-version.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/app-version.ts"
       },
       {
         "status": "A",
         "file": "src/lib/bot-hubspot-reporting.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/lib/bot-hubspot-reporting.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/bot-hubspot-reporting.ts"
       },
       {
         "status": "A",
         "file": "src/lib/camelot-bot-operating-model.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/lib/camelot-bot-operating-model.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/camelot-bot-operating-model.ts"
       },
       {
         "status": "A",
         "file": "src/lib/cta-scenarios.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/lib/cta-scenarios.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/cta-scenarios.ts"
+      },
+      {
+        "status": "M",
+        "file": "src/lib/excalibur.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/excalibur.ts"
+      },
+      {
+        "status": "A",
+        "file": "src/lib/fact-packet.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/fact-packet.ts"
       },
       {
         "status": "M",
         "file": "src/lib/integrations.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/lib/integrations.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/integrations.ts"
+      },
+      {
+        "status": "A",
+        "file": "src/lib/jackie-engine.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/jackie-engine.ts"
+      },
+      {
+        "status": "M",
+        "file": "src/lib/jackie-v2-orchestrator.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/jackie-v2-orchestrator.ts"
       },
       {
         "status": "M",
         "file": "src/lib/report-crm-tracking.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/lib/report-crm-tracking.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/report-crm-tracking.ts"
+      },
+      {
+        "status": "A",
+        "file": "src/lib/runtime-mode.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/runtime-mode.ts"
       },
       {
         "status": "M",
         "file": "src/lib/scout-ai-doctrines.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/lib/scout-ai-doctrines.ts"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/scout-ai-doctrines.ts"
+      },
+      {
+        "status": "M",
+        "file": "src/lib/supabase.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/supabase.ts"
+      },
+      {
+        "status": "A",
+        "file": "src/lib/template-billing.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/template-billing.ts"
+      },
+      {
+        "status": "M",
+        "file": "src/lib/twin-knowledge.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/twin-knowledge.ts"
       },
       {
         "status": "M",
         "file": "src/pages/Bots.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Bots.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Bots.tsx"
+      },
+      {
+        "status": "M",
+        "file": "src/pages/DailyHunt.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/DailyHunt.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Import.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Import.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Import.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Integrations.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Integrations.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Integrations.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Outreach.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Outreach.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Outreach.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Pipeline.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Pipeline.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Pipeline.tsx"
+      },
+      {
+        "status": "A",
+        "file": "src/pages/QAConsole.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/QAConsole.tsx"
+      },
+      {
+        "status": "M",
+        "file": "src/pages/ReportCenter.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/ReportCenter.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Results.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Results.tsx"
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Results.tsx"
+      },
+      {
+        "status": "A",
+        "file": "src/pages/TemplateBilling.tsx",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/TemplateBilling.tsx"
+      },
+      {
+        "status": "M",
+        "file": "src/types/index.ts",
+        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/types/index.ts"
       }
     ],
-    "changedFileCount": 15,
-    "diffStatTail": " 15 files changed, 1150 insertions(+), 73 deletions(-)"
+    "changedFileCount": 32,
+    "diffStatTail": " 32 files changed, 3430 insertions(+), 97 deletions(-)"
   },
   "summary": {
-    "totalRoutes": 30,
-    "workingPages": 29,
+    "totalRoutes": 31,
+    "workingPages": 30,
     "brokenPages": 0,
     "redirectRoutes": 1,
     "missingPackages": 0,
-    "sourceFiles": 105,
+    "sourceFiles": 113,
     "checks": {
-      "typecheck": "blocked",
-      "lint": "blocked",
-      "build": "blocked"
+      "typecheck": "not-run",
+      "lint": "not-run",
+      "build": "not-run"
     }
   },
   "pages": [
@@ -114,8 +199,8 @@
       "importSpec": "@/pages/Search",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Search.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Search.tsx",
+      "file": "src\\pages\\Search.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Search.tsx",
       "brokenImports": [],
       "importedModuleCount": 24
     },
@@ -125,8 +210,8 @@
       "importSpec": "@/pages/Results",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Results.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Results.tsx",
+      "file": "src\\pages\\Results.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Results.tsx",
       "brokenImports": [],
       "importedModuleCount": 75
     },
@@ -136,10 +221,10 @@
       "importSpec": "@/pages/DailyHunt",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/DailyHunt.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/DailyHunt.tsx",
+      "file": "src\\pages\\DailyHunt.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/DailyHunt.tsx",
       "brokenImports": [],
-      "importedModuleCount": 19
+      "importedModuleCount": 21
     },
     {
       "path": "/saved",
@@ -147,8 +232,8 @@
       "importSpec": "@/pages/Saved",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Saved.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Saved.tsx",
+      "file": "src\\pages\\Saved.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Saved.tsx",
       "brokenImports": [],
       "importedModuleCount": 71
     },
@@ -158,8 +243,8 @@
       "importSpec": "@/pages/Import",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Import.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Import.tsx",
+      "file": "src\\pages\\Import.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Import.tsx",
       "brokenImports": [],
       "importedModuleCount": 13
     },
@@ -169,8 +254,8 @@
       "importSpec": "@/pages/Pipeline",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Pipeline.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Pipeline.tsx",
+      "file": "src\\pages\\Pipeline.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Pipeline.tsx",
       "brokenImports": [],
       "importedModuleCount": 75
     },
@@ -180,8 +265,8 @@
       "importSpec": "@/pages/Outreach",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Outreach.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Outreach.tsx",
+      "file": "src\\pages\\Outreach.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Outreach.tsx",
       "brokenImports": [],
       "importedModuleCount": 20
     },
@@ -191,8 +276,8 @@
       "importSpec": "@/pages/Chat",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Chat.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Chat.tsx",
+      "file": "src\\pages\\Chat.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Chat.tsx",
       "brokenImports": [],
       "importedModuleCount": 12
     },
@@ -202,8 +287,8 @@
       "importSpec": "@/pages/Archive",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Archive.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Archive.tsx",
+      "file": "src\\pages\\Archive.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Archive.tsx",
       "brokenImports": [],
       "importedModuleCount": 67
     },
@@ -213,8 +298,8 @@
       "importSpec": "@/pages/Export",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Export.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Export.tsx",
+      "file": "src\\pages\\Export.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Export.tsx",
       "brokenImports": [],
       "importedModuleCount": 9
     },
@@ -224,8 +309,8 @@
       "importSpec": "@/pages/Integrations",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Integrations.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Integrations.tsx",
+      "file": "src\\pages\\Integrations.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Integrations.tsx",
       "brokenImports": [],
       "importedModuleCount": 21
     },
@@ -235,8 +320,8 @@
       "importSpec": "@/pages/Bots",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Bots.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Bots.tsx",
+      "file": "src\\pages\\Bots.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Bots.tsx",
       "brokenImports": [],
       "importedModuleCount": 10
     },
@@ -246,8 +331,8 @@
       "importSpec": "@/pages/Settings",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Settings.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Settings.tsx",
+      "file": "src\\pages\\Settings.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Settings.tsx",
       "brokenImports": [],
       "importedModuleCount": 12
     },
@@ -257,8 +342,8 @@
       "importSpec": "@/pages/Tutorials",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Tutorials.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Tutorials.tsx",
+      "file": "src\\pages\\Tutorials.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Tutorials.tsx",
       "brokenImports": [],
       "importedModuleCount": 2
     },
@@ -268,8 +353,8 @@
       "importSpec": "@/pages/Compliance",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Compliance.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Compliance.tsx",
+      "file": "src\\pages\\Compliance.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Compliance.tsx",
       "brokenImports": [],
       "importedModuleCount": 13
     },
@@ -279,8 +364,8 @@
       "importSpec": "@/pages/Alerts",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Alerts.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Alerts.tsx",
+      "file": "src\\pages\\Alerts.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Alerts.tsx",
       "brokenImports": [],
       "importedModuleCount": 12
     },
@@ -290,8 +375,8 @@
       "importSpec": "@/pages/InstantProposal",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/InstantProposal.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/InstantProposal.tsx",
+      "file": "src\\pages\\InstantProposal.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/InstantProposal.tsx",
       "brokenImports": [],
       "importedModuleCount": 32
     },
@@ -301,8 +386,8 @@
       "importSpec": "@/pages/Proposals",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Proposals.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Proposals.tsx",
+      "file": "src\\pages\\Proposals.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Proposals.tsx",
       "brokenImports": [],
       "importedModuleCount": 53
     },
@@ -312,8 +397,8 @@
       "importSpec": "@/pages/Intelligence",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Intelligence.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Intelligence.tsx",
+      "file": "src\\pages\\Intelligence.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Intelligence.tsx",
       "brokenImports": [],
       "importedModuleCount": 8
     },
@@ -323,8 +408,8 @@
       "importSpec": "@/pages/Reports",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Reports.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Reports.tsx",
+      "file": "src\\pages\\Reports.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Reports.tsx",
       "brokenImports": [],
       "importedModuleCount": 9
     },
@@ -334,8 +419,8 @@
       "importSpec": "@/pages/ReportCenter",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/ReportCenter.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/ReportCenter.tsx",
+      "file": "src\\pages\\ReportCenter.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/ReportCenter.tsx",
       "brokenImports": [],
       "importedModuleCount": 54
     },
@@ -345,8 +430,8 @@
       "importSpec": "@/pages/Agreements",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Agreements.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Agreements.tsx",
+      "file": "src\\pages\\Agreements.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Agreements.tsx",
       "brokenImports": [],
       "importedModuleCount": 38
     },
@@ -356,8 +441,8 @@
       "importSpec": "@/pages/Sentinel",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Sentinel.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Sentinel.tsx",
+      "file": "src\\pages\\Sentinel.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Sentinel.tsx",
       "brokenImports": [],
       "importedModuleCount": 6
     },
@@ -367,8 +452,8 @@
       "importSpec": "@/pages/Arthur",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Arthur.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Arthur.tsx",
+      "file": "src\\pages\\Arthur.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Arthur.tsx",
       "brokenImports": [],
       "importedModuleCount": 7
     },
@@ -378,10 +463,21 @@
       "importSpec": "@/pages/ContentEngine",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/ContentEngine.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/ContentEngine.tsx",
+      "file": "src\\pages\\ContentEngine.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/ContentEngine.tsx",
       "brokenImports": [],
       "importedModuleCount": 1
+    },
+    {
+      "path": "/template-billing",
+      "component": "TemplateBilling",
+      "importSpec": "@/pages/TemplateBilling",
+      "status": "ok",
+      "issues": [],
+      "file": "src\\pages\\TemplateBilling.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/TemplateBilling.tsx",
+      "brokenImports": [],
+      "importedModuleCount": 11
     },
     {
       "path": "/violations",
@@ -389,8 +485,8 @@
       "importSpec": "@/pages/Violations",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/Violations.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/Violations.tsx",
+      "file": "src\\pages\\Violations.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Violations.tsx",
       "brokenImports": [],
       "importedModuleCount": 3
     },
@@ -400,8 +496,8 @@
       "importSpec": "@/pages/LegalReportTerms",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/LegalReportTerms.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/LegalReportTerms.tsx",
+      "file": "src\\pages\\LegalReportTerms.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/LegalReportTerms.tsx",
       "brokenImports": [],
       "importedModuleCount": 1
     },
@@ -411,8 +507,8 @@
       "importSpec": "@/pages/QAConsole",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/QAConsole.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/QAConsole.tsx",
+      "file": "src\\pages\\QAConsole.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/QAConsole.tsx",
       "brokenImports": [],
       "importedModuleCount": 0
     },
@@ -422,8 +518,8 @@
       "importSpec": "@/pages/QAConsole",
       "status": "ok",
       "issues": [],
-      "file": "src/pages/QAConsole.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/1bd49ebe6759c32e3d108a686472833ab7e2dc05/src/pages/QAConsole.tsx",
+      "file": "src\\pages\\QAConsole.tsx",
+      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/QAConsole.tsx",
       "brokenImports": [],
       "importedModuleCount": 0
     },
@@ -443,24 +539,18 @@
   "checks": [
     {
       "name": "typecheck",
-      "status": "blocked",
-      "command": "npx tsc -b --pretty false",
-      "ranAt": "2026-06-04T05:11:19.558Z",
-      "detail": "Toolchain missing: node_modules/.bin/tsc not found. Run `npm install` (or `npm ci`) with registry access, then re-run `npm run qa`."
+      "status": "not-run",
+      "detail": "No result recorded. Run `npm run qa` (or the individual script) to populate."
     },
     {
       "name": "lint",
-      "status": "blocked",
-      "command": "npx eslint . --max-warnings=9999",
-      "ranAt": "2026-06-04T05:11:19.561Z",
-      "detail": "Toolchain missing: node_modules/.bin/eslint not found. Run `npm install` (or `npm ci`) with registry access, then re-run `npm run qa`."
+      "status": "not-run",
+      "detail": "No result recorded. Run `npm run qa` (or the individual script) to populate."
     },
     {
       "name": "build",
-      "status": "blocked",
-      "command": "npm run build",
-      "ranAt": "2026-06-04T05:11:19.561Z",
-      "detail": "Toolchain missing: node_modules/.bin/vite not found. Run `npm install` (or `npm ci`) with registry access, then re-run `npm run qa`."
+      "status": "not-run",
+      "detail": "No result recorded. Run `npm run qa` (or the individual script) to populate."
     }
   ]
 }

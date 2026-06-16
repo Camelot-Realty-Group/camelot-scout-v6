@@ -36,6 +36,7 @@ const LegalReportTerms = lazy(() => import('@/pages/LegalReportTerms'));
 const Arthur = lazy(() => import('@/pages/Arthur'));
 const ContentEngine = lazy(() => import('@/pages/ContentEngine'));
 const QAConsole = lazy(() => import('@/pages/QAConsole'));
+const TemplateBilling = lazy(() => import('@/pages/TemplateBilling'));
 
 function page(Page: ComponentType) {
   return (
@@ -94,6 +95,7 @@ export default function App() {
           <Route path="/sentinel" element={page(Sentinel)} />
           <Route path="/arthur" element={page(Arthur)} />
           <Route path="/content-engine" element={page(ContentEngine)} />
+          <Route path="/template-billing" element={page(TemplateBilling)} />
           <Route path="/violations" element={page(Violations)} />
           <Route path="/legal-report-terms" element={page(LegalReportTerms)} />
           <Route path="/qa" element={page(QAConsole)} />

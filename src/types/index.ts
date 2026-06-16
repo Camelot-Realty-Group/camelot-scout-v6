@@ -8,6 +8,23 @@ export type PipelineStage = 'discovered' | 'scored' | 'contacted' | 'nurture' | 
 export type TeamRole = 'owner' | 'tech_lead' | 'cold_caller' | 'operations' | 'team';
 export type BotStatus = 'active' | 'paused' | 'error' | 'idle';
 export type OutreachStatus = 'draft' | 'sent' | 'delivered' | 'opened' | 'replied' | 'bounced';
+export type TemplateBillingStatus = 'draft' | 'approval_needed' | 'approved' | 'sent' | 'paid' | 'void';
+export type TemplateBillingMode = 'flat' | 'hourly' | 'percent' | 'included' | 'quote_required';
+export type TemplateBillingParty =
+  | 'association'
+  | 'board_member'
+  | 'unit_owner'
+  | 'shareholder'
+  | 'owner'
+  | 'resident'
+  | 'renter'
+  | 'vendor'
+  | 'buyer'
+  | 'seller'
+  | 'landlord'
+  | 'broker'
+  | 'prospect';
+export type BillableTaskStatus = 'queued' | 'needs_review' | 'approved' | 'invoiced' | 'waived' | 'rejected';
 
 export type ContactRole =
   | 'board_president' | 'board_treasurer' | 'board_secretary' | 'board_member'
@@ -203,6 +220,100 @@ export interface OutreachLog {
   bounced_at?: string;
   sent_by?: string;
   created_at: string;
+}
+
+export interface TemplateRateSheetItem {
+  id: string;
+  template_name: string;
+  category: string;
+  jurisdiction: string;
+  asset_types: string[];
+  billing_party: TemplateBillingParty;
+  billing_mode: TemplateBillingMode;
+  base_amount: number;
+  min_amount?: number;
+  max_amount?: number;
+  percent_rate?: number;
+  description?: string;
+  included_in_base: boolean;
+  approval_required: boolean;
+  revenue_note?: string;
+  legal_review_status?: string;
+  source_url?: string;
+  last_reviewed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TemplateInvoice {
+  id: string;
+  generated_document_id?: string;
+  building_id?: string;
+  building_address: string;
+  building_name?: string;
+  invoice_number: string;
+  recipient_name?: string;
+  recipient_email?: string;
+  recipient_phone?: string;
+  status: TemplateBillingStatus;
+  subtotal: number;
+  tax_amount: number;
+  total_amount: number;
+  payment_provider?: string;
+  payment_link?: string;
+  accounting_system?: string;
+  accounting_invoice_id?: string;
+  hubspot_note_id?: string;
+  hubspot_deal_id?: string;
+  approved_by?: string;
+  approved_at?: string;
+  sent_at?: string;
+  paid_at?: string;
+  voided_at?: string;
+  notes?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TemplateInvoiceLine {
+  id: string;
+  invoice_id: string;
+  template_rate_id?: string;
+  description: string;
+  billing_party: TemplateBillingParty;
+  quantity: number;
+  unit_price: number;
+  amount: number;
+  notes?: string;
+  created_at: string;
+}
+
+export interface BillableTaskQueueItem {
+  id: string;
+  source_bot: string;
+  task_type: string;
+  template_rate_id?: string;
+  building_id?: string;
+  building_address: string;
+  building_name?: string;
+  requested_by_name?: string;
+  requested_by_role?: TemplateBillingParty;
+  requested_by_email?: string;
+  payer_role: TemplateBillingParty;
+  payer_name?: string;
+  payer_email?: string;
+  manager_owner?: string;
+  description: string;
+  evidence_url?: string;
+  billable: boolean;
+  amount: number;
+  status: BillableTaskStatus;
+  review_reason?: string;
+  invoice_id?: string;
+  hubspot_note_id?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ChatMessage {

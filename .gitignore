@@ -3,6 +3,7 @@ dist/
 .env
 .env.local
 *.log
+~$*
 desktop.ini
 **/desktop.ini
 tmp_pdf_extracts/

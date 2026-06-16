@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Camelot OS Render Update Manual and Implementation Prompt</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #101828; line-height: 1.5; margin: 40px; }
+    h1, h2, h3 { color: #0d1b2a; }
+    h1 { border-bottom: 4px solid #c9a227; padding-bottom: 10px; }
+    h2 { margin-top: 32px; border-left: 6px solid #c9a227; padding-left: 12px; }
+    code, pre { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
+    pre { padding: 14px; white-space: pre-wrap; }
+    table { border-collapse: collapse; width: 100%; margin: 18px 0; }
+    th, td { border: 1px solid #d0d5dd; padding: 9px; vertical-align: top; }
+    th { background: #0d1b2a; color: white; }
+    .gold { color: #b48a00; font-weight: bold; }
+    .box { background: #fff8e5; border-left: 5px solid #c9a227; padding: 14px; margin: 18px 0; }
+  </style>
+</head>
+<body>
+  <h1>Camelot OS Render Update Manual and Implementation Prompt</h1>
+  <p><strong>Prepared for:</strong> David Goldoff and Sam Lodge</p>
+  <p><strong>Date:</strong> June 16, 2026</p>
+  <p><strong>Purpose:</strong> Turn Camelot OS into a stable, revenue-driving property intelligence system with HubSpot as the daily sales workspace, Supabase as the fact and automation layer, and Render as a fast front-end viewer.</p>
+
+  <div class="box">
+    <strong>Bottom line:</strong> Camelot OS should stop trying to do everything inside the browser. The browser should trigger jobs and display results. Supabase should own facts, reports, archives, jobs, and HubSpot sync. HubSpot should own leads, contacts, companies, deals, tasks, and follow-up.
+  </div>
+
+  <h2>1. Plain-English Manual</h2>
+
+  <h3>The Three-System Rule</h3>
+  <table>
+    <tr><th>System</th><th>Job</th><th>What It Should Not Do</th></tr>
+    <tr>
+      <td><strong>HubSpot</strong></td>
+      <td>Daily workspace for sales, interns, cold callers, contacts, companies, deals, calls, notes, tasks, meetings, and pipeline.</td>
+      <td>It should not be the place where raw public-record facts are guessed or manually retyped without source control.</td>
+    </tr>
+    <tr>
+      <td><strong>Camelot OS / Supabase</strong></td>
+      <td>Property intelligence engine: verified building facts, fact packets, scoring, report archives, scheduled jobs, and HubSpot sync.</td>
+      <td>It should not become a messy CRM replacement.</td>
+    </tr>
+    <tr>
+      <td><strong>Render Frontend</strong></td>
+      <td>Fast user interface: search, view records, trigger jobs, preview reports, download documents.</td>
+      <td>It should not generate heavy PDFs, scrape sources, run scoring, or freeze the user browser.</td>
+    </tr>
+  </table>
+
+  <h3>Why Camelot OS Has Been Breaking</h3>
+  <p>The system is currently overloaded. Jackie, Daily Hunt, proposals, PDF rendering, HubSpot syncing, images, and facts are all too tightly mixed together. That creates the same failures again and again: wrong addresses, stale manager names, wrong unit counts, missing images, frozen pages, blank PDFs, and buttons that look real but call nothing reliable.</p>
+
+  <p>The fix is not another button. The fix is separating the work into smaller tools with clear responsibilities.</p>
+
+  <h3>Recommended Bot Split</h3>
+  <table>
+    <tr><th>Bot / Desk</th><th>Responsibility</th><th>Revenue Purpose</th></tr>
+    <tr><td>Daily Hunt</td><td>Find and score lead opportunities every morning.</td><td>Feeds HubSpot with clean prospects.</td></tr>
+    <tr><td>Fact Authority</td><td>Build one verified fact packet per property.</td><td>Prevents wrong reports and protects credibility.</td></tr>
+    <tr><td>Report Renderer</td><td>Render First Email, Meeting Handout, Jackie Appendix, and Proposal from the same fact packet.</td><td>Creates polished sales materials without retyping facts.</td></tr>
+    <tr><td>Media Desk</td><td>Cache, resize, and reuse building photos and maps.</td><td>Makes reports look professional without crashing the browser.</td></tr>
+    <tr><td>HubSpot Sync Desk</td><td>Create/update companies, contacts, deals, notes, tasks, and report links.</td><td>Keeps the sales team moving from HubSpot.</td></tr>
+    <tr><td>TARA</td><td>Template Automation & Revenue Agent for forms, fee codes, invoices, and billable tasks.</td><td>Captures ancillary revenue that used to be missed.</td></tr>
+  </table>
+
+  <h3>Fact Packet Rule</h3>
+  <p>Every property must have a versioned fact packet. Reports should not re-research or re-guess facts at render time. They should read from the latest approved fact packet.</p>
+
+  <p>Every key fact should have:</p>
+  <ul>
+    <li>value</li>
+    <li>source</li>
+    <li>retrieved date</li>
+    <li>confidence level</li>
+    <li>human override note, if applicable</li>
+  </ul>
+
+  <p>This is how Camelot fixes the recurring “why is the address wrong?” and “why is the unit count wrong?” problem. Fix it once in the fact packet; every report then uses the corrected version.</p>
+
+  <h3>PDF and Image Rule</h3>
+  <p>Do not generate heavy PDFs in the browser. Generate reports server-side, save them to Supabase Storage or Drive, and show the finished PDF link in the browser.</p>
+
+  <p>Images should be cached and resized before reports use them. Do not embed large base64 images inside report HTML. Use optimized URLs and thumbnails.</p>
+
+  <h3>HubSpot Rule</h3>
+  <p>HubSpot should receive every qualified building, contact, deal, task, note, report link, and follow-up. Interns and cold callers should work in HubSpot, not inside Camelot OS.</p>
+
+  <p>Minimum HubSpot sync for each qualified lead:</p>
+  <ul>
+    <li>Company: building record</li>
+    <li>Contacts: decision-makers and contact paths</li>
+    <li>Deal: property management opportunity</li>
+    <li>Task: next action</li>
+    <li>Note: Camelot OS intelligence summary</li>
+    <li>Report link: latest PDF or report archive</li>
+  </ul>
+
+  <h3>Revenue Priority</h3>
+  <p>The first revenue win is not a prettier report. The first win is a reliable daily pipeline: Daily Hunt finds leads, HubSpot assigns calls, Camelot OS provides intelligence, and humans book meetings.</p>
+
+  <p>The second revenue win is TARA: every billable template task gets queued, reviewed, invoiced, archived, and potentially included in staff incentive compensation after the fee is collected.</p>
+
+  <h2>2. 30-Day Implementation Plan</h2>
+
+  <h3>Week 1: Stop the Bleeding</h3>
+  <ul>
+    <li>Hide or disable buttons that do not call real backend functions.</li>
+    <li>Stop browser-side PDF generation for large reports.</li>
+    <li>Create tables for fact packets, reports, job runs, media assets, HubSpot sync logs, and TARA billable tasks.</li>
+    <li>Add a dashboard banner showing whether Daily Hunt last ran successfully.</li>
+  </ul>
+
+  <h3>Week 2: Build the Fact Packet Layer</h3>
+  <ul>
+    <li>Create the Fact Authority function.</li>
+    <li>Store source-proven facts by property.</li>
+    <li>Add human override fields for corrected address, unit count, manager name, building type, and images.</li>
+    <li>Make every report read from the same packet.</li>
+  </ul>
+
+  <h3>Week 3: Fix Reports and Images</h3>
+  <ul>
+    <li>Move report generation server-side.</li>
+    <li>Cache and optimize property images.</li>
+    <li>Generate First Email, Meeting Handout, Full Appendix, and Proposal from the same facts.</li>
+    <li>Archive every generated report with property, date, user, and version.</li>
+  </ul>
+
+  <h3>Week 4: HubSpot and Revenue Workflow</h3>
+  <ul>
+    <li>Push qualified buildings to HubSpot as companies.</li>
+    <li>Create/update contacts and deals.</li>
+    <li>Create follow-up tasks.</li>
+    <li>Attach report links to HubSpot notes.</li>
+    <li>Queue TARA billable tasks and invoice drafts.</li>
+  </ul>
+
+  <h2>3. Implementation Prompt for Codex / Replit</h2>
+  <p>Use the following prompt to update Camelot OS or build the Replit prototype:</p>
+
+  <pre>
+You are building the next stable version of Camelot OS for Camelot Property Management.
+
+Goal:
+Separate Camelot OS into clean modules so the platform stops freezing, stops generating wrong property facts, and starts producing revenue through HubSpot lead workflow and TARA billable task automation.
+
+Core architecture:
+1. HubSpot is the daily workspace and system of record for companies, contacts, deals, tasks, calls, notes, meetings, and pipeline.
+2. Supabase is the property intelligence layer: fact packets, reports, media cache, job runs, HubSpot sync logs, and TARA billable tasks.
+3. Render is the static frontend: it displays data, triggers backend jobs, previews reports, and downloads PDFs. It does not perform heavy scraping, PDF rendering, scoring, or HubSpot sync in the browser.
+
+Build these modules:
+
+A. Fact Authority
+- Create versioned fact packets for each building.
+- Every fact must include value, source URL, retrieved date, confidence, and override notes.
+- Reports must read from fact packets and never re-derive facts at render time.
+
+B. Report Renderer
+- Generate First Email Intro, Meeting Handout, Full Appendix, and Proposal from the same fact packet.
+- Use server-side rendering for PDFs.
+- Store generated PDFs and HTML outputs in an archive.
+- Add buttons: Preview, Download PDF, Email PDF, Push to HubSpot, Print.
+
+C. Media Desk
+- Upload, cache, resize, and reuse building photos.
+- Convert large images to optimized WebP/JPEG.
+- Do not embed large base64 images in reports.
+- Every report should support multiple property and neighborhood images.
+
+D. Daily Hunt
+- Run as a backend scheduled job.
+- Find, dedupe, score, and store building leads.
+- Log each run in job_runs.
+- Push qualified leads to HubSpot.
+
+E. HubSpot Sync Desk
+- Create/update building as Company.
+- Create/update decision-makers as Contacts.
+- Create/update property management opportunity as Deal.
+- Create next-step Tasks.
+- Add intelligence Notes and report links.
+- Store HubSpot IDs back in Camelot OS.
+
+F. TARA: Template Automation & Revenue Agent
+- Manage templates, fee codes, billable task queue, invoice drafts, and generated document archive.
+- Classify requester and payer role: association, board member, unit owner, shareholder, resident, renter, buyer, seller, vendor, landlord, broker, owner, prospect.
+- Never auto-bill. Queue for manager approval.
+- After approval, create invoice draft and archive the document.
+- Support staff incentive tracking up to 30% of approved and collected fees.
+
+Hard rules:
+- Do not generate heavy PDFs in the browser.
+- Do not let the frontend call dead API routes.
+- Do not push incomplete or dirty data into HubSpot.
+- Do not let reports use stale manager names or guessed unit counts.
+- Do not invoice without manager approval.
+- Do not remove source provenance.
+
+First milestone:
+Build a working vertical slice:
+1. User enters one property.
+2. Backend creates a fact packet.
+3. User previews a First Email report.
+4. PDF is generated server-side and archived.
+5. Report link pushes to HubSpot.
+6. TARA queues any billable template task for manager approval.
+
+Output:
+- Working app changes
+- Database migrations
+- Environment variable list
+- Setup manual
+- Test checklist
+- HubSpot sync mapping
+- TARA rate-sheet and invoice queue
+  </pre>
+
+  <h2>4. Staff Training Script for AI Video</h2>
+  <p><strong>Opening:</strong> Camelot OS is our property intelligence engine. HubSpot is our daily sales workspace. TARA is our template and revenue agent.</p>
+
+  <p><strong>Scene 1:</strong> Daily Hunt finds new building opportunities every morning and sends clean leads into HubSpot.</p>
+
+  <p><strong>Scene 2:</strong> Camelot OS builds a verified fact packet so reports use the same address, unit count, building type, source links, and photos.</p>
+
+  <p><strong>Scene 3:</strong> The team reviews the report, pushes it to HubSpot, creates a next-step task, and follows up from HubSpot.</p>
+
+  <p><strong>Scene 4:</strong> When the team creates templates, forms, agreements, or special packets, TARA checks whether the task may be billable.</p>
+
+  <p><strong>Scene 5:</strong> The manager approves, waives, rejects, or invoices the task. No invoice goes out without review.</p>
+
+  <p><strong>Scene 6:</strong> Staff can earn up to 30% of approved and collected template/service fees when they identify and complete legitimate billable work.</p>
+
+  <p><strong>Closing:</strong> Camelot OS makes the lead smarter. HubSpot makes the follow-up visible. TARA makes the work profitable.</p>
+
+  <h2>5. Test Checklist</h2>
+  <ul>
+    <li>Can Daily Hunt run without a failed fetch?</li>
+    <li>Does every button call a real backend function?</li>
+    <li>Can one property create a fact packet?</li>
+    <li>Can a corrected fact update every report?</li>
+    <li>Can the report preview before download?</li>
+    <li>Can PDF generation finish without freezing the browser?</li>
+    <li>Are images optimized and visible?</li>
+    <li>Can the report push to HubSpot?</li>
+    <li>Does HubSpot receive company, contact, deal, task, note, and report link?</li>
+    <li>Can TARA queue, approve, invoice, and archive a billable task?</li>
+  </ul>
+
+  <h2>6. Opinionated Recommendation</h2>
+  <p>Do not keep expanding Jackie. Jackie should be reduced to reporting from verified facts. Daily Hunt, HubSpot Sync, Media Desk, Report Renderer, and TARA should be separate modules. That is the only way this becomes stable enough for the team to trust and revenue-producing enough to justify the build.</p>
+
+</body>
+</html>

@@ -31,6 +31,7 @@ import {
   Megaphone,
   Sparkles,
   Activity,
+  Receipt,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/lib/store';
@@ -86,6 +87,7 @@ const navigation: NavSection[] = [
     title: 'Excalibur — Agreements',
     items: [
       { label: 'Generate Agreement', href: '/agreements', icon: <Sword size={18} /> },
+      { label: 'Templates & Billing', href: '/template-billing', icon: <Receipt size={18} /> },
     ],
   },
   {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/qa-scan.mjs || echo \"[qa] scan failed (non-fatal); using committed qa-report.json\"",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p tsconfig.json --noEmit --incremental false && vite build",
     "qa:full": "node scripts/qa-run.mjs",
     "verify:jackie": "node scripts/verify-jackie-report.mjs",
     "hubspot:rollout": "node scripts/hubspot-rollout.mjs setup",
