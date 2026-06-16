@@ -17,7 +17,7 @@ const cacheDir = resolve(root, '.qa-cache');
 if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
 
 const CHECKS = [
-  { name: 'typecheck', cmd: 'npx tsc -b --pretty false', tool: 'node_modules/.bin/tsc' },
+  { name: 'typecheck', cmd: 'npx tsc -p tsconfig.json --noEmit --incremental false --pretty false', tool: 'node_modules/.bin/tsc' },
   { name: 'lint', cmd: 'npx eslint . --max-warnings=9999', tool: 'node_modules/.bin/eslint' },
   { name: 'build', cmd: 'npm run build', tool: 'node_modules/.bin/vite' },
 ];

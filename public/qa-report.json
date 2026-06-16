@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-16T19:17:14.172Z",
+  "generatedAt": "2026-06-16T19:54:50.810Z",
   "git": {
     "branch": "main",
-    "commit": "0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76",
-    "shortCommit": "0d67a859",
-    "remoteUrl": "https://github.com/dgoldoff-hue/camelot-scout-v6.git",
-    "githubSlug": "dgoldoff-hue/camelot-scout-v6",
-    "blobBase": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76"
+    "commit": "2637bc4919e8156c64c115151809a72536f9c57a",
+    "shortCommit": "2637bc49",
+    "remoteUrl": "https://github.com/Camelot-Realty-Group/camelot-scout-v6.git",
+    "githubSlug": "Camelot-Realty-Group/camelot-scout-v6",
+    "blobBase": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a"
   },
   "baseline": {
     "ref": "124e56c",
@@ -18,162 +18,162 @@
       {
         "status": "M",
         "file": "src/App.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/App.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/App.tsx"
       },
       {
         "status": "M",
         "file": "src/components/Layout.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/Layout.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/components/Layout.tsx"
       },
       {
         "status": "A",
         "file": "src/components/OfflineBanner.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/OfflineBanner.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/components/OfflineBanner.tsx"
       },
       {
         "status": "M",
         "file": "src/components/PropertyDetail.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/PropertyDetail.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/components/PropertyDetail.tsx"
       },
       {
         "status": "A",
         "file": "src/components/VersionStamp.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/components/VersionStamp.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/components/VersionStamp.tsx"
       },
       {
         "status": "M",
         "file": "src/hooks/useDailyHunt.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/hooks/useDailyHunt.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/hooks/useDailyHunt.ts"
       },
       {
         "status": "A",
         "file": "src/lib/app-version.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/app-version.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/app-version.ts"
       },
       {
         "status": "A",
         "file": "src/lib/bot-hubspot-reporting.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/bot-hubspot-reporting.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/bot-hubspot-reporting.ts"
       },
       {
         "status": "A",
         "file": "src/lib/camelot-bot-operating-model.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/camelot-bot-operating-model.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/camelot-bot-operating-model.ts"
       },
       {
         "status": "A",
         "file": "src/lib/cta-scenarios.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/cta-scenarios.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/cta-scenarios.ts"
       },
       {
         "status": "M",
         "file": "src/lib/excalibur.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/excalibur.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/excalibur.ts"
       },
       {
         "status": "A",
         "file": "src/lib/fact-packet.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/fact-packet.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/fact-packet.ts"
       },
       {
         "status": "M",
         "file": "src/lib/integrations.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/integrations.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/integrations.ts"
       },
       {
         "status": "A",
         "file": "src/lib/jackie-engine.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/jackie-engine.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/jackie-engine.ts"
       },
       {
         "status": "M",
         "file": "src/lib/jackie-v2-orchestrator.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/jackie-v2-orchestrator.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/jackie-v2-orchestrator.ts"
       },
       {
         "status": "M",
         "file": "src/lib/report-crm-tracking.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/report-crm-tracking.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/report-crm-tracking.ts"
       },
       {
         "status": "A",
         "file": "src/lib/runtime-mode.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/runtime-mode.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/runtime-mode.ts"
       },
       {
         "status": "M",
         "file": "src/lib/scout-ai-doctrines.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/scout-ai-doctrines.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/scout-ai-doctrines.ts"
       },
       {
         "status": "M",
         "file": "src/lib/supabase.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/supabase.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/supabase.ts"
       },
       {
         "status": "A",
         "file": "src/lib/template-billing.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/template-billing.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/template-billing.ts"
       },
       {
         "status": "M",
         "file": "src/lib/twin-knowledge.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/lib/twin-knowledge.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/lib/twin-knowledge.ts"
       },
       {
         "status": "M",
         "file": "src/pages/Bots.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Bots.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Bots.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/DailyHunt.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/DailyHunt.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/DailyHunt.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Import.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Import.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Import.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Integrations.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Integrations.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Integrations.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Outreach.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Outreach.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Outreach.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Pipeline.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Pipeline.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Pipeline.tsx"
       },
       {
         "status": "A",
         "file": "src/pages/QAConsole.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/QAConsole.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/QAConsole.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/ReportCenter.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/ReportCenter.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/ReportCenter.tsx"
       },
       {
         "status": "M",
         "file": "src/pages/Results.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Results.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Results.tsx"
       },
       {
         "status": "A",
         "file": "src/pages/TemplateBilling.tsx",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/TemplateBilling.tsx"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/TemplateBilling.tsx"
       },
       {
         "status": "M",
         "file": "src/types/index.ts",
-        "link": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/types/index.ts"
+        "link": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/types/index.ts"
       }
     ],
     "changedFileCount": 32,
@@ -187,9 +187,9 @@
     "missingPackages": 0,
     "sourceFiles": 113,
     "checks": {
-      "typecheck": "not-run",
-      "lint": "not-run",
-      "build": "not-run"
+      "typecheck": "pass",
+      "lint": "pass",
+      "build": "pass"
     }
   },
   "pages": [
@@ -200,7 +200,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Search.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Search.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Search.tsx",
       "brokenImports": [],
       "importedModuleCount": 24
     },
@@ -211,7 +211,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Results.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Results.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Results.tsx",
       "brokenImports": [],
       "importedModuleCount": 75
     },
@@ -222,7 +222,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\DailyHunt.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/DailyHunt.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/DailyHunt.tsx",
       "brokenImports": [],
       "importedModuleCount": 21
     },
@@ -233,7 +233,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Saved.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Saved.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Saved.tsx",
       "brokenImports": [],
       "importedModuleCount": 71
     },
@@ -244,7 +244,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Import.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Import.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Import.tsx",
       "brokenImports": [],
       "importedModuleCount": 13
     },
@@ -255,7 +255,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Pipeline.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Pipeline.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Pipeline.tsx",
       "brokenImports": [],
       "importedModuleCount": 75
     },
@@ -266,7 +266,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Outreach.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Outreach.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Outreach.tsx",
       "brokenImports": [],
       "importedModuleCount": 20
     },
@@ -277,7 +277,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Chat.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Chat.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Chat.tsx",
       "brokenImports": [],
       "importedModuleCount": 12
     },
@@ -288,7 +288,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Archive.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Archive.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Archive.tsx",
       "brokenImports": [],
       "importedModuleCount": 67
     },
@@ -299,7 +299,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Export.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Export.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Export.tsx",
       "brokenImports": [],
       "importedModuleCount": 9
     },
@@ -310,7 +310,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Integrations.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Integrations.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Integrations.tsx",
       "brokenImports": [],
       "importedModuleCount": 21
     },
@@ -321,7 +321,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Bots.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Bots.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Bots.tsx",
       "brokenImports": [],
       "importedModuleCount": 10
     },
@@ -332,7 +332,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Settings.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Settings.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Settings.tsx",
       "brokenImports": [],
       "importedModuleCount": 12
     },
@@ -343,7 +343,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Tutorials.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Tutorials.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Tutorials.tsx",
       "brokenImports": [],
       "importedModuleCount": 2
     },
@@ -354,7 +354,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Compliance.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Compliance.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Compliance.tsx",
       "brokenImports": [],
       "importedModuleCount": 13
     },
@@ -365,7 +365,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Alerts.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Alerts.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Alerts.tsx",
       "brokenImports": [],
       "importedModuleCount": 12
     },
@@ -376,7 +376,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\InstantProposal.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/InstantProposal.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/InstantProposal.tsx",
       "brokenImports": [],
       "importedModuleCount": 32
     },
@@ -387,7 +387,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Proposals.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Proposals.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Proposals.tsx",
       "brokenImports": [],
       "importedModuleCount": 53
     },
@@ -398,7 +398,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Intelligence.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Intelligence.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Intelligence.tsx",
       "brokenImports": [],
       "importedModuleCount": 8
     },
@@ -409,7 +409,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Reports.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Reports.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Reports.tsx",
       "brokenImports": [],
       "importedModuleCount": 9
     },
@@ -420,7 +420,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\ReportCenter.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/ReportCenter.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/ReportCenter.tsx",
       "brokenImports": [],
       "importedModuleCount": 54
     },
@@ -431,7 +431,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Agreements.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Agreements.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Agreements.tsx",
       "brokenImports": [],
       "importedModuleCount": 38
     },
@@ -442,7 +442,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Sentinel.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Sentinel.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Sentinel.tsx",
       "brokenImports": [],
       "importedModuleCount": 6
     },
@@ -453,7 +453,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Arthur.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Arthur.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Arthur.tsx",
       "brokenImports": [],
       "importedModuleCount": 7
     },
@@ -464,7 +464,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\ContentEngine.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/ContentEngine.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/ContentEngine.tsx",
       "brokenImports": [],
       "importedModuleCount": 1
     },
@@ -475,7 +475,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\TemplateBilling.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/TemplateBilling.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/TemplateBilling.tsx",
       "brokenImports": [],
       "importedModuleCount": 11
     },
@@ -486,7 +486,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\Violations.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/Violations.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/Violations.tsx",
       "brokenImports": [],
       "importedModuleCount": 3
     },
@@ -497,7 +497,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\LegalReportTerms.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/LegalReportTerms.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/LegalReportTerms.tsx",
       "brokenImports": [],
       "importedModuleCount": 1
     },
@@ -508,7 +508,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\QAConsole.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/QAConsole.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/QAConsole.tsx",
       "brokenImports": [],
       "importedModuleCount": 0
     },
@@ -519,7 +519,7 @@
       "status": "ok",
       "issues": [],
       "file": "src\\pages\\QAConsole.tsx",
-      "fileLink": "https://github.com/dgoldoff-hue/camelot-scout-v6/blob/0d67a8593d1190ee42dccfc1d8acf7b38e8d0e76/src/pages/QAConsole.tsx",
+      "fileLink": "https://github.com/Camelot-Realty-Group/camelot-scout-v6/blob/2637bc4919e8156c64c115151809a72536f9c57a/src/pages/QAConsole.tsx",
       "brokenImports": [],
       "importedModuleCount": 0
     },
@@ -539,18 +539,27 @@
   "checks": [
     {
       "name": "typecheck",
-      "status": "not-run",
-      "detail": "No result recorded. Run `npm run qa` (or the individual script) to populate."
+      "status": "pass",
+      "command": "npx tsc -p tsconfig.json --noEmit --incremental false --pretty false",
+      "durationMs": 8095,
+      "ranAt": "2026-06-16T19:54:25.581Z",
+      "detail": ""
     },
     {
       "name": "lint",
-      "status": "not-run",
-      "detail": "No result recorded. Run `npm run qa` (or the individual script) to populate."
+      "status": "pass",
+      "command": "npx eslint . --max-warnings=9999",
+      "durationMs": 4899,
+      "ranAt": "2026-06-16T19:54:30.483Z",
+      "detail": ""
     },
     {
       "name": "build",
-      "status": "not-run",
-      "detail": "No result recorded. Run `npm run qa` (or the individual script) to populate."
+      "status": "pass",
+      "command": "npm run build",
+      "durationMs": 19708,
+      "ranAt": "2026-06-16T19:54:50.192Z",
+      "detail": "\u001b[2mdist/\u001b[22m\u001b[36massets/building-2-CBhjrRJE.js                 \u001b[39m\u001b[1m\u001b[2m    0.61 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.35 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/play-DUoqkrOU.js                       \u001b[39m\u001b[1m\u001b[2m    0.63 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.32 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/square-DMao236b.js                     \u001b[39m\u001b[1m\u001b[2m    0.66 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.35 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/nyc-311-DPcbr4K3.js                    \u001b[39m\u001b[1m\u001b[2m    1.13 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.72 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/acquisition-pipeline-DW2OVGcA.js       \u001b[39m\u001b[1m\u001b[2m    1.50 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.82 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/camelot-signature-Cy0oCCv2.js          \u001b[39m\u001b[1m\u001b[2m    1.95 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   0.90 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/jackie-report-library-BX_j8Z50.js      \u001b[39m\u001b[1m\u001b[2m    2.67 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.23 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ll97-calculator-Ct0bdoUq.js            \u001b[39m\u001b[1m\u001b[2m    3.20 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.14 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/jackie-fact-authority-DCSvOXx4.js      \u001b[39m\u001b[1m\u001b[2m    3.61 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.46 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/scoring-jswnaFzY.js                    \u001b[39m\u001b[1m\u001b[2m    3.70 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.64 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/email-templates-BYEI0qXQ.js            \u001b[39m\u001b[1m\u001b[2m    3.99 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.77 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/pdf-generator-BTSNarHK.js              \u001b[39m\u001b[1m\u001b[2m    4.28 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.92 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/report-crm-tracking-DGIAYuAc.js        \u001b[39m\u001b[1m\u001b[2m    5.17 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.00 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Archive-dSg2lE2C.js                    \u001b[39m\u001b[1m\u001b[2m    5.25 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.81 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ny-research-sources-CdFJR2V3.js        \u001b[39m\u001b[1m\u001b[2m    5.33 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.06 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/LegalReportTerms-CfIm7U2f.js           \u001b[39m\u001b[1m\u001b[2m    5.39 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.14 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/PropertyCard-C8aROvqq.js               \u001b[39m\u001b[1m\u001b[2m    5.55 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   1.59 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/bot-hubspot-reporting-CKq9zcnj.js      \u001b[39m\u001b[1m\u001b[2m    5.75 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.03 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/nyc-violations-BUAmCVeq.js             \u001b[39m\u001b[1m\u001b[2m    6.02 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.45 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Saved-8t50Qu4e.js                      \u001b[39m\u001b[1m\u001b[2m    6.74 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.59 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Pipeline-DmURuKsG.js                   \u001b[39m\u001b[1m\u001b[2m    7.19 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   2.63 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Chat-CbUJ1k7x.js                       \u001b[39m\u001b[1m\u001b[2m    9.64 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   3.88 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Export-Bo4p-uK4.js                     \u001b[39m\u001b[1m\u001b[2m   12.05 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   4.27 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Results-Dl2KfjOw.js                    \u001b[39m\u001b[1m\u001b[2m   12.18 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   4.18 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/QAConsole-CLJvnnwC.js                  \u001b[39m\u001b[1m\u001b[2m   12.94 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   3.68 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ai-client-7Az5gMfk.js                  \u001b[39m\u001b[1m\u001b[2m   13.51 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   5.70 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Alerts-CLpJtVMx.js                     \u001b[39m\u001b[1m\u001b[2m   14.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   4.55 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Integrations-CQksablr.js               \u001b[39m\u001b[1m\u001b[2m   15.86 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   4.99 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Settings-CpZ-UM3w.js                   \u001b[39m\u001b[1m\u001b[2m   16.36 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   4.54 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/cta-scenarios-BaOSODkl.js              \u001b[39m\u001b[1m\u001b[2m   17.49 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   5.90 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/scout-ai-doctrines-CVF_U4lg.js         \u001b[39m\u001b[1m\u001b[2m   20.42 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   7.87 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Violations-CdwDESQv.js                 \u001b[39m\u001b[1m\u001b[2m   20.87 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   7.00 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Compliance-BAe_XB1d.js                 \u001b[39m\u001b[1m\u001b[2m   22.57 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   5.76 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Outreach-CyisT_z8.js                   \u001b[39m\u001b[1m\u001b[2m   22.82 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   6.65 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/InstantProposal-565fBiAz.js            \u001b[39m\u001b[1m\u001b[2m   23.61 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   6.64 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/nyc-api-DSwS095r.js                    \u001b[39m\u001b[1m\u001b[2m   28.01 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   9.37 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/TemplateBilling-Db6ee3M-.js            \u001b[39m\u001b[1m\u001b[2m   29.62 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   8.01 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Intelligence-DsOSc4ty.js               \u001b[39m\u001b[1m\u001b[2m   35.77 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:   9.52 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/sentinel-report-CT8-TzL1.js            \u001b[39m\u001b[1m\u001b[2m   38.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  12.07 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Import-cayW7D11.js                     \u001b[39m\u001b[1m\u001b[2m   39.55 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  13.85 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ContentEngine-DNBatH_r.js              \u001b[39m\u001b[1m\u001b[2m   43.72 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  12.39 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Tutorials-CutTVXAC.js                  \u001b[39m\u001b[1m\u001b[2m   47.92 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  15.50 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Reports-D4i6LgmU.js                    \u001b[39m\u001b[1m\u001b[2m   52.58 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  12.41 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/DailyHunt-BTfpzGEF.js                  \u001b[39m\u001b[1m\u001b[2m   54.22 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  15.93 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Arthur-BopAENgt.js                     \u001b[39m\u001b[1m\u001b[2m   63.03 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  17.90 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Proposals-CljwP1Si.js                  \u001b[39m\u001b[1m\u001b[2m   64.69 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  16.99 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/PropertyDetail-D53vl-_6.js             \u001b[39m\u001b[1m\u001b[2m   64.74 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  16.36 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Sentinel-BWWw_7Xv.js                   \u001b[39m\u001b[1m\u001b[2m   72.49 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  17.71 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Bots-DJlHZxsz.js                       \u001b[39m\u001b[1m\u001b[2m   80.19 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  22.84 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Agreements-BgQAiucS.js                 \u001b[39m\u001b[1m\u001b[2m   86.51 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  22.56 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/Search-DpBFj2Hu.js                     \u001b[39m\u001b[1m\u001b[2m   87.14 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  19.49 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/pitch-report-BPgeFNNA.js               \u001b[39m\u001b[1m\u001b[2m  156.67 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip:  41.59 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/xlsx-D_0l8YDs.js                       \u001b[39m\u001b[1m\u001b[2m  429.03 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 143.08 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/ReportCenter-CEzmOThr.js               \u001b[39m\u001b[1m\u001b[2m  439.39 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 144.37 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/index-B6xLovQv.js                      \u001b[39m\u001b[1m\u001b[2m  452.32 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 134.39 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/camelot-report-FKE_VjQl.js             \u001b[39m\u001b[1m\u001b[2m  555.00 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 153.44 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/html2pdf-D0yfUWrf.js                   \u001b[39m\u001b[1m\u001b[2m  982.47 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 285.52 kB\u001b[22m\n\u001b[2mdist/\u001b[22m\u001b[36massets/react-pdf.browser-C6iBOdb9.js          \u001b[39m\u001b[1m\u001b[2m1,310.35 kB\u001b[22m\u001b[1m\u001b[22m\u001b[2m │ gzip: 434.20 kB\u001b[22m\n\u001b[32m✓ built in 10.97s\u001b[39m\n"
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 ## Quick Deploy to Render (Static Site)
 
-1. Connect repo: github.com/dgoldoff-hue/camelot-scout-v6
+1. Connect repo: github.com/Camelot-Realty-Group/camelot-scout-v6
 2. Build Command: `npm ci && npm run build`
 3. Publish Directory: `dist`
 4. Add Environment Variables in Render dashboard:
