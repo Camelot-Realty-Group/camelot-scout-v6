@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
  * Background: in v6, a build-time-baked `VITE_SUPABASE_URL` pointed at a deleted
  * project. Every call returned `ERR_NAME_NOT_RESOLVED`, killing Daily Hunt and
  * Jackie silently. This module now:
- *   1. Treats a missing/placeholder URL as "demo mode" up front
+ *   1. Treats a missing/placeholder URL as "live database unavailable" up front
  *   2. Pings a health endpoint at startup to catch a dead-but-syntactically-valid URL
  *   3. Exposes a single `supabaseStatus` event listeners can subscribe to so the
  *      OfflineBanner can warn the user instead of failing silently.
@@ -79,9 +79,9 @@ export const getSupabaseStatusMessage = (): string => {
         return 'Connected to Supabase';
       }
     case 'unreachable':
-      return 'Supabase project unreachable. Running in read-only demo mode. Update VITE_SUPABASE_URL in Render and redeploy.';
+      return 'Supabase project unreachable. Live building data is unavailable. Update VITE_SUPABASE_URL in Render and redeploy.';
     case 'demo':
-      return 'Demo mode active — add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Render, then redeploy.';
+      return 'Live database not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Render, then redeploy.';
     case 'unknown':
     default:
       return 'Checking Supabase connection…';

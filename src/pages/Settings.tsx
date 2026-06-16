@@ -35,7 +35,7 @@ export default function Settings() {
       name: 'Supabase Database',
       configured: isSupabaseConfigured(),
       details: getSupabaseStatusMessage(),
-      fallbackLabel: 'Demo mode',
+      fallbackLabel: 'Live data blocked',
     },
     {
       name: 'NYC Open Data (HPD, DOF, DOB, LL97)',

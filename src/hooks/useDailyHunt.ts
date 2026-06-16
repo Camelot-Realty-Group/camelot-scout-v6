@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { DAILY_HUNT_SEED_LEADS } from '@/lib/daily-hunt-seed';
 import { reportBotActivityToHubSpot } from '@/lib/bot-hubspot-reporting';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { useBuildings } from '@/hooks/useBuildings';
@@ -27,7 +26,7 @@ export interface DailyHuntLead {
   verification_status?: 'VERIFIED' | 'CORRECTED' | 'UNVERIFIED' | null;
   verified_sources?: Array<{ label?: string; url?: string; checked_at?: string }>;
   corrections?: Array<{ field: string; from?: string | number | null; to?: string | number | null; reason?: string }>;
-  source_mode: 'demo' | 'supabase';
+  source_mode: 'supabase';
 }
 
 export interface LeadHuntRun {
@@ -62,32 +61,11 @@ const shouldUseServerDailyHunt = () =>
   String(import.meta.env.VITE_ENABLE_SERVER_INTEGRATIONS || '').toLowerCase() === 'true' &&
   String(import.meta.env.VITE_DISABLE_SERVER_INTEGRATIONS || '').toLowerCase() !== 'true';
 
-const demoLeads: DailyHuntLead[] = DAILY_HUNT_SEED_LEADS.map((lead) => ({
-  id: lead.id,
-  name: lead.target,
-  address: lead.address,
-  city: null,
-  state: stateFromAddress(lead.address),
-  unit_count: lead.units,
-  lead_source: lead.source,
-  lead_category: lead.category,
-  lead_priority: lead.priority,
-  lead_pitch_angle: lead.pitch_angle,
-  lead_contact_path: lead.best_contact_path,
-  lead_source_url: null,
-  lead_found_at: lead.imported_at,
-  developer_or_owner: lead.developer_or_owner,
-  status: lead.status,
-  verification_status: 'UNVERIFIED',
-  verified_sources: [{ label: 'Claude/Twin export CSV', checked_at: lead.imported_at }],
-  corrections: [],
-  source_mode: 'demo',
-}));
-
 export function useDailyHunt() {
   const [leads, setLeads] = useState<DailyHuntLead[]>([]);
   const [runs, setRuns] = useState<LeadHuntRun[]>([]);
   const [latestRun, setLatestRun] = useState<LeadHuntRun | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [selectedLead, setSelectedLead] = useState<DailyHuntLead | null>(null);
@@ -112,25 +90,13 @@ export function useDailyHunt() {
 
   const reload = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       if (!isSupabaseConfigured()) {
-        const filtered = applyFilters(demoLeads);
-        setLeads(filtered);
-        const run = {
-          id: 'demo-2026-05-25',
-          started_at: '2026-05-25T18:00:00.000Z',
-          finished_at: '2026-05-25T18:03:00.000Z',
-          triggered_by: 'claude_export',
-          sources_queried: ['Kimi research', 'Claude handoff CSV'],
-          candidates_found: demoLeads.length,
-          new_leads_inserted: filtered.length,
-          duplicates_skipped: 0,
-          rejected_count: 0,
-          corrected_count: 0,
-          errors: [],
-        };
-        setRuns([run]);
-        setLatestRun(run);
+        setError('Daily Hunt requires live Supabase data. No offline research packet, demo, or sandbox leads are being shown.');
+        setLeads([]);
+        setRuns([]);
+        setLatestRun(null);
         return;
       }
 
@@ -178,8 +144,9 @@ export function useDailyHunt() {
       setRuns((runRows ?? []) as LeadHuntRun[]);
       setLatestRun(((runRows ?? [])[0] ?? null) as LeadHuntRun | null);
     } catch (error: any) {
-      console.warn('Daily Hunt Supabase load failed; falling back to exported leads.', error?.message || error);
-      setLeads(applyFilters(demoLeads));
+      console.warn('Daily Hunt Supabase load failed; live queue blocked.', error?.message || error);
+      setError(`Daily Hunt live data blocked: ${error?.message || 'Supabase query failed'}`);
+      setLeads([]);
       setRuns([]);
       setLatestRun(null);
     } finally {
@@ -247,7 +214,7 @@ export function useDailyHunt() {
     setRunning(true);
     try {
       if (!isSupabaseConfigured()) {
-        toast('Daily Hunt is showing the Claude export until Supabase functions are deployed.');
+        toast.error('Daily Hunt requires live Supabase data. No sandbox or imported export will be used.');
         return;
       }
 
@@ -274,14 +241,14 @@ export function useDailyHunt() {
       if (!response.ok) throw new Error(payload.message || `Daily Hunt failed: ${response.status}`);
       await reload();
       if (payload.status === 'fallback') {
-        toast(payload.message || 'Daily Hunt backend is not deployed yet; showing the imported queue.');
+        toast.error(payload.message || 'Daily Hunt backend is not deployed. Live queue was not refreshed.');
       } else {
         toast.success(payload.message || 'Daily Hunt run started');
       }
     } catch (error: any) {
-      console.warn('Daily Hunt run failed; keeping imported queue visible.', error?.message || error);
+      console.warn('Daily Hunt run failed; live queue blocked.', error?.message || error);
       await reload();
-      toast('Daily Hunt backend is unavailable right now. The imported Claude/Twin queue is still available.');
+      toast.error('Daily Hunt backend is unavailable. No sandbox or imported queue will be used.');
     } finally {
       setRunning(false);
     }
@@ -315,6 +282,7 @@ export function useDailyHunt() {
     leads,
     runs,
     latestRun,
+    error,
     loading,
     running,
     filter,

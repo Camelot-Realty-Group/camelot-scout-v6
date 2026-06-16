@@ -419,8 +419,8 @@ export function useBuildings() {
     actions.setError(null);
 
     if (!isSupabaseConfigured()) {
-      // Use demo data
-      actions.setBuildings(DEMO_BUILDINGS);
+      actions.setError('Live Supabase database is not configured. No sandbox/demo building data will be shown.');
+      actions.setBuildings([]);
       actions.setLoading(false);
       return;
     }
@@ -435,10 +435,9 @@ export function useBuildings() {
       if (error) throw error;
       actions.setBuildings(data || []);
     } catch (err: any) {
-      console.warn('Supabase building table unavailable; using Scout demo data instead.', err?.message || err);
-      actions.setError(null);
-      // Fall back to demo data
-      actions.setBuildings(DEMO_BUILDINGS);
+      console.warn('Supabase building table unavailable; live building data blocked.', err?.message || err);
+      actions.setError(`Live building data blocked: ${err?.message || 'Supabase query failed'}`);
+      actions.setBuildings([]);
     } finally {
       actions.setLoading(false);
     }
@@ -447,11 +446,7 @@ export function useBuildings() {
   const saveBuildingToSupabase = useCallback(async (building: Partial<Building>) => {
     const actions = useBuildingsStore.getState();
     if (!isSupabaseConfigured()) {
-      // In demo mode, just update local state
-      if (building.id) {
-        actions.updateBuilding(building.id, building);
-      }
-      return building;
+      throw new Error('Live Supabase database is not configured. Refusing to save sandbox/demo building data.');
     }
 
     try {

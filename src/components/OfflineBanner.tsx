@@ -9,7 +9,7 @@ import {
 /**
  * Top-of-app banner that surfaces a dead Supabase connection instead of letting
  * the UI fail silently. Dismissible per-session so the user isn't nagged once
- * they've acknowledged demo mode.
+ * they've acknowledged that live backend data is blocked.
  */
 export default function OfflineBanner() {
   const [health, setHealth] = useState<SupabaseHealth>('unknown');
@@ -39,7 +39,7 @@ export default function OfflineBanner() {
       <AlertTriangle size={16} className="flex-shrink-0" />
       <div className="flex-1 leading-tight">
         <span className="font-semibold mr-1">
-          {isUnreachable ? 'Backend unreachable.' : 'Demo mode.'}
+          {isUnreachable ? 'Backend unreachable.' : 'Live data blocked.'}
         </span>
         <span className="opacity-90">{getSupabaseStatusMessage()}</span>
       </div>

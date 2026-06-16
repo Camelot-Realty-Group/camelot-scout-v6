@@ -283,7 +283,7 @@ export default function Proposals() {
         )
       );
     } catch (err: any) {
-      console.warn('Supabase proposal table unavailable; proposal library will stay in local/demo mode.', err?.message || err);
+      console.warn('Supabase proposal table unavailable; proposal library will show local generated records only.', err?.message || err);
       setSavedProposals(localRecords);
     } finally {
       setLoadingProposals(false);

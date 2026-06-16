@@ -25,6 +25,7 @@ export default function DailyHunt() {
   const {
     leads,
     latestRun,
+    error,
     loading,
     running,
     filter,
@@ -57,7 +58,7 @@ export default function DailyHunt() {
             </div>
             <h1 className="mt-2 text-3xl font-bold text-[#10233F]">Bot-Sourced Lead Queue</h1>
             <p className="mt-2 max-w-3xl text-sm text-slate-600">
-              Overnight lead sourcing from the Claude/Twin handoff, staged for verification, review, and Pipeline action.
+              Overnight lead sourcing from live property intelligence sources, staged for verification, review, and Pipeline action.
               Daily Hunt is built to find boutique-fit board, sponsor, distress, referral, and acquisition opportunities.
             </p>
           </div>
@@ -105,9 +106,15 @@ export default function DailyHunt() {
               {latestRun.duplicates_skipped} duplicates skipped.
             </>
           ) : (
-            <>Using the imported Claude/Twin export until the Supabase Daily Hunt function is deployed.</>
+            <>Live Daily Hunt data is unavailable until Supabase and the Daily Hunt function are configured.</>
           )}
         </div>
+
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <FilterSelect
